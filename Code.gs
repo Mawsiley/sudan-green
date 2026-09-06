@@ -31,6 +31,7 @@ function doPost(e) {
       // ── Auth
       case 'login':          return jsonOut(login_(data));
       case 'register':       return jsonOut(register_(data));
+      case 'registerDirect': return jsonOut(registerDirect_(data));
       case 'logout':         return jsonOut(logout_(data));
       case 'sendOtp':        return jsonOut(sendOtp_(data));
       case 'verifyOtp':      return jsonOut(verifyOtp_(data));
@@ -346,6 +347,63 @@ function sendOtp_(p) {
     }
   }
   return { ok: false, error: 'NOT_FOUND' };
+}
+
+// تسجيل مباشر بكلمة سر يختارها المستخدم
+function registerDirect_(p) {
+  ensureSheets_();
+  const country  = String(p.country  || '249').replace(/\D/g,'');
+  const phone    = String(p.phone    || '').replace(/\D/g,'').replace(/^0+/,'');
+  const fullName = String(p.fullName || '').trim();
+  const userType = String(p.userType || 'مزارع').trim();
+  const password = String(p.password || '').trim();
+
+  if (phone.length < 6)   return { ok: false, error: 'INVALID_PHONE' };
+  if (!fullName)           return { ok: false, error: 'MISSING_NAME' };
+  if (password.length < 4) return { ok: false, error: 'PASSWORD_TOO_SHORT' };
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sh    = ss.getSheetByName('Users');
+  const data  = sh.getDataRange().getValues();
+  const hdr   = data[0]; const idx = col => hdr.indexOf(col);
+
+  // التحقق من التكرار
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idx('Phone')]) === phone) {
+      return { ok: false, error: 'PHONE_EXISTS' };
+    }
+  }
+
+  // حفظ المستخدم بكلمة سر مباشرة
+  const salt = Utilities.getUuid();
+  const hash = sha256_(salt + password);
+  const uid  = Utilities.getUuid();
+  sh.appendRow([
+    uid, phone, hash, salt, fullName, userType,
+    '', country, true, 0, '', false, '', '',
+    new Date().toISOString(), ''
+  ]);
+
+  // إنشاء جلسة مباشرة
+  const hours  = parseInt(getSetting_('SESSION_HOURS')) || 12;
+  const token  = Utilities.getUuid();
+  const expiry = new Date(Date.now() + hours * 3600000).toISOString();
+  ss.getSheetByName('Sessions').appendRow([
+    token, uid, phone, fullName, userType,
+    new Date().toISOString(), expiry
+  ]);
+
+  // إشعار واتساب اختياري
+  const fullPhone = country + phone;
+  const waMsg = `🌿 *السودان الأخضر*\nمرحباً ${fullName}!\n\nتم تسجيلك بنجاح كـ ${userType}.\nاستمتع بخدمات المنصة الزراعية.`;
+  sendWhatsAppText_(fullPhone, waMsg);
+
+  return {
+    ok: true, token,
+    fullName, userType, phone,
+    expiresAt: expiry,
+    message: 'تم التسجيل بنجاح'
+  };
 }
 
 function verifyOtp_(p) {

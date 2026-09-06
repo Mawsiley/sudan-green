@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>السودان الأخضر — تسجيل الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
+  --vg:#1A9A48;--lg:#25C05A;--vg2:rgba(26,154,72,.1);
+  --gold:#B8860B;--gold-l:#D4A017;
+  --text:#1A2E1F;--dim:#4A7A5A;--dim2:#6B9A7A;
+  --bg:#FFFFFF;--bg2:#F4FAF6;
+  --card:#FFFFFF;--card2:#F0F8F2;
+  --border:rgba(26,154,72,.2);--border2:rgba(26,154,72,.1);
+  --red:#D03030;--amber:#C07800;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg2);color:var(--text);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  position:relative;overflow:hidden;
+}
+
+/* BACKGROUND */
+.bg-glow{
+  position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 90%, rgba(26,154,72,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(26,94,56,.05) 0%, transparent 60%);
+}
+.stars{display:none}
+
+/* WRAPPER */
+.wrapper{
+  width:100%;max-width:440px;position:relative;z-index:10;
+}
+
+/* LOGO */
+.logo{text-align:center;margin-bottom:28px}
+.logo-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,var(--eg2),var(--eg3));
+  border:2px solid rgba(46,224,112,.3);
+  font-size:36px;margin-bottom:12px;
+  box-shadow:0 8px 32px rgba(46,224,112,.15);
+}
+.logo h1{font-family:'Reem Kufi',sans-serif;font-size:24px;color:var(--eg);margin-bottom:4px}
+.logo p{font-size:13px;color:var(--dim)}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px 24px;
+  box-shadow:0 4px 24px rgba(26,154,72,.1), 0 1px 4px rgba(0,0,0,.06);
+}
+
+/* TABS */
+.tabs{display:flex;background:rgba(26,154,72,.08);border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{
+  flex:1;padding:10px;text-align:center;font-size:14px;
+  border-radius:7px;cursor:pointer;transition:.2s;color:var(--dim);
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+}
+.tab.active{background:var(--vg);color:#fff;font-weight:600}
+
+/* FORM */
+.form-panel{display:none}
+.form-panel.active{display:block}
+
+.field{margin-bottom:14px}
+label.lbl{font-size:12px;color:var(--dim);display:block;margin-bottom:6px;font-weight:500}
+.input-wrap{position:relative}
+input,select{
+  width:100%;background:#F9FDF9;
+  border:1px solid #D0E8D5;border-radius:8px;
+  padding:11px 14px;color:var(--text);
+  font-family:inherit;font-size:14px;
+  transition:border-color .2s, box-shadow .2s;
+}
+input:focus,select:focus{
+  outline:none;border-color:var(--vg);
+  box-shadow:0 0 0 3px rgba(46,224,112,.12);
+}
+input::placeholder{color:#A0C0A8}
+select option{background:#fff;color:var(--text)}
+
+/* phone row */
+.phone-row{display:flex;gap:8px}
+.phone-row .cc{width:90px;flex-shrink:0}
+.phone-row input{flex:1}
+
+/* password toggle */
+.pw-wrap{position:relative}
+.pw-wrap input{padding-left:40px}
+.pw-eye{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  cursor:pointer;color:var(--dim);font-size:16px;user-select:none;
+  transition:color .2s;
+}
+.pw-eye:hover{color:var(--vg)}
+
+/* type grid */
+.type-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.type-card{
+  border:1px solid #D0E8D5;border-radius:10px;
+  padding:12px 10px;text-align:center;cursor:pointer;
+  transition:.2s;background:#F9FDF9;
+}
+.type-card:hover{border-color:var(--vg);background:var(--vg2)}
+.type-card.selected{border-color:var(--vg);background:rgba(26,154,72,.1);color:var(--vg)}
+.type-card .type-icon{font-size:22px;margin-bottom:4px}
+.type-card .type-name{font-size:12px;font-weight:500}
+
+/* strength bar */
+.strength{height:3px;border-radius:2px;background:var(--border2);margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+
+/* alert */
+.alert{
+  padding:10px 14px;border-radius:8px;font-size:13px;
+  margin-bottom:16px;display:none;align-items:center;gap:8px;
+}
+.alert.show{display:flex}
+.alert-ok{background:rgba(46,224,112,.12);border:1px solid rgba(46,224,112,.3);color:var(--vg)}
+.alert-err{background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.3);color:var(--red)}
+.alert-warn{background:rgba(240,160,48,.12);border:1px solid rgba(240,160,48,.3);color:var(--amber)}
+
+/* button */
+.btn-main{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--vg),var(--lg));
+  color:#fff;font-size:15px;font-weight:700;
+  font-family:inherit;cursor:pointer;
+  transition:opacity .2s,transform .1s;
+  margin-top:4px;
+}
+.btn-main:hover{opacity:.9}
+.btn-main:active{transform:scale(.98)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+
+/* divider */
+.or-divider{
+  text-align:center;color:var(--dim2);font-size:12px;
+  margin:16px 0;position:relative;
+}
+.or-divider::before,.or-divider::after{
+  content:'';position:absolute;top:50%;width:42%;height:1px;
+  background:var(--border2);
+}
+.or-divider::before{right:0}
+.or-divider::after{left:0}
+
+/* ═══ PROFILE SCREEN ═══ */
+#profileScreen{display:none}
+
+.profile-hero{
+  text-align:center;padding:24px 0 16px;
+}
+.avatar{
+  width:88px;height:88px;border-radius:50%;
+  background:linear-gradient(135deg,var(--eg2),var(--eg3));
+  border:3px solid var(--vg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin:0 auto 14px;
+  box-shadow:0 0 0 6px rgba(46,224,112,.1);
+  position:relative;
+}
+.avatar-badge{
+  position:absolute;bottom:-4px;right:-4px;
+  background:var(--gold);border-radius:50%;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;border:2px solid var(--bg);
+}
+.profile-name{
+  font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--vg);
+  margin-bottom:4px;
+}
+.profile-type{
+  display:inline-block;padding:3px 14px;border-radius:20px;
+  font-size:12px;font-weight:600;
+  background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);
+  color:var(--gold-l);margin-bottom:4px;
+}
+
+.profile-info{
+  background:#F4FAF6;border:1px solid #D0E8D5;
+  border-radius:12px;padding:0;overflow:hidden;margin:16px 0;
+}
+.info-row{
+  display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-bottom:1px solid #D0E8D5;
+}
+.info-row:last-child{border-bottom:none}
+.info-icon{width:32px;height:32px;border-radius:8px;
+  background:rgba(26,154,72,.12);display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;}
+.info-label{font-size:11px;color:var(--dim);margin-bottom:2px}
+.info-value{font-size:14px;color:var(--text);font-weight:500}
+
+.profile-actions{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.btn-outline{
+  padding:11px;border:1px solid #D0E8D5;border-radius:10px;
+  background:transparent;color:var(--dim);font-size:14px;
+  font-family:inherit;cursor:pointer;transition:.2s;
+}
+.btn-outline:hover{border-color:var(--vg);color:var(--vg)}
+.btn-logout{
+  padding:11px;border:1px solid rgba(224,80,80,.3);border-radius:10px;
+  background:rgba(224,80,80,.08);color:var(--red);font-size:14px;
+  font-family:inherit;cursor:pointer;transition:.2s;
+}
+.btn-logout:hover{background:rgba(224,80,80,.15)}
+
+/* edit profile panel */
+#editPanel{display:none;margin-top:16px;border-top:1px solid var(--border2);padding-top:16px}
+
+/* API MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;z-index:200;
+  padding:16px;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px;width:100%;max-width:420px;
+}
+.modal-title{font-family:'Reem Kufi',sans-serif;font-size:17px;margin-bottom:16px}
+
+@media(max-width:380px){
+  .card{padding:20px 16px}
+  .type-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="stars" id="stars"></div>
+
+<!-- API MODAL -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ إعداد رابط الـ API</div>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:14px">
+      الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/
+    </p>
+    <div class="field">
+      <label class="lbl">API URL</label>
+      <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <button class="btn-main" onclick="saveApiModal()">حفظ الرابط</button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- ══ LOGO ══ -->
+  <div class="logo">
+    <div class="logo-badge">🌿</div>
+    <h1>السودان الأخضر</h1>
+    <p>المنصة الزراعية الوطنية</p>
+  </div>
+
+  <!-- ══ AUTH CARD ══ -->
+  <div class="card" id="authCard">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" id="tab-login" onclick="switchTab('login')">تسجيل الدخول</div>
+      <div class="tab"        id="tab-reg"   onclick="switchTab('reg')">حساب جديد</div>
+    </div>
+
+    <div id="authAlert" class="alert"></div>
+
+    <!-- ══ LOGIN PANEL ══ -->
+    <div class="form-panel active" id="panel-login">
+      <div class="field">
+        <label class="lbl">رقم الهاتف</label>
+        <div class="phone-row">
+          <select class="cc" id="lcc">
+            <option value="249">🇸🇩 249</option>
+            <option value="20">🇪🇬 20</option>
+            <option value="966">🇸🇦 966</option>
+            <option value="971">🇦🇪 971</option>
+            <option value="1">🇺🇸 1</option>
+            <option value="44">🇬🇧 44</option>
+          </select>
+          <input type="tel" id="lPhone" placeholder="918251171" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">كلمة السر</label>
+        <div class="pw-wrap">
+          <input type="password" id="lPass" placeholder="كلمة السر">
+          <span class="pw-eye" onclick="togglePw('lPass',this)">👁</span>
+        </div>
+      </div>
+      <button class="btn-main" id="loginBtn" onclick="doLogin()">دخول ←</button>
+      <div class="or-divider">ليس لديك حساب؟</div>
+      <button class="btn-outline" onclick="switchTab('reg')">إنشاء حساب جديد</button>
+    </div>
+
+    <!-- ══ REGISTER PANEL ══ -->
+    <div class="form-panel" id="panel-reg">
+
+      <!-- نوع الحساب -->
+      <div class="field">
+        <label class="lbl">نوع الحساب</label>
+        <div class="type-grid" id="typeGrid">
+          <div class="type-card selected" data-type="مزارع" onclick="selectType(this)">
+            <div class="type-icon">🌾</div>
+            <div class="type-name">مزارع</div>
+          </div>
+          <div class="type-card" data-type="مستثمر" onclick="selectType(this)">
+            <div class="type-icon">💼</div>
+            <div class="type-name">مستثمر</div>
+          </div>
+          <div class="type-card" data-type="شريك" onclick="selectType(this)">
+            <div class="type-icon">🤝</div>
+            <div class="type-name">شريك</div>
+          </div>
+          <div class="type-card" data-type="باحث" onclick="selectType(this)">
+            <div class="type-icon">🔬</div>
+            <div class="type-name">باحث</div>
+          </div>
+          <div class="type-card" data-type="مشتري" onclick="selectType(this)">
+            <div class="type-icon">🛒</div>
+            <div class="type-name">مشتري</div>
+          </div>
+          <div class="type-card" data-type="مورد" onclick="selectType(this)">
+            <div class="type-icon">🚚</div>
+            <div class="type-name">مورد</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">الاسم الكامل</label>
+        <input type="text" id="rName" placeholder="أحمد محمد عبدالله" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label class="lbl">رقم الهاتف</label>
+        <div class="phone-row">
+          <select class="cc" id="rcc">
+            <option value="249">🇸🇩 249</option>
+            <option value="20">🇪🇬 20</option>
+            <option value="966">🇸🇦 966</option>
+            <option value="971">🇦🇪 971</option>
+            <option value="1">🇺🇸 1</option>
+            <option value="44">🇬🇧 44</option>
+          </select>
+          <input type="tel" id="rPhone" placeholder="91XXXXXXX" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">كلمة السر</label>
+        <div class="pw-wrap">
+          <input type="password" id="rPass" placeholder="أدخل كلمة سر قوية" oninput="checkStrength(this.value)">
+          <span class="pw-eye" onclick="togglePw('rPass',this)">👁</span>
+        </div>
+        <div class="strength"><div class="strength-fill" id="strBar"></div></div>
+        <div id="strText" style="font-size:11px;color:var(--dim);margin-top:3px"></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">تأكيد كلمة السر</label>
+        <div class="pw-wrap">
+          <input type="password" id="rPass2" placeholder="أعد كتابة كلمة السر">
+          <span class="pw-eye" onclick="togglePw('rPass2',this)">👁</span>
+        </div>
+      </div>
+
+      <button class="btn-main" id="regBtn" onclick="doRegister()">إنشاء الحساب ←</button>
+      <div class="or-divider">لديك حساب؟</div>
+      <button class="btn-outline" onclick="switchTab('login')">تسجيل الدخول</button>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- ══ PROFILE SCREEN ══ -->
+  <div id="profileScreen">
+    <div class="card">
+      <div class="profile-hero">
+        <div class="avatar" id="profAvatar">
+          <span id="profEmoji">🌾</span>
+          <div class="avatar-badge" id="profBadge">✦</div>
+        </div>
+        <div class="profile-name" id="profName">—</div>
+        <div class="profile-type" id="profType">—</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px" id="profPhone"></div>
+      </div>
+
+      <div class="profile-info">
+        <div class="info-row">
+          <div class="info-icon">📱</div>
+          <div>
+            <div class="info-label">رقم الهاتف</div>
+            <div class="info-value" id="pi-phone">—</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">👤</div>
+          <div>
+            <div class="info-label">نوع الحساب</div>
+            <div class="info-value" id="pi-type">—</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">📅</div>
+          <div>
+            <div class="info-label">تاريخ الانضمام</div>
+            <div class="info-value" id="pi-created">—</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">🕐</div>
+          <div>
+            <div class="info-label">آخر دخول</div>
+            <div class="info-value" id="pi-last">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Profile -->
+      <div class="profile-actions">
+        <button class="btn-outline" onclick="toggleEdit()">✏️ تعديل الملف الشخصي</button>
+
+        <div id="editPanel">
+          <div id="editAlert" class="alert"></div>
+          <div class="field">
+            <label class="lbl">الاسم الكامل</label>
+            <input type="text" id="editName" placeholder="الاسم الكامل">
+          </div>
+          <div class="field">
+            <label class="lbl">الدولة</label>
+            <input type="text" id="editCountry" placeholder="السودان">
+          </div>
+          <div class="field">
+            <label class="lbl">كلمة السر الجديدة (اتركها فارغة إن لم تُرد التغيير)</label>
+            <div class="pw-wrap">
+              <input type="password" id="editPass" placeholder="كلمة السر الجديدة (اختياري)">
+              <span class="pw-eye" onclick="togglePw('editPass',this)">👁</span>
+            </div>
+          </div>
+          <button class="btn-main" onclick="saveProfile()" style="margin-top:4px">💾 حفظ التعديلات</button>
+        </div>
+
+        <button class="btn-logout" onclick="doLogout()">⬅ تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+let API_URL = localStorage.getItem('sg_api_url') || '';
+let SESSION = JSON.parse(localStorage.getItem('sg_session') || 'null');
+let selectedType = 'مزارع';
+
+const typeEmojis = {
+  'مزارع':'🌾','مستثمر':'💼','شريك':'🤝',
+  'باحث':'🔬','مشتري':'🛒','مورد':'🚚','admin':'⚙️'
+};
+const typeBadges = {
+  'مزارع':'🌿','مستثمر':'💰','شريك':'🤝',
+  'باحث':'📊','مشتري':'🛒','مورد':'🚛','admin':'⚙️'
+};
+
+// check ?api= param
+const urlApi = new URLSearchParams(location.search).get('api');
+if (urlApi) {
+  API_URL = decodeURIComponent(urlApi);
+  localStorage.setItem('sg_api_url', API_URL);
+  history.replaceState({}, '', location.pathname);
+}
+
+// STARS
+(function() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2 + 1;
+    Object.assign(s.style, {
+      left: Math.random()*100+'%', top: Math.random()*100+'%',
+      width: sz+'px', height: sz+'px',
+      '--d': (2 + Math.random()*4)+'s',
+      '--del': -(Math.random()*4)+'s',
+      '--op': (0.3 + Math.random()*0.7).toFixed(2)
+    });
+    c.appendChild(s);
+  }
+})();
+
+// INIT
+window.addEventListener('DOMContentLoaded', () => {
+  if (!API_URL) openApiModal();
+  if (SESSION?.token) loadAndShowProfile();
+});
+
+// ══════════════════════════════════════════════════
+//  API
+// ══════════════════════════════════════════════════
+async function api(data) {
+  if (!API_URL) { openApiModal(); throw new Error('NO_API_URL'); }
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
+// ══════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════
+async function doLogin() {
+  const phone = document.getElementById('lPhone').value.trim().replace(/\D/g,'');
+  const password = document.getElementById('lPass').value.trim();
+  if (!phone || !password) { showAlert('authAlert','أدخل رقم الهاتف وكلمة السر','err'); return; }
+
+  setLoading('loginBtn', true, 'جاري الدخول...');
+  try {
+    const r = await api({ action:'login', phone, password });
+    if (r.ok) {
+      SESSION = { token: r.token, fullName: r.fullName, userType: r.userType, phone };
+      localStorage.setItem('sg_session', JSON.stringify(SESSION));
+      await loadAndShowProfile();
+    } else {
+      const msgs = {
+        WRONG_PASSWORD: `كلمة السر خاطئة — ${r.attemptsLeft||'?'} محاولات متبقية`,
+        LOCKED:  `الحساب مقفول — انتظر ${r.minutesLeft} دقيقة`,
+        NOT_FOUND: 'الرقم غير مسجل — أنشئ حساباً جديداً',
+        INACTIVE: 'الحساب غير مُفعَّل، تواصل مع الإدارة'
+      };
+      showAlert('authAlert', msgs[r.error] || r.error, 'err');
+    }
+  } catch(e) {
+    showAlert('authAlert','تعذر الاتصال بالخادم','err');
+  }
+  setLoading('loginBtn', false, 'دخول ←');
+}
+
+async function doRegister() {
+  const name  = document.getElementById('rName').value.trim();
+  const phone = document.getElementById('rPhone').value.trim().replace(/\D/g,'');
+  const cc    = document.getElementById('rcc').value;
+  const pass  = document.getElementById('rPass').value.trim();
+  const pass2 = document.getElementById('rPass2').value.trim();
+
+  if (!name)          { showAlert('authAlert','أدخل اسمك الكامل','err'); return; }
+  if (phone.length<6) { showAlert('authAlert','رقم الهاتف غير صحيح','err'); return; }
+  if (pass.length<4)  { showAlert('authAlert','كلمة السر قصيرة جداً (4 أحرف على الأقل)','err'); return; }
+  if (pass !== pass2) { showAlert('authAlert','كلمتا السر غير متطابقتين','err'); return; }
+
+  setLoading('regBtn', true, 'جاري التسجيل...');
+  try {
+    const r = await api({
+      action: 'registerDirect',
+      fullName: name, phone, country: cc,
+      password: pass, userType: selectedType
+    });
+    if (r.ok) {
+      SESSION = { token: r.token, fullName: r.fullName, userType: r.userType, phone };
+      localStorage.setItem('sg_session', JSON.stringify(SESSION));
+      await loadAndShowProfile();
+    } else {
+      const msgs = {
+        PHONE_EXISTS:      'هذا الرقم مسجل مسبقاً — سجّل الدخول',
+        PASSWORD_TOO_SHORT:'كلمة السر قصيرة جداً',
+        INVALID_PHONE:     'رقم الهاتف غير صحيح',
+        MISSING_NAME:      'أدخل اسمك الكامل'
+      };
+      showAlert('authAlert', msgs[r.error] || r.error, 'err');
+    }
+  } catch(e) {
+    showAlert('authAlert','تعذر الاتصال بالخادم','err');
+  }
+  setLoading('regBtn', false, 'إنشاء الحساب ←');
+}
+
+async function doLogout() {
+  if (SESSION) api({ action:'logout', token:SESSION.token }).catch(()=>{});
+  SESSION = null;
+  localStorage.removeItem('sg_session');
+  document.getElementById('profileScreen').style.display = 'none';
+  document.getElementById('authCard').style.display = 'block';
+  switchTab('login');
+}
+
+// ══════════════════════════════════════════════════
+//  PROFILE
+// ══════════════════════════════════════════════════
+async function loadAndShowProfile() {
+  try {
+    const r = await api({ action:'getProfile', token: SESSION.token });
+    if (r.ok) renderProfile(r.profile);
+    else renderProfile({ fullName: SESSION.fullName, userType: SESSION.userType, phone: SESSION.phone });
+  } catch(e) {
+    renderProfile({ fullName: SESSION?.fullName, userType: SESSION?.userType, phone: SESSION?.phone });
+  }
+}
+
+function renderProfile(p) {
+  const type = p.userType || 'مزارع';
+  document.getElementById('profEmoji').textContent  = typeEmojis[type] || '👤';
+  document.getElementById('profBadge').textContent  = typeBadges[type] || '✦';
+  document.getElementById('profName').textContent   = p.fullName || '—';
+  document.getElementById('profType').textContent   = type;
+  document.getElementById('profPhone').textContent  = '+' + (p.countryCode||'249') + ' ' + (p.phone||SESSION?.phone||'');
+  document.getElementById('pi-phone').textContent   = p.phone || SESSION?.phone || '—';
+  document.getElementById('pi-type').textContent    = type;
+  document.getElementById('pi-created').textContent = fmtDate(p.createdAt);
+  document.getElementById('pi-last').textContent    = fmtDate(p.lastLogin) || 'الآن';
+  document.getElementById('editName').value    = p.fullName || '';
+  document.getElementById('editCountry').value = p.country || 'السودان';
+
+  document.getElementById('authCard').style.display    = 'none';
+  document.getElementById('profileScreen').style.display = 'block';
+}
+
+function toggleEdit() {
+  const p = document.getElementById('editPanel');
+  p.style.display = p.style.display === 'block' ? 'none' : 'block';
+}
+
+async function saveProfile() {
+  const name    = document.getElementById('editName').value.trim();
+  const country = document.getElementById('editCountry').value.trim();
+  const newPass = document.getElementById('editPass').value.trim();
+
+  if (!name) { showAlert('editAlert','أدخل الاسم','err'); return; }
+
+  try {
+    const r = await api({ action:'updateProfile', token:SESSION.token, fullName:name, country });
+    if (!r.ok) { showAlert('editAlert', r.error, 'err'); return; }
+
+    if (newPass) {
+      if (newPass.length < 4) { showAlert('editAlert','كلمة السر قصيرة','err'); return; }
+      const cp = await api({ action:'changePassword', token:SESSION.token, newPassword:newPass });
+      if (!cp.ok) { showAlert('editAlert', cp.error, 'err'); return; }
+    }
+
+    SESSION.fullName = name;
+    localStorage.setItem('sg_session', JSON.stringify(SESSION));
+    showAlert('editAlert','تم الحفظ بنجاح ✅','ok');
+    document.getElementById('profName').textContent = name;
+    document.getElementById('editPass').value = '';
+  } catch(e) {
+    showAlert('editAlert','خطأ في الاتصال','err');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════════
+function switchTab(t) {
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-reg').classList.toggle('active',   t==='reg');
+  document.getElementById('panel-login').classList.toggle('active', t==='login');
+  document.getElementById('panel-reg').classList.toggle('active',   t==='reg');
+  document.getElementById('authAlert').classList.remove('show');
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.dataset.type;
+}
+
+function togglePw(id, eye) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  eye.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function checkStrength(v) {
+  let score = 0;
+  if (v.length >= 6)  score++;
+  if (v.length >= 8)  score++;
+  if (/[A-Za-z]/.test(v)) score++;
+  if (/[0-9]/.test(v))    score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const bar   = document.getElementById('strBar');
+  const txt   = document.getElementById('strText');
+  const levels = [
+    {w:'0%',  bg:'transparent', label:''},
+    {w:'25%', bg:'#E05050',     label:'ضعيفة'},
+    {w:'50%', bg:'#F0A030',     label:'متوسطة'},
+    {w:'75%', bg:'#D4A017',     label:'جيدة'},
+    {w:'100%',bg:'#2EE070',     label:'قوية جداً'},
+  ];
+  const l = levels[Math.min(score, 4)];
+  bar.style.width = l.w;
+  bar.style.background = l.bg;
+  txt.textContent = l.label;
+  txt.style.color = l.bg;
+}
+
+function setLoading(id, loading, text) {
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.textContent = text;
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${type==='ok'?'ok':type==='warn'?'warn':'err'} show`;
+  el.textContent = msg;
+  if (type === 'ok') setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString('ar', {
+      year:'numeric', month:'long', day:'numeric'
+    });
+  } catch(e) { return d; }
+}
+
+// API MODAL
+function openApiModal() {
+  document.getElementById('apiInput').value = API_URL || '';
+  document.getElementById('apiModal').classList.add('show');
+}
+function saveApiModal() {
+  const url = document.getElementById('apiInput').value.trim();
+  if (!url.startsWith('https://')) return;
+  API_URL = url;
+  localStorage.setItem('sg_api_url', url);
+  document.getElementById('apiModal').classList.remove('show');
+  api({ action:'saveApiUrl', apiUrl: url }).catch(()=>{});
+}
+
+// Enter key shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('panel-login').classList.contains('active')) doLogin();
+  else if (document.getElementById('panel-reg').classList.contains('active')) doRegister();
+});
+</script>
+</body>
+</html>
