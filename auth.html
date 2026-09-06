@@ -7,23 +7,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
+/* ═══ DESIGN: Modern Oasis — فاتح وعصري ═══ */
 :root{
-  --eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
-  --vg:#1A9A48;--lg:#25C05A;--vg2:rgba(26,154,72,.1);
-  --gold:#B8860B;--gold-l:#D4A017;
-  --text:#1A2E1F;--dim:#4A7A5A;--dim2:#6B9A7A;
-  --bg:#FFFFFF;--bg2:#F4FAF6;
-  --card:#FFFFFF;--card2:#F0F8F2;
-  --border:rgba(26,154,72,.2);--border2:rgba(26,154,72,.1);
-  --red:#D03030;--amber:#C07800;
-  --r:12px;
+  --eg:#0B3D22;--eg2:#155230;--eg3:#1A6E3C;
+  --vg:#1A9A48;--lg:#2CC462;--vg2:rgba(26,154,72,.11);
+  --gold:#B87E14;--gold-l:#D4A320;
+  --text:#0E1C12;--dim:#3A5C4A;--dim2:#587A68;
+  --bg:#F1F8F3;--bg2:#FFFFFF;
+  --card:#FFFFFF;--card2:#E9F5ED;
+  --border:rgba(26,154,72,.16);--border2:rgba(26,154,72,.09);
+  --red:#CC2828;--amber:#B07000;
+  --r:14px;
 }
 /* ── DARK MODE ── */
 html[data-theme="dark"]{
   --text:#D8EEE0;--dim:#7DB88A;--dim2:#5A9A6A;
   --bg:#0A1510;--bg2:#0D1A12;
   --card:#12221A;--card2:#1A2E22;
-  --border:rgba(26,154,72,.4);--border2:rgba(26,154,72,.2);
+  --border:rgba(26,154,72,.38);--border2:rgba(26,154,72,.18);
 }
 html[data-theme="dark"] input,html[data-theme="dark"] select{
   background:#1A2E1F!important;border-color:rgba(26,154,72,.35)!important;color:#D8EEE0!important;
@@ -36,65 +37,102 @@ html[data-theme="dark"] .info-row{border-color:rgba(26,154,72,.2)}
 html[data-theme="dark"] .btn-outline{background:#1A2E1F;border-color:rgba(26,154,72,.3);color:#7DB88A}
 html[data-theme="dark"] .btn-logout{background:rgba(200,48,48,.12)}
 html[data-theme="dark"] .modal{background:#12221A}
+html[data-theme="dark"] .auth-visual{filter:brightness(.9)}
+html[data-theme="dark"] .auth-form{background:var(--bg2)}
 /* ── TOGGLE BAR ── */
-.toggle-bar{position:fixed;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
+.toggle-bar{position:fixed;top:16px;left:16px;z-index:1000;display:flex;gap:6px}
 .tgl-btn{
-  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--border);
   background:var(--card);color:var(--text);cursor:pointer;font-size:15px;
   display:flex;align-items:center;justify-content:center;
-  transition:.2s;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1);
+  transition:.2s;font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,.08);
 }
 .tgl-btn:hover{border-color:var(--vg);color:var(--vg)}
 .tgl-btn.lang{width:auto;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:.5px}
 *{box-sizing:border-box;margin:0;padding:0}
 
-body{
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-  background:var(--bg2);color:var(--text);
-  min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  padding:16px;
-  position:relative;overflow:hidden;
-}
+/* ── BASE ── */
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
-/* BACKGROUND */
-.bg-glow{
-  position:fixed;inset:0;pointer-events:none;
+/* ── SPLIT LAYOUT ── */
+.auth-root{display:flex;min-height:100vh;}
+
+/* ── VISUAL PANEL ── */
+.auth-visual{
+  flex:0 0 44%;position:relative;overflow:hidden;
+  background:linear-gradient(170deg,#081C0D 0%,#0E3420 35%,#155A2E 70%,#1D6E3A 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 44px;
+}
+.auth-visual::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 80% 60% at 15% 95%, rgba(26,154,72,.07) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 85% 8%, rgba(26,94,56,.06) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(196,154,60,.03) 0%, transparent 60%);
+    radial-gradient(ellipse 100% 60% at 50% 110%,rgba(26,154,72,.28) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 15%,rgba(196,154,60,.1) 0%,transparent 50%),
+    radial-gradient(ellipse 50% 40% at 15% 20%,rgba(14,52,28,.5) 0%,transparent 60%);
 }
-/* Islamic geometric pattern */
-.bg-pattern{
-  position:fixed;inset:0;pointer-events:none;opacity:.035;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cdefs%3E%3Cpattern id='p' x='0' y='0' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpolygon points='30,4 38,22 56,22 42,34 48,52 30,42 12,52 18,34 4,22 22,22' fill='none' stroke='%2326C06A' stroke-width='0.6' opacity='0.8'/%3E%3Ccircle cx='30' cy='30' r='10' fill='none' stroke='%2326C06A' stroke-width='0.4' opacity='0.5'/%3E%3Cline x1='0' y1='30' x2='60' y2='30' stroke='%2326C06A' stroke-width='0.2' opacity='0.3'/%3E%3Cline x1='30' y1='0' x2='30' y2='60' stroke='%2326C06A' stroke-width='0.2' opacity='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='120' height='120' fill='url(%23p)'/%3E%3C/svg%3E");
-  background-size:120px;
+/* ground shadow at bottom */
+.auth-visual::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:30%;
+  background:linear-gradient(to top,rgba(4,12,6,.65) 0%,transparent 100%);
+  pointer-events:none;
 }
-/* grain texture */
-.bg-grain{
-  position:fixed;inset:0;pointer-events:none;opacity:.025;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:320px;
+/* floating leaf */
+.vleaf{position:absolute;pointer-events:none;opacity:.2;
+  animation:vlfloat linear infinite;}
+@keyframes vlfloat{
+  0%{transform:translateY(110%) rotate(0deg);opacity:0}
+  8%{opacity:.24}
+  92%{opacity:.12}
+  100%{transform:translateY(-110%) rotate(350deg);opacity:0}
 }
-.stars{display:none}
+.visual-trees{position:absolute;bottom:0;left:0;right:0;pointer-events:none;}
+.visual-brand{position:relative;z-index:2;text-align:center;color:#fff;width:100%;}
+.visual-logo{
+  width:84px;height:84px;border-radius:24px;
+  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.07));
+  border:1.5px solid rgba(255,255,255,.24);
+  display:flex;align-items:center;justify-content:center;font-size:44px;
+  margin:0 auto 26px;box-shadow:0 10px 36px rgba(0,0,0,.3);
+  backdrop-filter:blur(10px);
+}
+.visual-title{font-family:'Amiri',serif;font-size:30px;font-weight:700;color:#fff;margin-bottom:8px;text-shadow:0 2px 24px rgba(0,0,0,.35);}
+.visual-sub{font-size:13px;color:rgba(255,255,255,.68);line-height:1.75;max-width:240px;margin:0 auto 34px;}
+.visual-feats{display:flex;flex-direction:column;gap:10px;width:100%;max-width:230px;}
+.vfeat{display:flex;align-items:center;gap:12px;padding:10px 15px;border-radius:11px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);}
+.vfeat-icon{font-size:19px;flex-shrink:0}
+.vfeat-txt{font-size:12.5px;color:rgba(255,255,255,.82);}
 
-/* WRAPPER */
-.wrapper{
-  width:100%;max-width:440px;position:relative;z-index:10;
+/* ── FORM PANEL ── */
+.auth-form{
+  flex:1;overflow-y:auto;
+  display:flex;align-items:center;justify-content:center;
+  padding:44px 28px;background:var(--bg2);position:relative;
 }
+.auth-form::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 35% at 100% 0%,rgba(26,154,72,.055) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 30% at 0% 100%,rgba(26,154,72,.04) 0%,transparent 55%);
+}
+/* ── WRAPPER ── */
+.wrapper{width:100%;max-width:420px;position:relative;z-index:1;}
+
+/* HIDE OLD BACKGROUND ELEMENTS */
+.bg-glow,.bg-pattern,.bg-grain,.stars{display:none}
 
 /* LOGO */
-.logo{text-align:center;margin-bottom:28px}
+.logo{text-align:center;margin-bottom:30px}
 .logo-badge{
   display:inline-flex;align-items:center;justify-content:center;
-  width:72px;height:72px;border-radius:20px;
+  width:68px;height:68px;border-radius:20px;
   background:linear-gradient(135deg,var(--eg2),var(--eg3));
-  border:2px solid rgba(46,224,112,.3);
-  font-size:36px;margin-bottom:12px;
-  box-shadow:0 8px 32px rgba(46,224,112,.15);
+  border:2px solid rgba(26,154,72,.22);
+  font-size:34px;margin-bottom:12px;
+  box-shadow:0 6px 24px rgba(26,154,72,.2);
 }
-.logo h1{font-family:'Amiri',serif;font-size:24px;color:var(--eg);margin-bottom:4px}
+.logo h1{font-family:'Amiri',serif;font-size:22px;color:var(--eg);margin-bottom:4px;font-weight:700}
 .logo p{font-size:13px;color:var(--dim)}
 
 /* CARD */
@@ -111,13 +149,13 @@ body{
 }
 
 /* TABS */
-.tabs{display:flex;background:rgba(26,154,72,.08);border-radius:10px;padding:4px;margin-bottom:24px}
+.tabs{display:flex;background:var(--card2);border:1px solid var(--border2);border-radius:13px;padding:4px;margin-bottom:24px}
 .tab{
   flex:1;padding:10px;text-align:center;font-size:14px;
-  border-radius:7px;cursor:pointer;transition:.2s;color:var(--dim);
+  border-radius:10px;cursor:pointer;transition:.22s;color:var(--dim);
   font-family:'IBM Plex Sans Arabic',sans-serif;
 }
-.tab.active{background:var(--vg);color:#fff;font-weight:600}
+.tab.active{background:var(--vg);color:#fff;font-weight:600;box-shadow:0 2px 12px rgba(26,154,72,.24)}
 
 /* FORM */
 .form-panel{display:none}
@@ -127,18 +165,18 @@ body{
 label.lbl{font-size:12px;color:var(--dim);display:block;margin-bottom:6px;font-weight:500}
 .input-wrap{position:relative}
 input,select{
-  width:100%;background:#F9FDF9;
-  border:1px solid #D0E8D5;border-radius:8px;
-  padding:11px 14px;color:var(--text);
-  font-family:inherit;font-size:14px;
-  transition:border-color .2s, box-shadow .2s;
+  width:100%;background:var(--bg);
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:12px 14px;color:var(--text);
+  font-family:inherit;font-size:14px;outline:none;
+  transition:border-color .2s, box-shadow .2s, background .2s;
 }
 input:focus,select:focus{
-  outline:none;border-color:var(--vg);
-  box-shadow:0 0 0 3px rgba(46,224,112,.12);
+  border-color:var(--vg);background:var(--bg2);
+  box-shadow:0 0 0 3px rgba(26,154,72,.1),0 2px 8px rgba(26,154,72,.07);
 }
-input::placeholder{color:#A0C0A8}
-select option{background:#fff;color:var(--text)}
+input::placeholder{color:var(--dim2);opacity:.65}
+select option{background:var(--bg2);color:var(--text)}
 
 /* phone row */
 .phone-row{display:flex;gap:8px}
@@ -156,13 +194,11 @@ select option{background:#fff;color:var(--text)}
 .pw-eye:hover{color:var(--vg)}
 
 /* type grid */
-.type-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
-}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .type-card{
-  border:1px solid #D0E8D5;border-radius:10px;
+  border:1.5px solid var(--border2);border-radius:11px;
   padding:12px 10px;text-align:center;cursor:pointer;
-  transition:.2s;background:#F9FDF9;
+  transition:.2s;background:var(--bg);
 }
 .type-card:hover{border-color:var(--vg);background:var(--vg2)}
 .type-card.selected{border-color:var(--vg);background:rgba(26,154,72,.1);color:var(--vg)}
@@ -174,14 +210,11 @@ select option{background:#fff;color:var(--text)}
 .strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
 
 /* alert */
-.alert{
-  padding:10px 14px;border-radius:8px;font-size:13px;
-  margin-bottom:16px;display:none;align-items:center;gap:8px;
-}
+.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;align-items:center;gap:8px;}
 .alert.show{display:flex}
-.alert-ok{background:rgba(46,224,112,.12);border:1px solid rgba(46,224,112,.3);color:var(--vg)}
-.alert-err{background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.3);color:var(--red)}
-.alert-warn{background:rgba(240,160,48,.12);border:1px solid rgba(240,160,48,.3);color:var(--amber)}
+.alert-ok{background:rgba(26,154,72,.1);border:1px solid rgba(26,154,72,.22);color:var(--vg)}
+.alert-err{background:rgba(204,40,40,.08);border:1px solid rgba(204,40,40,.22);color:var(--red)}
+.alert-warn{background:rgba(176,112,0,.08);border:1px solid rgba(176,112,0,.22);color:var(--amber)}
 
 /* button */
 .btn-main{
@@ -241,12 +274,12 @@ select option{background:#fff;color:var(--text)}
 }
 
 .profile-info{
-  background:#F4FAF6;border:1px solid #D0E8D5;
-  border-radius:12px;padding:0;overflow:hidden;margin:16px 0;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:13px;padding:0;overflow:hidden;margin:16px 0;
 }
 .info-row{
   display:flex;align-items:center;gap:12px;padding:13px 16px;
-  border-bottom:1px solid #D0E8D5;
+  border-bottom:1px solid var(--border2);
 }
 .info-row:last-child{border-bottom:none}
 .info-icon{width:32px;height:32px;border-radius:8px;
@@ -257,7 +290,7 @@ select option{background:#fff;color:var(--text)}
 
 .profile-actions{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .btn-outline{
-  padding:11px;border:1px solid #D0E8D5;border-radius:10px;
+  padding:11px;border:1.5px solid var(--border);border-radius:10px;
   background:transparent;color:var(--dim);font-size:14px;
   font-family:inherit;cursor:pointer;transition:.2s;
 }
@@ -274,17 +307,23 @@ select option{background:#fff;color:var(--text)}
 
 /* API MODAL */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);
-  display:none;align-items:center;justify-content:center;z-index:200;
-  padding:16px;
+  position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:200;padding:16px;
 }
 .modal-overlay.show{display:flex}
 .modal{
   background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:24px;width:100%;max-width:420px;
+  border-radius:18px;padding:26px;width:100%;max-width:440px;
+  box-shadow:0 20px 60px rgba(0,0,0,.12);
 }
-.modal-title{font-family:'Amiri',serif;font-size:17px;margin-bottom:16px}
+.modal-title{font-family:'Amiri',serif;font-size:19px;margin-bottom:6px;color:var(--eg)}
+.modal-desc{font-size:13px;color:var(--dim);margin-bottom:18px;line-height:1.6}
 
+@media(max-width:768px){
+  .auth-visual{display:none}
+  .auth-root{display:block}
+  .auth-form{padding:28px 16px;min-height:100vh}
+}
 @media(max-width:380px){
   .card{padding:20px 16px}
   .type-grid{grid-template-columns:1fr 1fr}
@@ -299,18 +338,11 @@ select option{background:#fff;color:var(--text)}
   <button class="tgl-btn lang" id="langBtn" onclick="toggleLang()">EN</button>
 </div>
 
-<div class="bg-glow"></div>
-<div class="bg-pattern" aria-hidden="true"></div>
-<div class="bg-grain" aria-hidden="true"></div>
-<div class="stars" id="stars"></div>
-
 <!-- API MODAL -->
 <div class="modal-overlay" id="apiModal">
   <div class="modal">
     <div class="modal-title" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
-    <p style="font-size:13px;color:var(--dim);margin-bottom:14px" data-i18n="apiSub">
-      الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/
-    </p>
+    <div class="modal-desc" data-i18n="apiSub">الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/</div>
     <div class="field">
       <label class="lbl">API URL</label>
       <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec">
@@ -319,7 +351,41 @@ select option{background:#fff;color:var(--text)}
   </div>
 </div>
 
-<div class="wrapper">
+<!-- SPLIT LAYOUT -->
+<div class="auth-root">
+
+  <!-- VISUAL PANEL -->
+  <div class="auth-visual" aria-hidden="true">
+    <!-- floating leaves -->
+    <span class="vleaf" style="left:7%;font-size:16px;animation-duration:13s;animation-delay:-2s">🍃</span>
+    <span class="vleaf" style="left:22%;font-size:12px;animation-duration:9s;animation-delay:-6s">🌿</span>
+    <span class="vleaf" style="left:55%;font-size:18px;animation-duration:15s;animation-delay:-11s">🍀</span>
+    <span class="vleaf" style="left:78%;font-size:14px;animation-duration:11s;animation-delay:-4s">🌱</span>
+    <span class="vleaf" style="left:40%;font-size:13px;animation-duration:17s;animation-delay:-8s">🍃</span>
+    <!-- tree silhouettes -->
+    <svg class="visual-trees" viewBox="0 0 440 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+      <path d="M55,220 L55,130 Q48,108 30,88 Q48,100 55,84 Q62,62 44,48 Q62,58 70,44 Q76,24 58,10 Q80,28 78,48 Q90,30 86,56 Q100,42 92,66 Q104,62 96,86 Q108,84 96,106 L96,220Z" fill="rgba(255,255,255,.07)"/>
+      <path d="M210,220 L210,118 Q202,94 180,72 Q202,86 210,68 Q218,44 196,30 Q218,42 226,26 Q234,4 212,0 Q238,18 234,38 Q248,20 244,46 Q260,32 250,58 Q264,54 254,80 Q268,76 256,102 L256,220Z" fill="rgba(255,255,255,.06)"/>
+      <path d="M365,220 L365,140 Q358,118 340,100 Q358,112 365,96 Q372,74 354,60 Q372,70 380,56 Q386,36 368,22 Q390,40 386,60 Q398,44 394,68 Q408,56 400,80 Q412,76 402,100 L402,220Z" fill="rgba(255,255,255,.07)"/>
+      <ellipse cx="75" cy="220" rx="42" ry="5" fill="rgba(255,255,255,.04)"/>
+      <ellipse cx="233" cy="220" rx="50" ry="6" fill="rgba(255,255,255,.04)"/>
+      <ellipse cx="383" cy="220" rx="40" ry="5" fill="rgba(255,255,255,.04)"/>
+    </svg>
+    <div class="visual-brand">
+      <div class="visual-logo">🌿</div>
+      <div class="visual-title">السودان الأخضر</div>
+      <div class="visual-sub">المنصة الزراعية الوطنية — نبني مستقبلاً أخضر ومستداماً لأجيال السودان</div>
+      <div class="visual-feats">
+        <div class="vfeat"><span class="vfeat-icon">🌳</span><span class="vfeat-txt">٢٥٠,٠٠٠ شجرة مزروعة</span></div>
+        <div class="vfeat"><span class="vfeat-icon">🌾</span><span class="vfeat-txt">١٢,٠٠٠ مزارع مسجل</span></div>
+        <div class="vfeat"><span class="vfeat-icon">💧</span><span class="vfeat-txt">٨٥,٠٠٠ هكتار محمي</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM PANEL -->
+  <div class="auth-form">
+    <div class="wrapper">
 
   <!-- ══ LOGO ══ -->
   <div class="logo">
@@ -520,6 +586,8 @@ select option{background:#fff;color:var(--text)}
   </div>
 
 </div><!-- /wrapper -->
+  </div><!-- /auth-form -->
+</div><!-- /auth-root -->
 
 <script>
 // ══════════════════════════════════════════════════
@@ -566,7 +634,7 @@ if (urlApi) {
 
 // INIT
 window.addEventListener('DOMContentLoaded', () => {
-  if (!API_URL) openApiModal();
+  // لا نفتح نافذة API تلقائياً — تفتح فقط عند محاولة الدخول
   if (SESSION?.token) loadAndShowProfile();
 });
 
