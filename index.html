@@ -4,24 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>السودان الأخضر</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
-  --vg:#2EE070;--lg:#5AEEA0;
-  --gold:#D4A017;--gold-l:#F0C84A;--gold-d:#8A6A05;
+  --eg:#0B3D22;--eg2:#165230;--eg3:#1E6B40;
+  --vg:#2CC665;--lg:#52D98A;
+  --gold:#C49A3C;--gold-l:#E8B84B;--gold-d:#8A6A05;
   --nile:#1260A0;--nile-l:#2490D0;
   --sand:#F5EFE0;--sand2:#EDE0C8;
-  --text:#F0FFF4;--dim:#9DCCA8;--dim2:rgba(240,255,244,.55);
-  --bg:#041209;--bg2:#071C0D;--card:rgba(18,58,32,.8);
-  --border:rgba(46,224,112,.18);--border-g:rgba(212,160,23,.25);
-  --shadow:rgba(0,0,0,.55);
+  --text:#ECF7EE;--dim:#8ABDA0;--dim2:rgba(236,247,238,.5);
+  --bg:#060E09;--bg2:#0B1610;--card:rgba(14,48,26,.85);
+  --border:rgba(44,198,101,.16);--border-g:rgba(232,184,75,.22);
+  --shadow:rgba(0,0,0,.65);
   /* gallery */
   --gal-h:340px;
+  /* grain */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
 body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+/* ══ GRAIN OVERLAY ══ */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  opacity:.032;background-image:var(--grain);background-size:340px;}
 
 /* ══ SCROLLBAR ══ */
 ::-webkit-scrollbar{width:5px}
@@ -34,7 +39,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   height:68px;display:flex;align-items:center;justify-content:space-between;
   padding:0 32px;transition:all .4s;
 }
-.nav.scrolled{background:rgba(3,15,7,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav.scrolled{background:rgba(4,10,6,.88);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);border-bottom:1px solid rgba(44,198,101,.12);box-shadow:0 1px 40px rgba(0,0,0,.5)}
 .nav-logo{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none}
 .nav-logo-icon{
   width:42px;height:42px;border-radius:12px;
@@ -44,7 +49,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 }
 .nav-logo-icon svg{width:24px;height:24px}
 .nav-logo-text{line-height:1.1}
-.nav-logo-ar{font-family:'Reem Kufi',sans-serif;font-size:17px;font-weight:700;color:var(--lg)}
+.nav-logo-ar{font-family:'Amiri',serif;font-size:17px;font-weight:700;color:var(--lg)}
 .nav-logo-en{font-size:9px;color:var(--dim);letter-spacing:.15em;text-transform:uppercase}
 .nav-links{display:flex;gap:4px}
 .nav-link{padding:7px 14px;border-radius:8px;font-size:13px;color:var(--dim);cursor:pointer;transition:.2s;text-decoration:none}
@@ -79,10 +84,12 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 .hero-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--vg);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
 .hero-title{
-  font-family:'Reem Kufi',sans-serif;
-  font-size:clamp(38px,7vw,86px);
-  font-weight:700;line-height:1.1;margin-bottom:18px;
+  font-family:'Amiri',serif;
+  font-size:clamp(42px,7.5vw,92px);
+  font-weight:700;line-height:1.08;margin-bottom:20px;
+  letter-spacing:-.01em;
   animation:fadeUp .7s .1s ease both;opacity:0;animation-fill-mode:forwards;
+  text-shadow:0 2px 40px rgba(0,0,0,.4);
 }
 .hero-title .t-green{
   background:linear-gradient(135deg,var(--lg),var(--vg),#86EFAC);
@@ -95,7 +102,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   margin-bottom:36px;
   animation:fadeUp .7s .2s ease both;opacity:0;animation-fill-mode:forwards;
 }
-.hero-sub em{font-family:'Playfair Display',serif;font-style:italic;color:var(--dim);font-size:.9em}
+.hero-sub em{font-family:'EB Garamond',serif;font-style:italic;color:var(--gold-l);font-size:1em;opacity:.8}
 .hero-cta{
   display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
   animation:fadeUp .7s .3s ease both;opacity:0;animation-fill-mode:forwards;
@@ -153,7 +160,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   pointer-events:none;
 }
 .war-banner-title{
-  font-family:'Reem Kufi',sans-serif;font-size:18px;font-weight:700;
+  font-family:'Amiri',serif;font-size:18px;font-weight:700;
   color:#FCA5A5;text-shadow:0 0 20px rgba(248,113,113,.4);
 }
 .war-banner-sub{font-size:13px;color:rgba(252,165,165,.75);line-height:1.5}
@@ -199,7 +206,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 }
 .badge-open{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ADE80}
 .badge-soon{background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);color:var(--gold-l)}
-.invest-card-title{font-family:'Reem Kufi',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.invest-card-title{font-family:'Amiri',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
 .invest-card-sub{font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:16px}
 .invest-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .invest-meta-item{background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px}
@@ -219,7 +226,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.2);
   border-radius:16px;padding:32px;max-width:720px;margin:0 auto;text-align:center;
 }
-.invest-concept-title{font-family:'Reem Kufi',sans-serif;font-size:18px;color:var(--vg);margin-bottom:12px}
+.invest-concept-title{font-family:'Amiri',serif;font-size:18px;color:var(--vg);margin-bottom:12px}
 .invest-concept-desc{font-size:14px;color:var(--dim);line-height:1.85}
 
 /* ══ SECTIONS ══ */
@@ -232,21 +239,26 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 }
 .sec-label::before{content:'';width:20px;height:1.5px;background:var(--vg)}
 .sec-title{
-  font-family:'Reem Kufi',sans-serif;
+  font-family:'Amiri',serif;
   font-size:clamp(24px,3.5vw,42px);font-weight:700;color:var(--text);
   margin-bottom:6px;
 }
 .sec-title-en{
-  font-family:'Playfair Display',serif;font-style:italic;
+  font-family:'EB Garamond',serif;font-style:italic;
   font-size:clamp(13px,1.8vw,18px);color:var(--dim);margin-bottom:40px;
 }
 .sec-sub{font-size:14px;color:var(--dim);line-height:1.8;max-width:520px;margin-bottom:44px}
 
 /* ══ STATS BAND ══ */
 .stats-band{
-  background:linear-gradient(135deg,var(--eg) 0%,rgba(22,77,48,.9) 100%);
-  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  padding:56px 24px;
+  background:linear-gradient(135deg,#0B2E18 0%,#112A1E 50%,#0E2415 100%);
+  border-top:1px solid rgba(44,198,101,.14);border-bottom:1px solid rgba(44,198,101,.14);
+  padding:60px 24px;position:relative;overflow:hidden;
+}
+.stats-band::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(44,198,101,.05) 0%,transparent 70%);
+  pointer-events:none;
 }
 .stats-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -260,22 +272,24 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 .stat-item:first-child{border-left:none}
 .stat-item:hover{background:rgba(34,197,94,.05)}
 .stat-num{
-  font-family:'Reem Kufi',sans-serif;font-size:clamp(32px,4vw,52px);
+  font-family:'Amiri',serif;font-size:clamp(32px,4vw,52px);
   font-weight:700;color:var(--gold-l);
   display:block;line-height:1;margin-bottom:8px;
 }
 .stat-ar{font-size:13px;color:var(--text);font-weight:500;margin-bottom:3px}
-.stat-en{font-family:'Playfair Display',serif;font-style:italic;font-size:10.5px;color:var(--dim)}
+.stat-en{font-family:'EB Garamond',serif;font-style:italic;font-size:10.5px;color:var(--dim)}
 
 /* ══ SERVICES CARDS ══ */
 .services-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;
 }
 .svc-card{
-  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  background:var(--card);border:1px solid var(--border);border-radius:22px;
   padding:32px 28px;cursor:pointer;
-  transition:all .35s cubic-bezier(.25,.8,.25,1);
+  transition:all .38s cubic-bezier(.25,.8,.25,1);
   position:relative;overflow:hidden;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 2px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
 }
 .svc-card::before{
   content:'';position:absolute;inset:0;
@@ -296,8 +310,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   transition:.3s;
 }
 .svc-card:hover .svc-icon{transform:scale(1.1) rotate(5deg)}
-.svc-title{font-family:'Reem Kufi',sans-serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px}
-.svc-title-en{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--dim);margin-bottom:12px}
+.svc-title{font-family:'Amiri',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px}
+.svc-title-en{font-family:'EB Garamond',serif;font-style:italic;font-size:11px;color:var(--dim);margin-bottom:12px}
 .svc-desc{font-size:13px;color:var(--dim);line-height:1.75}
 .svc-arrow{
   margin-top:20px;display:flex;align-items:center;gap:6px;
@@ -324,7 +338,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 .region-item:hover{background:rgba(34,197,94,.06);border-color:var(--border)}
 .region-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 .region-ar{font-size:14px;font-weight:600;color:var(--text)}
-.region-en{font-size:11px;color:var(--dim);margin-top:2px;font-family:'Playfair Display',serif;font-style:italic}
+.region-en{font-size:11px;color:var(--dim);margin-top:2px;font-family:'EB Garamond',serif;font-style:italic}
 .region-crops{font-size:11px;color:var(--vg);margin-top:4px}
 
 /* ══ PROJECT CARDS ══ */
@@ -349,7 +363,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   font-size:10.5px;font-weight:600;margin-bottom:10px;
   background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.3);color:var(--lg);
 }
-.proj-title{font-family:'Reem Kufi',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:6px}
+.proj-title{font-family:'Amiri',serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:6px}
 .proj-sub{font-size:12px;color:rgba(255,255,255,.65)}
 .proj-meta{
   display:flex;align-items:center;justify-content:space-between;margin-top:14px;
@@ -376,7 +390,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   width:44px;height:44px;border-radius:50%;
   background:linear-gradient(135deg,var(--eg2),var(--eg3));
   display:flex;align-items:center;justify-content:center;
-  font-family:'Reem Kufi',sans-serif;font-weight:700;font-size:17px;color:var(--lg);
+  font-family:'Amiri',serif;font-weight:700;font-size:17px;color:var(--lg);
   border:2px solid rgba(34,197,94,.25);flex-shrink:0;
 }
 .testi-name{font-weight:600;color:var(--text);font-size:13px}
@@ -394,7 +408,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 }
 .cta-content{position:relative;z-index:2;max-width:700px;margin:0 auto}
 .cta-title{
-  font-family:'Reem Kufi',sans-serif;font-size:clamp(28px,5vw,52px);
+  font-family:'Amiri',serif;font-size:clamp(28px,5vw,52px);
   font-weight:700;color:var(--text);margin-bottom:16px;
 }
 .cta-title span{color:var(--lg)}
@@ -491,7 +505,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   font-size:10px;font-weight:700;margin-bottom:7px;letter-spacing:.04em;
   background:rgba(46,224,112,.25);border:1px solid rgba(46,224,112,.4);color:var(--lg);
 }
-.gal-title{font-family:'Reem Kufi',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:3px}
+.gal-title{font-family:'Amiri',serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:3px}
 .gal-sub{font-size:11px;color:rgba(255,255,255,.6)}
 .gal-bg{position:absolute;inset:0;background-size:cover;background-position:center;
   transition:transform .5s ease;}
@@ -595,6 +609,21 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
     <div class="scroll-line"></div>
   </div>
 </section>
+
+<!-- WAVE DIVIDER -->
+<div aria-hidden="true" style="line-height:0;overflow:hidden;margin-top:-2px">
+  <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:72px">
+    <defs>
+      <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#0B1610"/>
+        <stop offset="50%" stop-color="#0F1F14"/>
+        <stop offset="100%" stop-color="#0B1610"/>
+      </linearGradient>
+    </defs>
+    <path d="M0,36 C180,72 360,0 540,36 C720,72 900,8 1080,40 C1260,68 1380,20 1440,36 L1440,72 L0,72 Z" fill="url(#waveGrad)"/>
+    <path d="M0,50 C240,18 480,68 720,44 C960,20 1200,62 1440,50 L1440,72 L0,72 Z" fill="rgba(44,198,101,0.04)"/>
+  </svg>
+</div>
 
 <!-- WAR MISSING BANNER -->
 <div class="war-banner">
@@ -828,7 +857,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
       </svg>
     </div>
     <div class="map-labels reveal-right">
-      <h3 style="font-family:'Reem Kufi',sans-serif;font-size:16px;color:var(--dim);margin-bottom:8px">انقر على منطقة للمزيد</h3>
+      <h3 style="font-family:'Amiri',serif;font-size:16px;color:var(--dim);margin-bottom:8px">انقر على منطقة للمزيد</h3>
       <div class="region-item" onclick="highlightRegion('gezira')" id="r-gezira">
         <div class="region-dot" style="background:#22C55E;box-shadow:0 0 8px #22C55E"></div>
         <div><div class="region-ar">مشروع الجزيرة</div><div class="region-en">Gezira Irrigation Scheme</div><div class="region-crops">🌾 قطن · ذرة · قمح · فول سوداني</div></div>
@@ -1088,7 +1117,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
       <div class="testi-stars">★★★★☆</div>
       <p class="testi-text">As an agricultural consultant, I was impressed by the data quality and regional mapping. This platform bridges the gap between traditional Sudanese farming and modern agri-investment</p>
       <div class="testi-author">
-        <div class="testi-avatar" style="background:linear-gradient(135deg,#0E4D72,#1B7AB5);font-family:'Playfair Display',serif;font-style:italic">S</div>
+        <div class="testi-avatar" style="background:linear-gradient(135deg,#0E4D72,#1B7AB5);font-family:'EB Garamond',serif;font-style:italic">S</div>
         <div><div class="testi-name">Sarah Mitchell</div><div class="testi-role">🌍 FAO Agricultural Consultant</div></div>
       </div>
     </div>
@@ -1103,7 +1132,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
     <div class="invest-header reveal">
       <div class="invest-badge">📈 مشاريع بالمساهمة الجماعية</div>
       <h2 class="sec-title">اشترِ سهماً في مشروع حقيقي</h2>
-      <div class="sec-title-en" style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--dim);margin-bottom:16px">Community Investment — Own a Share, Grow Together</div>
+      <div class="sec-title-en" style="font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--dim);margin-bottom:16px">Community Investment — Own a Share, Grow Together</div>
       <p class="sec-sub" style="margin:0 auto 40px;text-align:center">
         ليست تبرعاً — بل استثمار حقيقي. تساهم بمبلغ صغير وتصبح شريكاً فعلياً في مشروع زراعي أو إنتاجي، وتحصل على نسبة من الأرباح حسب حصتك.
       </p>
@@ -1239,7 +1268,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
       <button class="btn-sec" style="font-size:15px;padding:15px 36px">📞 تحدث مع فريقنا</button>
     </div>
     <p style="margin-top:24px;font-size:12px;color:var(--dim)">
-      <em style="font-family:'Playfair Display',serif">Join 45,000+ farmers already transforming Sudan's agricultural landscape</em>
+      <em style="font-family:'EB Garamond',serif">Join 45,000+ farmers already transforming Sudan's agricultural landscape</em>
     </p>
   </div>
 </div>
@@ -1299,7 +1328,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
   </div>
   <div class="footer-bottom">
     <span>© 2025 <span>السودان الأخضر</span> · Green Sudan Initiative — جميع الحقوق محفوظة</span>
-    <span style="font-family:'Playfair Display',serif;font-style:italic;font-size:10.5px;color:var(--dim)">Built with 🌱 for Sudan's future</span>
+    <span style="font-family:'EB Garamond',serif;font-style:italic;font-size:10.5px;color:var(--dim)">Built with 🌱 for Sudan's future</span>
   </div>
 </div>
 </div>

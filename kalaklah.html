@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>الكلاكلة الخضراء</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --vg:#1A9A48;--lg:#25C05A;--eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
@@ -30,6 +30,9 @@ html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::pla
 html[data-theme="dark"] .stat-ring{border-color:rgba(26,154,72,.3)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+html[data-theme="dark"] body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:300px;}
 
 /* TOGGLE BAR */
 .toggle-bar{position:fixed;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
@@ -50,22 +53,35 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:va
 }
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-logo-badge{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--eg2),var(--eg3));display:flex;align-items:center;justify-content:center;font-size:20px}
-.nav-logo-name{font-family:'Reem Kufi',sans-serif;font-size:16px;color:var(--vg)}
+.nav-logo-name{font-family:'Amiri',serif;font-size:16px;color:var(--vg)}
 .nav-logo-sub{font-size:11px;color:var(--dim)}
 .nav-back{color:var(--dim);font-size:13px;text-decoration:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;transition:.2s}
 .nav-back:hover{border-color:var(--vg);color:var(--vg)}
 
 /* HERO */
 .hero{
-  background:linear-gradient(135deg,var(--eg) 0%,var(--eg2) 50%,var(--eg3) 100%);
-  color:#fff;padding:72px 24px 60px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(150deg,#071A0D 0%,#0F2D18 45%,#163820 100%);
+  color:#fff;padding:80px 24px 68px;text-align:center;position:relative;overflow:hidden;
 }
 .hero::before{
   content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232EE070' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 80%,rgba(26,154,72,.12) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 20%,rgba(196,154,60,.06) 0%,transparent 55%);
+}
+/* floating leaf particles */
+.leaf{
+  position:absolute;pointer-events:none;font-size:18px;opacity:.25;
+  animation:leafFloat linear infinite;
+}
+@keyframes leafFloat{
+  0%{transform:translateY(120%) rotate(0deg) scale(0.8);opacity:0}
+  10%{opacity:.28}
+  90%{opacity:.18}
+  100%{transform:translateY(-120%) rotate(360deg) scale(1.1);opacity:0}
 }
 .hero-icon{font-size:64px;margin-bottom:16px;position:relative}
-.hero-title{font-family:'Reem Kufi',sans-serif;font-size:clamp(28px,5vw,48px);margin-bottom:12px;position:relative}
+.hero-title{font-family:'Amiri',serif;font-size:clamp(28px,5vw,48px);margin-bottom:12px;position:relative}
 .hero-sub{font-size:16px;color:rgba(255,255,255,.8);max-width:540px;margin:0 auto 28px;line-height:1.7;position:relative}
 .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:24px;font-size:13px;font-weight:600}
@@ -76,7 +92,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:va
 /* PROGRESS SECTION */
 .section{padding:48px 24px;max-width:960px;margin:0 auto}
 .section-title{
-  font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--vg);
+  font-family:'Amiri',serif;font-size:22px;color:var(--vg);
   margin-bottom:8px;display:flex;align-items:center;gap:8px;
 }
 .section-sub{font-size:14px;color:var(--dim);margin-bottom:28px;line-height:1.7}
@@ -87,24 +103,31 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:va
   background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
   padding:20px 16px;text-align:center;
 }
-.stat-num{font-family:'Reem Kufi',sans-serif;font-size:32px;font-weight:700;color:var(--vg)}
+.stat-num{font-family:'Amiri',serif;font-size:32px;font-weight:700;color:var(--vg)}
 .stat-label{font-size:12px;color:var(--dim);margin-top:4px}
 
 /* PROGRESS BAR */
 .progress-wrap{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:24px;margin-bottom:36px}
 .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.progress-title{font-family:'Reem Kufi',sans-serif;font-size:15px}
-.progress-pct{font-size:24px;font-weight:700;color:var(--vg);font-family:'Reem Kufi',sans-serif}
+.progress-title{font-family:'Amiri',serif;font-size:15px}
+.progress-pct{font-size:24px;font-weight:700;color:var(--vg);font-family:'Amiri',serif}
 .progress-bar{height:16px;background:var(--border2);border-radius:8px;overflow:hidden;margin-bottom:12px}
-.progress-fill{height:100%;border-radius:8px;transition:width 1.2s ease;
-  background:linear-gradient(90deg,var(--vg),var(--lg))}
+.progress-fill{height:100%;border-radius:8px;transition:width 1.4s cubic-bezier(.4,0,.2,1);
+  background:linear-gradient(90deg,var(--eg3),var(--vg) 50%,var(--lg));
+  position:relative;overflow:hidden;}
+.progress-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.22) 50%,transparent 100%);
+  animation:shimmer 2.2s ease infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
 .progress-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--dim)}
 
 /* CARDS GRID */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:36px}
 .feat-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:20px}
 .feat-icon{font-size:32px;margin-bottom:12px}
-.feat-title{font-family:'Reem Kufi',sans-serif;font-size:15px;color:var(--text);margin-bottom:6px}
+.feat-title{font-family:'Amiri',serif;font-size:15px;color:var(--text);margin-bottom:6px}
 .feat-desc{font-size:13px;color:var(--dim);line-height:1.7}
 
 /* PHASES */
@@ -115,7 +138,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:va
 }
 .phase-num{
   width:40px;height:40px;border-radius:50%;background:var(--vg);
-  color:#fff;font-family:'Reem Kufi',sans-serif;font-size:16px;
+  color:#fff;font-family:'Amiri',serif;font-size:16px;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .phase-num.done{background:var(--vg)}
@@ -131,7 +154,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:va
 
 /* VOLUNTEER FORM */
 .form-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:28px;margin-bottom:36px}
-.form-title{font-family:'Reem Kufi',sans-serif;font-size:18px;margin-bottom:6px;color:var(--vg)}
+.form-title{font-family:'Amiri',serif;font-size:18px;margin-bottom:6px;color:var(--vg)}
 .form-sub{font-size:13px;color:var(--dim);margin-bottom:20px;line-height:1.6}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-group{display:flex;flex-direction:column;gap:6px}
@@ -166,7 +189,7 @@ input:focus,select:focus,textarea:focus{
   padding:48px 24px;text-align:center;margin-bottom:36px;
 }
 .map-emoji{font-size:56px;margin-bottom:16px}
-.map-title{font-family:'Reem Kufi',sans-serif;font-size:18px;color:var(--vg);margin-bottom:8px}
+.map-title{font-family:'Amiri',serif;font-size:18px;color:var(--vg);margin-bottom:8px}
 .map-sub{font-size:13px;color:var(--dim);max-width:400px;margin:0 auto}
 
 /* DIVIDER */
@@ -208,7 +231,7 @@ input:focus,select:focus,textarea:focus{
 </nav>
 
 <!-- HERO -->
-<div class="hero">
+<div class="hero" id="heroSection">
   <div class="hero-icon">🌳</div>
   <h1 class="hero-title" data-i18n="heroTitle">الكلاكلة الخضراء</h1>
   <p class="hero-sub" data-i18n="heroSub">مشروع مجتمعي جماعي لتشجير وتخضير منطقة الكلاكلة — نزرع الأشجار معاً لمستقبل أجمل</p>
@@ -393,7 +416,7 @@ input:focus,select:focus,textarea:focus{
 <!-- API MODAL -->
 <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:200;padding:16px" id="apiModal" class="api-overlay">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:420px">
-    <div style="font-family:'Reem Kufi',sans-serif;font-size:17px;margin-bottom:12px" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
+    <div style="font-family:'Amiri',serif;font-size:17px;margin-bottom:12px" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
     <p style="font-size:13px;color:var(--dim);margin-bottom:14px" data-i18n="apiSub">الصق رابط Apps Script لحفظ بيانات المتطوعين</p>
     <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom:12px">
     <button class="btn-main" onclick="saveApiUrl()" data-i18n="apiSave">حفظ الرابط</button>
@@ -475,6 +498,23 @@ function saveApiUrl() {
 }
 
 // ══ ANIMATE PROGRESS ══
+/* ── Floating Leaves ── */
+(function spawnLeaves(){
+  const hero = document.getElementById('heroSection');
+  if(!hero) return;
+  const emojis = ['🍃','🌿','🍀','🌱','🍂'];
+  for(let i=0;i<14;i++){
+    const el = document.createElement('span');
+    el.className='leaf';
+    el.textContent=emojis[i%emojis.length];
+    el.style.left=Math.random()*100+'%';
+    el.style.animationDuration=(8+Math.random()*12)+'s';
+    el.style.animationDelay=(-Math.random()*20)+'s';
+    el.style.fontSize=(12+Math.random()*14)+'px';
+    hero.appendChild(el);
+  }
+})();
+
 window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     const fill = document.getElementById('progFill');
