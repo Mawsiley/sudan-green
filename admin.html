@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>لوحة المدير — السودان الأخضر</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700&display=swap"/>
+<style>
+:root{
+  --eg:#0B3D22;--eg2:#155230;--vg:#1A9A48;--lg:#2CC462;
+  --text:#0E1C12;--dim:#3A5C4A;--dim2:#587A68;
+  --bg:#F1F8F3;--bg2:#FFFFFF;
+  --card:#FFFFFF;
+  --border:rgba(26,154,72,.14);
+  --red:#DC2626;--amber:#D97706;--green:#16A34A;--blue:#2563EB;
+  --sidebar-w:260px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── Sidebar ── */
+.sidebar{
+  position:fixed;top:0;right:0;bottom:0;width:var(--sidebar-w);
+  background:linear-gradient(180deg,#081C0D,#0B3D22 60%,#0E4826);
+  padding:24px 0;z-index:100;display:flex;flex-direction:column;
+  box-shadow:-4px 0 32px rgba(0,0,0,.2)
+}
+.sidebar-logo{padding:0 20px 24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:8px}
+.sidebar-logo h2{font-family:'Amiri',serif;color:#fff;font-size:20px;margin-bottom:2px}
+.sidebar-logo p{font-size:11px;color:rgba(255,255,255,.5)}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:11px 20px;
+  font-size:14px;color:rgba(255,255,255,.65);cursor:pointer;
+  transition:all .15s;border-right:3px solid transparent
+}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(44,198,101,.12);color:#fff;border-right-color:var(--lg)}
+.nav-item .ico{font-size:18px;width:22px;text-align:center}
+.nav-badge{margin-right:auto;background:var(--red);color:#fff;border-radius:100px;font-size:11px;padding:1px 7px;font-weight:700}
+
+/* ── Main ── */
+.main{margin-right:var(--sidebar-w);padding:28px;min-height:100vh}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border-radius:14px;padding:14px 20px;
+  margin-bottom:24px;box-shadow:0 1px 12px rgba(0,0,0,.06)
+}
+.topbar-left h1{font-family:'Amiri',serif;font-size:20px;color:var(--eg)}
+.topbar-left p{font-size:12px;color:var(--dim2)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:100px;padding:6px 14px 6px 6px}
+.user-chip .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--vg),var(--eg));display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.user-chip .name{font-size:13px;font-weight:600;color:var(--eg)}
+.user-chip .role{font-size:11px;color:var(--dim2)}
+.btn-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--dim);transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 1px 12px rgba(0,0,0,.05)}
+.stat-card .label{font-size:12px;color:var(--dim2);margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:var(--eg);font-family:'Amiri',serif}
+.stat-card .badge{font-size:11px;margin-top:4px;color:var(--dim2)}
+
+/* ── Section ── */
+.section{background:var(--card);border-radius:14px;padding:24px;box-shadow:0 1px 12px rgba(0,0,0,.05);margin-bottom:24px;display:none}
+.section.active{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.section-header h2{font-family:'Amiri',serif;font-size:18px;color:var(--eg)}
+.search-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-bar input,.search-bar select{
+  padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-family:inherit;font-size:14px;color:var(--text);background:#fff;outline:none
+}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--vg)}
+.btn{padding:9px 18px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-primary{background:var(--vg);color:#fff}
+.btn-primary:hover{background:var(--eg)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-warning{background:var(--amber);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-ghost{background:var(--bg);color:var(--dim)}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;padding:10px 14px;background:var(--bg);color:var(--dim);font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:11px 14px;border-bottom:1px solid var(--border2);vertical-align:middle}
+tr:hover td{background:rgba(26,154,72,.02)}
+.no-data{text-align:center;padding:40px;color:var(--dim2);font-size:14px}
+
+/* ── Status badges ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;gap:4px}
+.badge-active{background:#ECFDF5;color:#065F46}
+.badge-pending{background:#FFFBEB;color:#92400E}
+.badge-suspended{background:#FEF2F2;color:#991B1B}
+.badge-rejected{background:#F3F4F6;color:#6B7280}
+.badge-admin{background:#EDE9FE;color:#5B21B6}
+.badge-super{background:linear-gradient(135deg,#EDE9FE,#DBEAFE);color:#4338CA}
+
+/* ── Alert ── */
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:16px;display:none}
+.alert.show{display:flex;align-items:flex-start;gap:10px}
+.alert-success{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+.alert-error{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+.alert-warn{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto}
+.modal h3{font-family:'Amiri',serif;font-size:18px;color:var(--eg);margin-bottom:20px}
+.modal .close{position:absolute;top:16px;left:16px;background:none;border:none;cursor:pointer;font-size:20px;color:var(--dim2)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-family:inherit;font-size:14px;outline:none
+}
+.field input:focus,.field select:focus{border-color:var(--vg)}
+.field textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+
+/* ── Settings form ── */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.set-card{background:var(--bg);border-radius:12px;padding:16px}
+.set-card label{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:8px}
+.set-card input,.set-card select{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:8px;font-family:inherit;font-size:14px;background:#fff;outline:none
+}
+
+/* ── Spinner ── */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading .spinner{display:inline-block}
+.loading .btn-text{display:none}
+
+@media(max-width:860px){
+  .sidebar{width:60px}.sidebar-logo{display:none}.nav-item span:not(.ico){display:none}.nav-badge{display:none}
+  .main{margin-right:60px;padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Sidebar ═══ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <h2>🌿 السودان الأخضر</h2>
+    <p>لوحة تحكم المدير</p>
+  </div>
+  <div class="nav-item active" onclick="nav('overview')" id="n-overview"><span class="ico">📊</span><span>نظرة عامة</span></div>
+  <div class="nav-item" onclick="nav('users')" id="n-users"><span class="ico">👥</span><span>المستخدمون</span><span class="nav-badge" id="pendingBadge" style="display:none">0</span></div>
+  <div class="nav-item" onclick="nav('roles')" id="n-roles"><span class="ico">🔖</span><span>الأدوار</span></div>
+  <div class="nav-item" onclick="nav('audit')" id="n-audit"><span class="ico">📋</span><span>سجل التدقيق</span></div>
+  <div class="nav-item" onclick="nav('whatsapp')" id="n-whatsapp"><span class="ico">💬</span><span>WhatsApp</span></div>
+  <div class="nav-item" onclick="nav('settings')" id="n-settings"><span class="ico">⚙️</span><span>الإعدادات</span></div>
+  <div style="margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:8px">
+    <div class="nav-item" onclick="goHome()"><span class="ico">🌐</span><span>الموقع الرئيسي</span></div>
+    <div class="nav-item" onclick="doLogout()"><span class="ico">🚪</span><span>تسجيل الخروج</span></div>
+  </div>
+</div>
+
+<!-- ═══ Main ═══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="pageTitle">نظرة عامة</h1>
+      <p id="pageDesc" style="font-size:12px;color:var(--dim2)"></p>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="avatar" id="avatarEl">م</div>
+        <div><div class="name" id="adminName">...</div><div class="role" id="adminRole">...</div></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <!-- Alert global -->
+  <div class="alert" id="globalAlert">
+    <span id="gAlertIcon"></span>
+    <div id="gAlertText"></div>
+  </div>
+
+  <!-- ══ Overview ══ -->
+  <div class="section active" id="sec-overview">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="label">إجمالي المستخدمين</div><div class="value" id="st-users">-</div></div>
+      <div class="stat-card"><div class="label">في انتظار الموافقة</div><div class="value" id="st-pending" style="color:var(--amber)">-</div></div>
+      <div class="stat-card"><div class="label">المستخدمون النشطون</div><div class="value" id="st-active" style="color:var(--green)">-</div></div>
+      <div class="stat-card"><div class="label">الأشجار المزروعة</div><div class="value" id="st-trees">250,000</div></div>
+    </div>
+    <div style="background:var(--bg);border-radius:12px;padding:20px;text-align:center;color:var(--dim2);font-size:14px">
+      <div style="font-size:40px;margin-bottom:8px">🌱</div>
+      مرحباً بك في لوحة تحكم المدير. استخدم القائمة الجانبية للتنقل.
+    </div>
+  </div>
+
+  <!-- ══ Users ══ -->
+  <div class="section" id="sec-users">
+    <div class="section-header">
+      <h2>إدارة المستخدمين</h2>
+      <div class="search-bar">
+        <input id="uSearch" placeholder="بحث بالاسم أو الرقم..." oninput="filterUsers()"/>
+        <select id="uStatus" onchange="filterUsers()">
+          <option value="">جميع الحالات</option>
+          <option value="ACTIVE">نشط</option>
+          <option value="PENDING_VERIFICATION">في انتظار التحقق</option>
+          <option value="PENDING_APPROVAL">في انتظار الموافقة</option>
+          <option value="SUSPENDED">موقوف</option>
+          <option value="REJECTED">مرفوض</option>
+        </select>
+        <select id="uRole" onchange="filterUsers()">
+          <option value="">جميع الأدوار</option>
+        </select>
+        <button class="btn btn-ghost" onclick="loadUsers()">🔄</button>
+        <button class="btn btn-primary" onclick="exportUsers()">📥 تصدير</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>الاسم</th><th>الهاتف</th><th>الدور</th><th>الحالة</th>
+            <th>آخر دخول</th><th>تاريخ التسجيل</th><th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody"><tr><td colspan="7" class="no-data">جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ Roles ══ -->
+  <div class="section" id="sec-roles">
+    <div class="section-header">
+      <h2>إدارة الأدوار</h2>
+      <button class="btn btn-primary" onclick="openRoleModal()">+ إضافة دور</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>المعرف</th><th>الاسم</th><th>التسجيل العام</th><th>يحتاج موافقة</th><th>الحالة</th><th>إجراءات</th></tr>
+        </thead>
+        <tbody id="rolesBody"><tr><td colspan="6" class="no-data">جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ Audit ══ -->
+  <div class="section" id="sec-audit">
+    <div class="section-header">
+      <h2>سجل التدقيق</h2>
+      <button class="btn btn-ghost" onclick="loadAudit()">🔄 تحديث</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>الوقت</th><th>المستخدم</th><th>الإجراء</th><th>الهدف</th><th>التفاصيل</th></tr></thead>
+        <tbody id="auditBody"><tr><td colspan="5" class="no-data">جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ WhatsApp ══ -->
+  <div class="section" id="sec-whatsapp">
+    <div class="section-header"><h2>إعدادات WhatsApp</h2></div>
+    <div class="settings-grid">
+      <div class="set-card">
+        <label>رقم WhatsApp الإداري</label>
+        <input type="text" id="wa-admin-phone" placeholder="+249918251171" value="+249918251171"/>
+      </div>
+      <div class="set-card">
+        <label>حالة WhatsApp</label>
+        <div style="font-size:13px;color:var(--dim2);margin-top:8px" id="wa-status">غير معروف</div>
+      </div>
+    </div>
+    <div style="margin-top:20px">
+      <h3 style="font-size:15px;color:var(--eg);margin-bottom:16px;font-family:'Amiri',serif">إرسال رسالة تجريبية</h3>
+      <div class="field"><label>رقم المستلم</label><input type="text" id="wa-test-to" placeholder="+249..."/></div>
+      <div class="field"><label>نص الرسالة</label><textarea id="wa-test-msg" placeholder="اكتب رسالة اختبار...">مرحباً! هذه رسالة اختبار من السودان الأخضر.</textarea></div>
+      <button class="btn btn-primary" id="wa-test-btn" onclick="sendWATest()">
+        <span class="spinner"></span><span class="btn-text">إرسال رسالة تجريبية</span>
+      </button>
+    </div>
+    <div style="margin-top:24px;background:var(--bg);border-radius:12px;padding:16px">
+      <h3 style="font-size:14px;color:var(--eg);margin-bottom:12px">⚙️ لإعداد WhatsApp Cloud API:</h3>
+      <ol style="font-size:13px;color:var(--dim);line-height:2;padding-right:20px">
+        <li>اذهب إلى <strong>developers.facebook.com</strong> وأنشئ تطبيقاً</li>
+        <li>أضف منتج <strong>WhatsApp Business</strong></li>
+        <li>من API Setup احصل على <strong>Phone Number ID</strong></li>
+        <li>أنشئ <strong>System User</strong> وأنشئ Access Token دائماً</li>
+        <li>أضف المتغيرات في إعدادات Netlify Environment Variables</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ══ Settings ══ -->
+  <div class="section" id="sec-settings">
+    <div class="section-header">
+      <h2>الإعدادات العامة</h2>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ التغييرات</button>
+    </div>
+    <div class="settings-grid" id="settingsGrid">
+      <div class="set-card"><label>اسم التطبيق</label><input id="s-APP_NAME" type="text"/></div>
+      <div class="set-card"><label>مدة الجلسة (ساعات)</label><input id="s-SESSION_HOURS" type="number" min="1" max="720"/></div>
+      <div class="set-card"><label>حد محاولات الدخول</label><input id="s-MAX_FAILED_ATTEMPTS" type="number" min="3" max="20"/></div>
+      <div class="set-card"><label>مدة القفل (دقائق)</label><input id="s-LOCKOUT_MINUTES" type="number" min="5" max="1440"/></div>
+      <div class="set-card"><label>صلاحية OTP (دقائق)</label><input id="s-OTP_VALIDITY_MINUTES" type="number" min="3" max="60"/></div>
+      <div class="set-card"><label>حد محاولات OTP</label><input id="s-OTP_MAX_ATTEMPTS" type="number" min="3" max="10"/></div>
+      <div class="set-card"><label>العملة الافتراضية</label><input id="s-DEFAULT_CURRENCY" type="text"/></div>
+      <div class="set-card">
+        <label>تفعيل التسجيل</label>
+        <select id="s-REGISTER_ENABLED"><option value="true">مفعل</option><option value="false">موقوف</option></select>
+      </div>
+      <div class="set-card">
+        <label>وضع الصيانة</label>
+        <select id="s-MAINTENANCE_MODE"><option value="false">إيقاف</option><option value="true">تفعيل</option></select>
+      </div>
+      <div class="set-card">
+        <label>رابط Apps Script API</label>
+        <input id="s-API_URL" type="url" placeholder="https://script.google.com/macros/s/..."/>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ══ Modal: تعديل مستخدم ══ -->
+<div class="overlay" id="userModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('userModal')">✕</button>
+    <h3 id="userModalTitle">تعديل المستخدم</h3>
+    <input type="hidden" id="um-userId"/>
+    <div class="field"><label>الاسم الكامل</label><input type="text" id="um-name" readonly/></div>
+    <div class="field"><label>رقم الهاتف</label><input type="text" id="um-phone" readonly/></div>
+    <div class="field"><label>الدور</label><select id="um-role"></select></div>
+    <div class="field"><label>الحالة</label><input type="text" id="um-status" readonly style="color:var(--dim2)"/></div>
+    <div class="field"><label>ملاحظات</label><textarea id="um-notes" placeholder="ملاحظات إدارية..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="um-suspend-btn" onclick="modalSuspend()">تعليق الحساب</button>
+      <button class="btn btn-success btn-sm" id="um-activate-btn" onclick="modalActivate()">تفعيل</button>
+      <button class="btn btn-primary btn-sm" onclick="modalSaveRole()">حفظ الدور</button>
+    </div>
+    <div class="modal-actions" id="approvalActions" style="display:none;border-top:1px solid var(--border);padding-top:12px;margin-top:0">
+      <button class="btn btn-danger" onclick="modalReject()">رفض الطلب</button>
+      <button class="btn btn-success" onclick="modalApprove()">✅ موافقة على الحساب</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: دور جديد ══ -->
+<div class="overlay" id="roleModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('roleModal')">✕</button>
+    <h3>إضافة دور جديد</h3>
+    <div class="field"><label>معرف الدور (بالإنجليزية)</label><input type="text" id="rm-id" placeholder="مثال: supervisor"/></div>
+    <div class="field"><label>الاسم العربي</label><input type="text" id="rm-ar" placeholder="مشرف"/></div>
+    <div class="field"><label>الاسم الإنجليزي</label><input type="text" id="rm-en" placeholder="Supervisor"/></div>
+    <div class="field">
+      <label>التسجيل العام</label>
+      <select id="rm-public"><option value="true">مسموح</option><option value="false">غير مسموح</option></select>
+    </div>
+    <div class="field">
+      <label>يحتاج موافقة المدير</label>
+      <select id="rm-approval"><option value="false">لا</option><option value="true">نعم</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('roleModal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="doCreateRole()">إنشاء الدور</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════
+//  Config & State
+// ══════════════════════
+const API    = '/.netlify/functions/auth';
+let SESSION  = null;
+let allUsers = [];
+let allRoles = [];
+
+// ── Init ──
+(function(){
+  try {
+    const s = localStorage.getItem('sg_session');
+    if (s) SESSION = JSON.parse(s);
+  } catch {}
+
+  if (!SESSION?.token || new Date(SESSION.expiresAt) <= new Date()) {
+    location.href = '/auth.html'; return;
+  }
+  if (!['admin','super_admin'].includes(SESSION.roleId)) {
+    location.href = '/dashboard.html'; return;
+  }
+
+  // عرض بيانات المدير
+  document.getElementById('adminName').textContent = SESSION.fullName || 'المدير';
+  document.getElementById('adminRole').textContent = SESSION.roleName || 'مدير';
+  document.getElementById('avatarEl').textContent  = (SESSION.fullName || 'م')[0];
+
+  // تحميل البيانات
+  loadOverview();
+  loadRoles();
+})();
+
+// ══════════════════════
+//  Navigation
+// ══════════════════════
+const sections = ['overview','users','roles','audit','whatsapp','settings'];
+const navTitles = {
+  overview: ['نظرة عامة','إحصائيات المنصة'],
+  users:    ['إدارة المستخدمين','قائمة المستخدمين المسجلين'],
+  roles:    ['إدارة الأدوار','صلاحيات وأنواع المستخدمين'],
+  audit:    ['سجل التدقيق','جميع الإجراءات المسجلة'],
+  whatsapp: ['إعدادات WhatsApp','إرسال الرسائل والإشعارات'],
+  settings: ['الإعدادات العامة','تخصيص المنصة']
+};
+
+function nav(id) {
+  sections.forEach(s => {
+    document.getElementById('sec-' + s)?.classList.remove('active');
+    document.getElementById('n-' + s)?.classList.remove('active');
+  });
+  document.getElementById('sec-' + id)?.classList.add('active');
+  document.getElementById('n-' + id)?.classList.add('active');
+  const t = navTitles[id] || ['',''];
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageDesc').textContent  = t[1];
+  clearAlert();
+
+  if (id === 'users')    loadUsers();
+  if (id === 'audit')    loadAudit();
+  if (id === 'settings') loadSettings();
+}
+
+// ══════════════════════
+//  API
+// ══════════════════════
+async function call(body) {
+  const token = SESSION?.token || '';
+  const r = await fetch(API, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+    body: JSON.stringify(body)
+  });
+  if (r.status === 401) { location.href = '/auth.html'; throw new Error('unauthorized'); }
+  return r.json();
+}
+
+// ══════════════════════
+//  Overview
+// ══════════════════════
+async function loadOverview() {
+  try {
+    const r = await call({ action:'getStats' });
+    if (r.success || r.data) {
+      const d = r.data || r;
+      el('st-users').textContent  = d.totalUsers || '-';
+      el('st-trees').textContent  = (d.trees||250000).toLocaleString();
+    }
+    // حساب المعلقين
+    const ur = await call({ action:'getUsers', status:'PENDING_APPROVAL' });
+    const pending = ur.data?.total || ur.total || 0;
+    el('st-pending').textContent = pending;
+    el('st-active').textContent  = '-';
+    if (pending > 0) {
+      el('pendingBadge').textContent = pending;
+      el('pendingBadge').style.display = '';
+    }
+  } catch(e){ console.error(e); }
+}
+
+// ══════════════════════
+//  Users
+// ══════════════════════
+async function loadUsers() {
+  el('usersBody').innerHTML = '<tr><td colspan="7" class="no-data">جاري التحميل...</td></tr>';
+  try {
+    const r = await call({ action:'getUsers' });
+    allUsers = (r.success ? r.data?.users : r.users) || [];
+    renderUsers(allUsers);
+    updateRoleFilter();
+  } catch { el('usersBody').innerHTML = '<tr><td colspan="7" class="no-data">❌ فشل التحميل</td></tr>'; }
+}
+
+function renderUsers(users) {
+  if (!users.length) {
+    el('usersBody').innerHTML = '<tr><td colspan="7" class="no-data">لا يوجد مستخدمون</td></tr>'; return;
+  }
+  el('usersBody').innerHTML = users.map(u => `
+    <tr>
+      <td><strong>${esc(u.fullName)}</strong></td>
+      <td style="direction:ltr;text-align:right">${esc(u.phone)}</td>
+      <td>${roleBadge(u.roleId, u.roleName)}</td>
+      <td>${statusBadge(u.status)}</td>
+      <td style="font-size:12px;color:var(--dim2)">${fmtDate(u.lastLoginAt)}</td>
+      <td style="font-size:12px;color:var(--dim2)">${fmtDate(u.createdAt)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='openUserModal(${JSON.stringify(u)})'>تعديل</button>
+        ${u.status === 'PENDING_APPROVAL' ? `<button class="btn btn-success btn-sm" style="margin-right:4px" onclick='quickApprove("${u.userId}")'>✅ موافقة</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers() {
+  const q   = el('uSearch').value.toLowerCase();
+  const st  = el('uStatus').value;
+  const rl  = el('uRole').value;
+  const res = allUsers.filter(u =>
+    (!q  || (u.fullName||'').toLowerCase().includes(q) || (u.phone||'').includes(q)) &&
+    (!st || u.status  === st) &&
+    (!rl || u.roleId  === rl)
+  );
+  renderUsers(res);
+}
+
+function updateRoleFilter() {
+  const sel = el('uRole');
+  const existingRoles = [...new Set(allUsers.map(u => u.roleId))];
+  sel.innerHTML = '<option value="">جميع الأدوار</option>' +
+    existingRoles.map(r => {
+      const found = allRoles.find(ar => ar.roleId === r);
+      return `<option value="${r}">${found?.roleNameAr || r}</option>`;
+    }).join('');
+}
+
+async function quickApprove(userId) {
+  if (!confirm('الموافقة على هذا الحساب؟')) return;
+  try {
+    const r = await call({ action:'approveUser', targetUserId:userId });
+    if (r.success) { showAlert('success', 'تمت الموافقة على الحساب'); loadUsers(); }
+    else showAlert('error', r.message || 'فشلت العملية');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+// ══════════════════════
+//  User Modal
+// ══════════════════════
+let currentUser = null;
+function openUserModal(u) {
+  currentUser = u;
+  el('um-userId').value   = u.userId;
+  el('um-name').value     = u.fullName;
+  el('um-phone').value    = u.phone;
+  el('um-status').value   = u.status;
+  el('um-notes').value    = u.notes || '';
+
+  // populate roles
+  el('um-role').innerHTML = allRoles.map(r =>
+    `<option value="${r.roleId}" ${r.roleId === u.roleId ? 'selected' : ''}>${r.roleNameAr}</option>`
+  ).join('');
+
+  const isPending = u.status === 'PENDING_APPROVAL';
+  el('approvalActions').style.display = isPending ? 'flex' : 'none';
+  el('um-suspend-btn').style.display  = u.status === 'ACTIVE' ? '' : 'none';
+  el('um-activate-btn').style.display = u.status !== 'ACTIVE' ? '' : 'none';
+
+  openModal('userModal');
+}
+
+async function modalSaveRole() {
+  const userId = el('um-userId').value;
+  const roleId = el('um-role').value;
+  try {
+    const r = await call({ action:'updateUserRole', targetUserId:userId, roleId });
+    if (r.success) { showAlert('success', 'تم تحديث الدور'); closeModal('userModal'); loadUsers(); }
+    else showAlert('error', r.message || 'فشل التحديث');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+async function modalApprove() {
+  const userId = el('um-userId').value;
+  const notes  = el('um-notes').value;
+  try {
+    const r = await call({ action:'approveUser', targetUserId:userId, notes });
+    if (r.success) { showAlert('success', 'تمت الموافقة على الحساب'); closeModal('userModal'); loadUsers(); }
+    else showAlert('error', r.message || 'فشلت العملية');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+async function modalReject() {
+  const reason = prompt('سبب الرفض (اختياري):');
+  const userId = el('um-userId').value;
+  try {
+    const r = await call({ action:'rejectUser', targetUserId:userId, reason:reason||'رفض من المدير', notes:reason||'' });
+    if (r.success) { showAlert('success', 'تم رفض الطلب'); closeModal('userModal'); loadUsers(); }
+    else showAlert('error', r.message || 'فشلت العملية');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+async function modalSuspend() {
+  if (!confirm('تعليق هذا الحساب؟')) return;
+  try {
+    const r = await call({ action:'suspendUser', targetUserId:el('um-userId').value });
+    if (r.success) { showAlert('success', 'تم تعليق الحساب'); closeModal('userModal'); loadUsers(); }
+    else showAlert('error', r.message || 'فشلت العملية');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+async function modalActivate() {
+  try {
+    const r = await call({ action:'activateUserAdmin', targetUserId:el('um-userId').value });
+    if (r.success) { showAlert('success', 'تم تفعيل الحساب'); closeModal('userModal'); loadUsers(); }
+    else showAlert('error', r.message || 'فشلت العملية');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+function exportUsers() {
+  if (!allUsers.length) { showAlert('warn', 'لا يوجد بيانات للتصدير'); return; }
+  const headers = ['الاسم','الهاتف','الدور','الحالة','تاريخ التسجيل','آخر دخول'];
+  const rows = allUsers.map(u => [u.fullName,u.phone,u.roleName||u.roleId,u.status,fmtDate(u.createdAt),fmtDate(u.lastLoginAt)]);
+  const csv  = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
+  a.download = 'users_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ══════════════════════
+//  Roles
+// ══════════════════════
+async function loadRoles() {
+  try {
+    const r = await call({ action:'getRoles' });
+    allRoles = (r.success ? r.data?.roles : r.roles) || [];
+    renderRoles(allRoles);
+  } catch {}
+}
+
+function renderRoles(roles) {
+  if (!roles.length) { el('rolesBody').innerHTML = '<tr><td colspan="6" class="no-data">لا توجد أدوار</td></tr>'; return; }
+  el('rolesBody').innerHTML = roles.map(r => `
+    <tr>
+      <td><code>${r.roleId}</code></td>
+      <td>${esc(r.roleNameAr)}</td>
+      <td>${r.publicRegistration ? '✅' : '❌'}</td>
+      <td>${r.requiresApproval ? '✅' : '❌'}</td>
+      <td>${r.active ? '<span class="badge badge-active">نشط</span>' : '<span class="badge badge-rejected">غير نشط</span>'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='editRole(${JSON.stringify(r)})'>تعديل</button>
+        <button class="btn btn-warning btn-sm" style="margin-right:4px" onclick="toggleRole('${r.roleId}',${!r.active})">${r.active ? 'إيقاف' : 'تفعيل'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openRoleModal() { openModal('roleModal'); }
+
+async function doCreateRole() {
+  const roleId = el('rm-id').value.trim().toLowerCase().replace(/\s+/g,'-');
+  const nameAr = el('rm-ar').value.trim();
+  const nameEn = el('rm-en').value.trim();
+  if (!roleId || !nameAr) { showAlert('warn', 'معرف الدور والاسم مطلوبان'); return; }
+  if (['admin','super_admin'].includes(roleId)) { showAlert('error', 'لا يمكن إنشاء دور بهذا المعرف'); return; }
+  try {
+    const r = await call({
+      action:'createRole', roleId, roleNameAr:nameAr, roleNameEn:nameEn,
+      publicRegistration: el('rm-public').value === 'true',
+      requiresApproval:   el('rm-approval').value === 'true'
+    });
+    if (r.success) { showAlert('success', 'تم إنشاء الدور'); closeModal('roleModal'); loadRoles(); }
+    else showAlert('error', r.message || 'فشل الإنشاء');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+function editRole(r) {
+  el('rm-id').value       = r.roleId;
+  el('rm-id').readOnly    = true;
+  el('rm-ar').value       = r.roleNameAr;
+  el('rm-en').value       = r.roleNameEn;
+  el('rm-public').value   = String(r.publicRegistration);
+  el('rm-approval').value = String(r.requiresApproval);
+  openModal('roleModal');
+}
+
+async function toggleRole(roleId, active) {
+  try {
+    const r = await call({ action:'updateRole', roleId, active });
+    if (r.success) { loadRoles(); }
+    else showAlert('error', r.message);
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+// ══════════════════════
+//  Audit Log
+// ══════════════════════
+async function loadAudit() {
+  el('auditBody').innerHTML = '<tr><td colspan="5" class="no-data">جاري التحميل...</td></tr>';
+  try {
+    const r = await call({ action:'getAuditLog', limit:100 });
+    const logs = (r.success ? r.data?.logs : r.logs) || [];
+    if (!logs.length) { el('auditBody').innerHTML = '<tr><td colspan="5" class="no-data">لا توجد سجلات</td></tr>'; return; }
+    el('auditBody').innerHTML = logs.map(l => `
+      <tr>
+        <td style="font-size:12px;color:var(--dim2)">${fmtDate(l.createdAt)}</td>
+        <td style="font-size:12px">${esc(l.userId||'').slice(0,8)}...</td>
+        <td><code style="font-size:11px">${esc(l.action)}</code></td>
+        <td style="font-size:12px">${esc(l.targetType)} / ${esc(l.targetId||'').slice(0,8)}</td>
+        <td style="font-size:12px;color:var(--dim2)">${esc(l.details)}</td>
+      </tr>
+    `).join('');
+  } catch { el('auditBody').innerHTML = '<tr><td colspan="5" class="no-data">❌ فشل التحميل</td></tr>'; }
+}
+
+// ══════════════════════
+//  Settings
+// ══════════════════════
+async function loadSettings() {
+  try {
+    const r = await call({ action:'getSettings' });
+    const s = (r.success ? r.data?.settings : r.settings) || {};
+    Object.entries(s).forEach(([k,v]) => {
+      const inp = el('s-'+k);
+      if (inp) inp.value = v;
+    });
+  } catch { showAlert('error', 'فشل تحميل الإعدادات'); }
+}
+
+async function saveSettings() {
+  const keys = ['APP_NAME','SESSION_HOURS','MAX_FAILED_ATTEMPTS','LOCKOUT_MINUTES',
+                'OTP_VALIDITY_MINUTES','OTP_MAX_ATTEMPTS','DEFAULT_CURRENCY',
+                'REGISTER_ENABLED','MAINTENANCE_MODE','API_URL'];
+  const settings = {};
+  keys.forEach(k => { const inp = el('s-'+k); if (inp) settings[k] = inp.value; });
+  try {
+    const r = await call({ action:'updateSettings', settings });
+    if (r.success) showAlert('success', 'تم حفظ الإعدادات');
+    else showAlert('error', r.message || 'فشل الحفظ');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+}
+
+// ══════════════════════
+//  WhatsApp Test
+// ══════════════════════
+async function sendWATest() {
+  const to  = el('wa-test-to').value.trim();
+  const msg = el('wa-test-msg').value.trim();
+  if (!to || !msg) { showAlert('warn', 'الرقم والرسالة مطلوبان'); return; }
+  const btn = el('wa-test-btn');
+  btn.classList.add('loading'); btn.disabled = true;
+  try {
+    const r = await call({ action:'sendWATest', to, message:msg });
+    if (r.success && r.data?.sent) showAlert('success', 'تم إرسال الرسالة بنجاح');
+    else showAlert('error', 'فشل الإرسال — تحقق من متغيرات البيئة');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  btn.classList.remove('loading'); btn.disabled = false;
+}
+
+// ══════════════════════
+//  Logout
+// ══════════════════════
+async function doLogout() {
+  try { await call({ action:'logout' }); } catch {}
+  localStorage.removeItem('sg_session');
+  location.href = '/auth.html';
+}
+
+function goHome() { location.href = '/'; }
+
+// ══════════════════════
+//  Helpers
+// ══════════════════════
+function el(id) { return document.getElementById(id); }
+function esc(s) { return String(s||'').replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleString('ar-SD', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+  catch { return String(d).slice(0,16); }
+}
+function statusBadge(s) {
+  const m = {
+    ACTIVE:'badge-active نشط',PENDING_VERIFICATION:'badge-pending انتظار تحقق',
+    PENDING_APPROVAL:'badge-pending انتظار موافقة',SUSPENDED:'badge-suspended موقوف',
+    REJECTED:'badge-rejected مرفوض'
+  };
+  const [cls,txt] = (m[s]||'badge-rejected غير معروف').split(' ').reduce((a,c,i)=>i===0?[c,a[1]]:[a[0],a[1]+' '+c],['','']).map(x=>x.trim());
+  return `<span class="badge ${m[s]?.split(' ')[0]||''}">${s?.replace(/_/g,' ')}</span>`;
+}
+function roleBadge(id, name) {
+  const cls = id === 'super_admin' ? 'badge-super' : id === 'admin' ? 'badge-admin' : '';
+  return cls ? `<span class="badge ${cls}">${esc(name||id)}</span>` : esc(name||id);
+}
+function openModal(id)  { el(id).classList.add('show'); }
+function closeModal(id) { el(id).classList.remove('show'); }
+function showAlert(type, msg) {
+  const ga = el('globalAlert');
+  const icons = {success:'✅',error:'❌',warn:'⚠️',info:'ℹ️'};
+  ga.className = 'alert alert-' + type + ' show';
+  el('gAlertIcon').textContent = icons[type]||'ℹ️';
+  el('gAlertText').textContent = msg;
+  setTimeout(() => ga.className = 'alert', 4000);
+}
+function clearAlert() { el('globalAlert').className = 'alert'; }
+
+// إغلاق المودال عند الضغط خارجه
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show'); });
+});
+</script>
+</body>
+</html>

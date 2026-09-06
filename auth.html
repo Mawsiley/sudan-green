@@ -1,1016 +1,685 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>السودان الأخضر — تسجيل الدخول</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>السودان الأخضر — الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"/>
 <style>
-/* ═══ DESIGN: Modern Oasis — فاتح وعصري ═══ */
 :root{
   --eg:#0B3D22;--eg2:#155230;--eg3:#1A6E3C;
-  --vg:#1A9A48;--lg:#2CC462;--vg2:rgba(26,154,72,.11);
-  --gold:#B87E14;--gold-l:#D4A320;
+  --vg:#1A9A48;--lg:#2CC462;
   --text:#0E1C12;--dim:#3A5C4A;--dim2:#587A68;
   --bg:#F1F8F3;--bg2:#FFFFFF;
-  --card:#FFFFFF;--card2:#E9F5ED;
   --border:rgba(26,154,72,.16);--border2:rgba(26,154,72,.09);
-  --red:#CC2828;--amber:#B07000;
-  --r:14px;
+  --red:#DC2626;--amber:#D97706;--green:#16A34A;
 }
-/* ── DARK MODE ── */
-html[data-theme="dark"]{
-  --text:#D8EEE0;--dim:#7DB88A;--dim2:#5A9A6A;
-  --bg:#0A1510;--bg2:#0D1A12;
-  --card:#12221A;--card2:#1A2E22;
-  --border:rgba(26,154,72,.38);--border2:rgba(26,154,72,.18);
-}
-html[data-theme="dark"] input,html[data-theme="dark"] select{
-  background:#1A2E1F!important;border-color:rgba(26,154,72,.35)!important;color:#D8EEE0!important;
-}
-html[data-theme="dark"] input::placeholder{color:#4A7A5A!important}
-html[data-theme="dark"] .type-card{background:#1A2E1F;border-color:rgba(26,154,72,.3)}
-html[data-theme="dark"] .type-card.selected{background:rgba(26,154,72,.2)}
-html[data-theme="dark"] .profile-info{background:#1A2E1F;border-color:rgba(26,154,72,.3)}
-html[data-theme="dark"] .info-row{border-color:rgba(26,154,72,.2)}
-html[data-theme="dark"] .btn-outline{background:#1A2E1F;border-color:rgba(26,154,72,.3);color:#7DB88A}
-html[data-theme="dark"] .btn-logout{background:rgba(200,48,48,.12)}
-html[data-theme="dark"] .modal{background:#12221A}
-html[data-theme="dark"] .auth-visual{filter:brightness(.9)}
-html[data-theme="dark"] .auth-form{background:var(--bg2)}
-/* ── TOGGLE BAR ── */
-.toggle-bar{position:fixed;top:16px;left:16px;z-index:1000;display:flex;gap:6px}
-.tgl-btn{
-  width:36px;height:36px;border-radius:9px;border:1px solid var(--border);
-  background:var(--card);color:var(--text);cursor:pointer;font-size:15px;
-  display:flex;align-items:center;justify-content:center;
-  transition:.2s;font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.tgl-btn:hover{border-color:var(--vg);color:var(--vg)}
-.tgl-btn.lang{width:auto;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:.5px}
 *{box-sizing:border-box;margin:0;padding:0}
-
-/* ── BASE ── */
-body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;overflow-x:hidden;}
-
-/* ── SPLIT LAYOUT ── */
-.auth-root{display:flex;min-height:100vh;}
-
-/* ── VISUAL PANEL ── */
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;overflow-x:hidden}
+.auth-root{display:flex;min-height:100vh}
 .auth-visual{
   flex:0 0 44%;position:relative;overflow:hidden;
   background:linear-gradient(170deg,#081C0D 0%,#0E3420 35%,#155A2E 70%,#1D6E3A 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 44px;
-}
-.auth-visual::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 100% 60% at 50% 110%,rgba(26,154,72,.28) 0%,transparent 55%),
-    radial-gradient(ellipse 70% 50% at 85% 15%,rgba(196,154,60,.1) 0%,transparent 50%),
-    radial-gradient(ellipse 50% 40% at 15% 20%,rgba(14,52,28,.5) 0%,transparent 60%);
-}
-/* ground shadow at bottom */
-.auth-visual::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:30%;
-  background:linear-gradient(to top,rgba(4,12,6,.65) 0%,transparent 100%);
-  pointer-events:none;
-}
-/* floating leaf */
-.vleaf{position:absolute;pointer-events:none;opacity:.2;
-  animation:vlfloat linear infinite;}
-@keyframes vlfloat{
-  0%{transform:translateY(110%) rotate(0deg);opacity:0}
-  8%{opacity:.24}
-  92%{opacity:.12}
-  100%{transform:translateY(-110%) rotate(350deg);opacity:0}
-}
-.visual-trees{position:absolute;bottom:0;left:0;right:0;pointer-events:none;}
-.visual-brand{position:relative;z-index:2;text-align:center;color:#fff;width:100%;}
-.visual-logo{
-  width:84px;height:84px;border-radius:24px;
-  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.07));
-  border:1.5px solid rgba(255,255,255,.24);
-  display:flex;align-items:center;justify-content:center;font-size:44px;
-  margin:0 auto 26px;box-shadow:0 10px 36px rgba(0,0,0,.3);
-  backdrop-filter:blur(10px);
-}
-.visual-title{font-family:'Amiri',serif;font-size:30px;font-weight:700;color:#fff;margin-bottom:8px;text-shadow:0 2px 24px rgba(0,0,0,.35);}
-.visual-sub{font-size:13px;color:rgba(255,255,255,.68);line-height:1.75;max-width:240px;margin:0 auto 34px;}
-.visual-feats{display:flex;flex-direction:column;gap:10px;width:100%;max-width:230px;}
-.vfeat{display:flex;align-items:center;gap:12px;padding:10px 15px;border-radius:11px;
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);}
-.vfeat-icon{font-size:19px;flex-shrink:0}
-.vfeat-txt{font-size:12.5px;color:rgba(255,255,255,.82);}
-
-/* ── FORM PANEL ── */
-.auth-form{
-  flex:1;overflow-y:auto;
-  display:flex;align-items:center;justify-content:center;
-  padding:44px 28px;background:var(--bg2);position:relative;
-}
-.auth-form::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 55% 35% at 100% 0%,rgba(26,154,72,.055) 0%,transparent 55%),
-    radial-gradient(ellipse 45% 30% at 0% 100%,rgba(26,154,72,.04) 0%,transparent 55%);
-}
-/* ── WRAPPER ── */
-.wrapper{width:100%;max-width:420px;position:relative;z-index:1;}
-
-/* HIDE OLD BACKGROUND ELEMENTS */
-.bg-glow,.bg-pattern,.bg-grain,.stars{display:none}
-
-/* LOGO */
-.logo{text-align:center;margin-bottom:30px}
-.logo-badge{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:68px;height:68px;border-radius:20px;
-  background:linear-gradient(135deg,var(--eg2),var(--eg3));
-  border:2px solid rgba(26,154,72,.22);
-  font-size:34px;margin-bottom:12px;
-  box-shadow:0 6px 24px rgba(26,154,72,.2);
-}
-.logo h1{font-family:'Amiri',serif;font-size:22px;color:var(--eg);margin-bottom:4px;font-weight:700}
-.logo p{font-size:13px;color:var(--dim)}
-
-/* CARD */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:28px 24px;
-  box-shadow:
-    0 8px 40px rgba(26,154,72,.08),
-    0 2px 8px rgba(0,0,0,.08),
-    inset 0 1px 0 rgba(255,255,255,.5);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-}
-
-/* TABS */
-.tabs{display:flex;background:var(--card2);border:1px solid var(--border2);border-radius:13px;padding:4px;margin-bottom:24px}
-.tab{
-  flex:1;padding:10px;text-align:center;font-size:14px;
-  border-radius:10px;cursor:pointer;transition:.22s;color:var(--dim);
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-}
-.tab.active{background:var(--vg);color:#fff;font-weight:600;box-shadow:0 2px 12px rgba(26,154,72,.24)}
-
-/* FORM */
-.form-panel{display:none}
-.form-panel.active{display:block}
-
-.field{margin-bottom:14px}
-label.lbl{font-size:12px;color:var(--dim);display:block;margin-bottom:6px;font-weight:500}
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 44px}
+.auth-form{flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:40px 28px;background:var(--bg2);position:relative}
+.wrapper{width:100%;max-width:440px;position:relative;z-index:1}
+/* ── visual side ── */
+.vleaf{position:absolute;pointer-events:none;animation:lf linear infinite;opacity:.2}
+@keyframes lf{0%{transform:translateY(110%) rotate(0deg);opacity:0}10%{opacity:.22}90%{opacity:.14}100%{transform:translateY(-110%) rotate(340deg);opacity:0}}
+.visual-trees{position:absolute;bottom:0;width:100%;opacity:.18}
+.visual-brand{text-align:center;color:#fff;z-index:2;position:relative}
+.visual-logo{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1A9A48,#0B3D22);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.visual-title{font-family:'Amiri',serif;font-size:clamp(28px,3.5vw,38px);font-weight:700;letter-spacing:.03em;margin-bottom:10px}
+.visual-sub{font-size:14px;opacity:.7;line-height:1.7;max-width:260px;margin:0 auto 28px}
+.vfeat{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:8px 16px;border-radius:100px;font-size:13px;color:#fff;margin:4px;backdrop-filter:blur(8px)}
+/* ── form header ── */
+.form-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.form-logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--vg),var(--eg));display:flex;align-items:center;justify-content:center;font-size:22px}
+.form-logo-text h1{font-family:'Amiri',serif;font-size:20px;font-weight:700;color:var(--eg)}
+.form-logo-text p{font-size:12px;color:var(--dim2)}
+/* ── tabs ── */
+.tabs{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px}
+.tab{flex:1;padding:10px;border:none;background:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;color:var(--dim);transition:all .2s}
+.tab.active{background:#fff;color:var(--eg);box-shadow:0 1px 8px rgba(0,0,0,.08)}
+/* ── fields ── */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--eg2);margin-bottom:6px}
+.field label .req{color:var(--red);margin-right:2px}
 .input-wrap{position:relative}
-input,select{
-  width:100%;background:var(--bg);
-  border:1.5px solid var(--border);border-radius:10px;
-  padding:12px 14px;color:var(--text);
-  font-family:inherit;font-size:14px;outline:none;
-  transition:border-color .2s, box-shadow .2s, background .2s;
-}
-input:focus,select:focus{
-  border-color:var(--vg);background:var(--bg2);
-  box-shadow:0 0 0 3px rgba(26,154,72,.1),0 2px 8px rgba(26,154,72,.07);
-}
-input::placeholder{color:var(--dim2);opacity:.65}
-select option{background:var(--bg2);color:var(--text)}
-
-/* phone row */
-.phone-row{display:flex;gap:8px}
-.phone-row .cc{width:90px;flex-shrink:0}
-.phone-row input{flex:1}
-
-/* password toggle */
-.pw-wrap{position:relative}
-.pw-wrap input{padding-left:40px}
-.pw-eye{
-  position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  cursor:pointer;color:var(--dim);font-size:16px;user-select:none;
-  transition:color .2s;
-}
-.pw-eye:hover{color:var(--vg)}
-
-/* type grid */
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.type-card{
-  border:1.5px solid var(--border2);border-radius:11px;
-  padding:12px 10px;text-align:center;cursor:pointer;
-  transition:.2s;background:var(--bg);
-}
-.type-card:hover{border-color:var(--vg);background:var(--vg2)}
-.type-card.selected{border-color:var(--vg);background:rgba(26,154,72,.1);color:var(--vg)}
-.type-card .type-icon{font-size:22px;margin-bottom:4px}
-.type-card .type-name{font-size:12px;font-weight:500}
-
-/* strength bar */
-.strength{height:3px;border-radius:2px;background:var(--border2);margin-top:6px;overflow:hidden}
-.strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
-
-/* alert */
-.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;align-items:center;gap:8px;}
+.input-wrap input,.input-wrap select{
+  width:100%;padding:12px 16px;border:1.5px solid var(--border);
+  border-radius:10px;font-family:inherit;font-size:15px;color:var(--text);
+  background:#fff;transition:border-color .2s,box-shadow .2s;outline:none}
+.input-wrap input:focus,.input-wrap select:focus{border-color:var(--vg);box-shadow:0 0 0 3px rgba(26,154,72,.12)}
+.toggle-pass{position:absolute;left:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--dim2);font-size:18px;padding:2px}
+.phone-wrap{display:flex;gap:8px}
+.phone-wrap select{width:130px;flex-shrink:0}
+.phone-wrap .input-wrap{flex:1}
+.field-error{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.field-error.show{display:block}
+/* ── strength ── */
+.strength-bar{display:flex;gap:4px;margin-top:8px}
+.strength-seg{flex:1;height:4px;border-radius:2px;background:#E5E7EB;transition:background .3s}
+.strength-label{font-size:11px;color:var(--dim2);margin-top:4px}
+/* ── OTP ── */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.otp-box{
+  width:52px;height:60px;text-align:center;font-size:24px;font-weight:700;
+  border:2px solid var(--border);border-radius:12px;outline:none;
+  color:var(--eg);font-family:'Amiri',serif;transition:all .2s}
+.otp-box:focus{border-color:var(--vg);box-shadow:0 0 0 3px rgba(26,154,72,.14)}
+.otp-timer{text-align:center;font-size:13px;color:var(--dim2);margin-bottom:16px}
+.otp-timer span{color:var(--vg);font-weight:600}
+.btn-resend{background:none;border:none;color:var(--vg);font-weight:600;cursor:pointer;font-size:13px;text-decoration:underline}
+.btn-resend:disabled{color:var(--dim2);cursor:default;text-decoration:none}
+/* ── buttons ── */
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--vg),var(--eg));color:#fff;box-shadow:0 4px 16px rgba(26,154,72,.28)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,154,72,.35)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-ghost{background:none;border:none;color:var(--vg);font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline;padding:0}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading .spinner{display:inline-block}
+.loading .btn-text{display:none}
+/* ── alerts ── */
+.alert{border-radius:10px;padding:12px 16px;font-size:14px;margin-bottom:16px;display:none;align-items:flex-start;gap:10px}
 .alert.show{display:flex}
-.alert-ok{background:rgba(26,154,72,.1);border:1px solid rgba(26,154,72,.22);color:var(--vg)}
-.alert-err{background:rgba(204,40,40,.08);border:1px solid rgba(204,40,40,.22);color:var(--red)}
-.alert-warn{background:rgba(176,112,0,.08);border:1px solid rgba(176,112,0,.22);color:var(--amber)}
-
-/* button */
-.btn-main{
-  width:100%;padding:14px;border:none;border-radius:11px;
-  background:linear-gradient(135deg,var(--eg3),var(--vg) 60%,var(--lg));
-  color:#fff;font-size:16px;font-weight:700;
-  font-family:'Amiri',serif;letter-spacing:.03em;cursor:pointer;
-  transition:all .22s;margin-top:4px;
-  box-shadow:0 4px 24px rgba(26,154,72,.28),0 1px 0 rgba(255,255,255,.15) inset;
-}
-.btn-main:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(26,154,72,.38)}
-.btn-main:active{transform:scale(.98)}
-.btn-main:disabled{opacity:.5;cursor:not-allowed}
-
-/* divider */
-.or-divider{
-  text-align:center;color:var(--dim2);font-size:12px;
-  margin:16px 0;position:relative;
-}
-.or-divider::before,.or-divider::after{
-  content:'';position:absolute;top:50%;width:42%;height:1px;
-  background:var(--border2);
-}
-.or-divider::before{right:0}
-.or-divider::after{left:0}
-
-/* ═══ PROFILE SCREEN ═══ */
-#profileScreen{display:none}
-
-.profile-hero{
-  text-align:center;padding:24px 0 16px;
-}
-.avatar{
-  width:88px;height:88px;border-radius:50%;
-  background:linear-gradient(135deg,var(--eg2),var(--eg3));
-  border:3px solid var(--vg);
-  display:flex;align-items:center;justify-content:center;
-  font-size:36px;margin:0 auto 14px;
-  box-shadow:0 0 0 6px rgba(46,224,112,.1);
-  position:relative;
-}
-.avatar-badge{
-  position:absolute;bottom:-4px;right:-4px;
-  background:var(--gold);border-radius:50%;
-  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
-  font-size:14px;border:2px solid var(--bg);
-}
-.profile-name{
-  font-family:'Amiri',serif;font-size:22px;color:var(--vg);
-  margin-bottom:4px;
-}
-.profile-type{
-  display:inline-block;padding:3px 14px;border-radius:20px;
-  font-size:12px;font-weight:600;
-  background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);
-  color:var(--gold-l);margin-bottom:4px;
-}
-
-.profile-info{
-  background:var(--card2);border:1px solid var(--border);
-  border-radius:13px;padding:0;overflow:hidden;margin:16px 0;
-}
-.info-row{
-  display:flex;align-items:center;gap:12px;padding:13px 16px;
-  border-bottom:1px solid var(--border2);
-}
-.info-row:last-child{border-bottom:none}
-.info-icon{width:32px;height:32px;border-radius:8px;
-  background:rgba(26,154,72,.12);display:flex;align-items:center;justify-content:center;
-  font-size:15px;flex-shrink:0;}
-.info-label{font-size:11px;color:var(--dim);margin-bottom:2px}
-.info-value{font-size:14px;color:var(--text);font-weight:500}
-
-.profile-actions{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-.btn-outline{
-  padding:11px;border:1.5px solid var(--border);border-radius:10px;
-  background:transparent;color:var(--dim);font-size:14px;
-  font-family:inherit;cursor:pointer;transition:.2s;
-}
-.btn-outline:hover{border-color:var(--vg);color:var(--vg)}
-.btn-logout{
-  padding:11px;border:1px solid rgba(224,80,80,.3);border-radius:10px;
-  background:rgba(224,80,80,.08);color:var(--red);font-size:14px;
-  font-family:inherit;cursor:pointer;transition:.2s;
-}
-.btn-logout:hover{background:rgba(224,80,80,.15)}
-
-/* edit profile panel */
-#editPanel{display:none;margin-top:16px;border-top:1px solid var(--border2);padding-top:16px}
-
-/* API MODAL */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
-  display:none;align-items:center;justify-content:center;z-index:200;padding:16px;
-}
-.modal-overlay.show{display:flex}
-.modal{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:18px;padding:26px;width:100%;max-width:440px;
-  box-shadow:0 20px 60px rgba(0,0,0,.12);
-}
-.modal-title{font-family:'Amiri',serif;font-size:19px;margin-bottom:6px;color:var(--eg)}
-.modal-desc{font-size:13px;color:var(--dim);margin-bottom:18px;line-height:1.6}
-
-@media(max-width:768px){
-  .auth-visual{display:none}
-  .auth-root{display:block}
-  .auth-form{padding:28px 16px;min-height:100vh}
-}
-@media(max-width:380px){
-  .card{padding:20px 16px}
-  .type-grid{grid-template-columns:1fr 1fr}
-}
+.alert-success{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+.alert-error{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+.alert-warn{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.alert-info{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.alert-code{font-size:10px;opacity:.6;margin-top:2px;font-family:monospace}
+/* ── terms ── */
+.terms-wrap{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.terms-wrap input{width:18px;height:18px;margin-top:2px;accent-color:var(--vg);flex-shrink:0;cursor:pointer}
+.terms-wrap label{font-size:13px;color:var(--dim);line-height:1.6;cursor:pointer}
+.terms-wrap a{color:var(--vg);text-decoration:underline}
+/* ── steps ── */
+.steps{display:flex;align-items:center;gap:6px;margin-bottom:24px}
+.step{width:24px;height:24px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--dim)}
+.step.active{background:var(--vg);color:#fff}
+.step.done{background:var(--green);color:#fff}
+.step-line{flex:1;height:1px;background:var(--border)}
+/* ── success ── */
+.success-state{text-align:center;padding:24px 0}
+.success-state .check{font-size:56px;margin-bottom:16px}
+.success-state h3{font-family:'Amiri',serif;font-size:22px;color:var(--eg);margin-bottom:8px}
+.success-state p{font-size:14px;color:var(--dim2);line-height:1.7}
+/* ── misc ── */
+.helper-links{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px}
+.top-bar{position:fixed;top:16px;right:16px;z-index:100}
+.top-bar button{background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--dim);font-family:inherit}
+@media(max-width:768px){.auth-visual{display:none}.auth-root{display:block}.auth-form{padding:24px 16px;min-height:100vh}}
 </style>
 </head>
 <body>
+<div class="top-bar"><button onclick="document.title" id="topBtn">🇸🇩</button></div>
 
-<!-- TOGGLE BAR -->
-<div class="toggle-bar">
-  <button class="tgl-btn" id="themeBtn" onclick="toggleTheme()" title="وضع ليلي / نهاري">🌙</button>
-  <button class="tgl-btn lang" id="langBtn" onclick="toggleLang()">EN</button>
-</div>
-
-<!-- API MODAL -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal">
-    <div class="modal-title" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
-    <div class="modal-desc" data-i18n="apiSub">الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/</div>
-    <div class="field">
-      <label class="lbl">API URL</label>
-      <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec">
-    </div>
-    <button class="btn-main" onclick="saveApiModal()" data-i18n="apiSaveBtn">حفظ الرابط</button>
-  </div>
-</div>
-
-<!-- SPLIT LAYOUT -->
 <div class="auth-root">
 
-  <!-- VISUAL PANEL -->
-  <div class="auth-visual" aria-hidden="true">
-    <!-- floating leaves -->
-    <span class="vleaf" style="left:7%;font-size:16px;animation-duration:13s;animation-delay:-2s">🍃</span>
-    <span class="vleaf" style="left:22%;font-size:12px;animation-duration:9s;animation-delay:-6s">🌿</span>
-    <span class="vleaf" style="left:55%;font-size:18px;animation-duration:15s;animation-delay:-11s">🍀</span>
-    <span class="vleaf" style="left:78%;font-size:14px;animation-duration:11s;animation-delay:-4s">🌱</span>
-    <span class="vleaf" style="left:40%;font-size:13px;animation-duration:17s;animation-delay:-8s">🍃</span>
-    <!-- tree silhouettes -->
-    <svg class="visual-trees" viewBox="0 0 440 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
-      <path d="M55,220 L55,130 Q48,108 30,88 Q48,100 55,84 Q62,62 44,48 Q62,58 70,44 Q76,24 58,10 Q80,28 78,48 Q90,30 86,56 Q100,42 92,66 Q104,62 96,86 Q108,84 96,106 L96,220Z" fill="rgba(255,255,255,.07)"/>
-      <path d="M210,220 L210,118 Q202,94 180,72 Q202,86 210,68 Q218,44 196,30 Q218,42 226,26 Q234,4 212,0 Q238,18 234,38 Q248,20 244,46 Q260,32 250,58 Q264,54 254,80 Q268,76 256,102 L256,220Z" fill="rgba(255,255,255,.06)"/>
-      <path d="M365,220 L365,140 Q358,118 340,100 Q358,112 365,96 Q372,74 354,60 Q372,70 380,56 Q386,36 368,22 Q390,40 386,60 Q398,44 394,68 Q408,56 400,80 Q412,76 402,100 L402,220Z" fill="rgba(255,255,255,.07)"/>
-      <ellipse cx="75" cy="220" rx="42" ry="5" fill="rgba(255,255,255,.04)"/>
-      <ellipse cx="233" cy="220" rx="50" ry="6" fill="rgba(255,255,255,.04)"/>
-      <ellipse cx="383" cy="220" rx="40" ry="5" fill="rgba(255,255,255,.04)"/>
-    </svg>
-    <div class="visual-brand">
-      <div class="visual-logo">🌿</div>
-      <div class="visual-title">السودان الأخضر</div>
-      <div class="visual-sub">المنصة الزراعية الوطنية — نبني مستقبلاً أخضر ومستداماً لأجيال السودان</div>
-      <div class="visual-feats">
-        <div class="vfeat"><span class="vfeat-icon">🌳</span><span class="vfeat-txt">٢٥٠,٠٠٠ شجرة مزروعة</span></div>
-        <div class="vfeat"><span class="vfeat-icon">🌾</span><span class="vfeat-txt">١٢,٠٠٠ مزارع مسجل</span></div>
-        <div class="vfeat"><span class="vfeat-icon">💧</span><span class="vfeat-txt">٨٥,٠٠٠ هكتار محمي</span></div>
-      </div>
+<!-- ── الجانب المرئي ───── -->
+<div class="auth-visual" aria-hidden="true">
+  <span class="vleaf" style="left:8%;font-size:15px;animation-duration:14s;animation-delay:-3s">🍃</span>
+  <span class="vleaf" style="left:22%;font-size:11px;animation-duration:11s;animation-delay:-7s">🌿</span>
+  <span class="vleaf" style="left:65%;font-size:18px;animation-duration:17s;animation-delay:-1s">🍃</span>
+  <span class="vleaf" style="left:80%;font-size:13px;animation-duration:12s;animation-delay:-9s">🌱</span>
+  <span class="vleaf" style="left:45%;font-size:10px;animation-duration:16s;animation-delay:-5s">🍀</span>
+  <svg class="visual-trees" viewBox="0 0 440 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M55,220 L55,130 L30,155 L55,100 L80,155 L55,130" fill="rgba(255,255,255,.07)"/>
+    <path d="M55,220 L55,100 L30,125 L55,60 L80,125 L55,100" fill="rgba(255,255,255,.05)"/>
+    <path d="M155,220 L155,150 L128,172 L155,118 L182,172 L155,150" fill="rgba(255,255,255,.07)"/>
+    <path d="M260,220 L260,140 L235,160 L260,108 L285,160 L260,140" fill="rgba(255,255,255,.06)"/>
+    <path d="M360,220 L360,160 L338,178 L360,130 L382,178 L360,160" fill="rgba(255,255,255,.07)"/>
+    <path d="M0,195 Q110,180 220,195 Q330,210 440,195 L440,220 L0,220 Z" fill="rgba(26,154,72,.12)"/>
+  </svg>
+  <div class="visual-brand">
+    <div class="visual-logo">🌿</div>
+    <div class="visual-title">السودان الأخضر</div>
+    <div class="visual-sub">المنصة الزراعية الوطنية — نبني مستقبلاً أخضر ومستداماً لأجيال السودان</div>
+    <div>
+      <div class="vfeat">🌳 ٢٥٠,٠٠٠ شجرة مزروعة</div>
+      <div class="vfeat">🌾 ١٢,٠٠٠ مزارع مسجل</div>
+      <div class="vfeat">💧 ٨٥,٠٠٠ هكتار محمي</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── نموذج ──────────── -->
+<div class="auth-form"><div class="wrapper">
+
+  <div class="form-logo">
+    <div class="form-logo-icon">🌿</div>
+    <div class="form-logo-text">
+      <h1>السودان الأخضر</h1>
+      <p>المنصة الزراعية الوطنية</p>
     </div>
   </div>
 
-  <!-- FORM PANEL -->
-  <div class="auth-form">
-    <div class="wrapper">
-
-  <!-- ══ LOGO ══ -->
-  <div class="logo">
-    <div class="logo-badge">🌿</div>
-    <h1 data-i18n="appTitle">السودان الأخضر</h1>
-    <p data-i18n="appSub">المنصة الزراعية الوطنية</p>
+  <!-- تبويبات -->
+  <div class="tabs" id="mainTabs">
+    <button class="tab active" id="tabLogin" onclick="switchTab('login')">تسجيل الدخول</button>
+    <button class="tab" id="tabReg" onclick="switchTab('register')">حساب جديد</button>
   </div>
 
-  <!-- ══ AUTH CARD ══ -->
-  <div class="card" id="authCard">
+  <!-- رسالة -->
+  <div class="alert" id="mainAlert">
+    <span id="alertIcon">ℹ️</span>
+    <div><div id="alertText"></div><div class="alert-code" id="alertCode"></div></div>
+  </div>
 
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab active" id="tab-login" onclick="switchTab('login')" data-i18n="tabLogin">تسجيل الدخول</div>
-      <div class="tab"        id="tab-reg"   onclick="switchTab('reg')"   data-i18n="tabReg">حساب جديد</div>
+  <!-- ══ تسجيل الدخول ══ -->
+  <div id="loginForm">
+    <div class="field">
+      <label>رقم الهاتف <span class="req">*</span></label>
+      <div class="phone-wrap">
+        <select id="lCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="971">🇦🇪 +971</option><option value="1">🇺🇸 +1</option></select>
+        <div class="input-wrap"><input type="tel" id="lPhone" placeholder="918251171" autocomplete="tel"/></div>
+      </div>
+      <div class="field-error" id="lPhoneErr">يرجى إدخال رقم هاتف صحيح</div>
     </div>
-
-    <div id="authAlert" class="alert"></div>
-
-    <!-- ══ LOGIN PANEL ══ -->
-    <div class="form-panel active" id="panel-login">
-      <div class="field">
-        <label class="lbl">رقم الهاتف</label>
-        <div class="phone-row">
-          <select class="cc" id="lcc">
-            <option value="249">🇸🇩 249</option>
-            <option value="20">🇪🇬 20</option>
-            <option value="966">🇸🇦 966</option>
-            <option value="971">🇦🇪 971</option>
-            <option value="1">🇺🇸 1</option>
-            <option value="44">🇬🇧 44</option>
-          </select>
-          <input type="tel" id="lPhone" placeholder="918251171" inputmode="numeric" data-i18n-ph="phPhone">
-        </div>
+    <div class="field">
+      <label>كلمة المرور <span class="req">*</span></label>
+      <div class="input-wrap">
+        <input type="password" id="lPass" placeholder="••••••••" autocomplete="current-password"/>
+        <button class="toggle-pass" onclick="togglePass('lPass',this)" type="button">👁</button>
       </div>
-      <div class="field">
-        <label class="lbl">كلمة السر</label>
-        <div class="pw-wrap">
-          <input type="password" id="lPass" placeholder="كلمة السر">
-          <span class="pw-eye" onclick="togglePw('lPass',this)">👁</span>
-        </div>
-      </div>
-      <button class="btn-main" id="loginBtn" onclick="doLogin()" data-i18n="loginBtn">دخول ←</button>
-      <div class="or-divider" data-i18n="orNo">ليس لديك حساب؟</div>
-      <button class="btn-outline" onclick="switchTab('reg')" data-i18n="createBtn">إنشاء حساب جديد</button>
+      <div class="field-error" id="lPassErr">يرجى إدخال كلمة المرور</div>
     </div>
-
-    <!-- ══ REGISTER PANEL ══ -->
-    <div class="form-panel" id="panel-reg">
-
-      <!-- نوع الحساب -->
-      <div class="field">
-        <label class="lbl" data-i18n="lblType">نوع الحساب</label>
-        <div class="type-grid" id="typeGrid">
-          <div class="type-card selected" data-type="مزارع" onclick="selectType(this)">
-            <div class="type-icon">🌾</div>
-            <div class="type-name">مزارع</div>
-          </div>
-          <div class="type-card" data-type="مستثمر" onclick="selectType(this)">
-            <div class="type-icon">💼</div>
-            <div class="type-name">مستثمر</div>
-          </div>
-          <div class="type-card" data-type="شريك" onclick="selectType(this)">
-            <div class="type-icon">🤝</div>
-            <div class="type-name">شريك</div>
-          </div>
-          <div class="type-card" data-type="باحث" onclick="selectType(this)">
-            <div class="type-icon">🔬</div>
-            <div class="type-name">باحث</div>
-          </div>
-          <div class="type-card" data-type="مشتري" onclick="selectType(this)">
-            <div class="type-icon">🛒</div>
-            <div class="type-name">مشتري</div>
-          </div>
-          <div class="type-card" data-type="مورد" onclick="selectType(this)">
-            <div class="type-icon">🚚</div>
-            <div class="type-name">مورد</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="lbl" data-i18n="lblName">الاسم الكامل</label>
-        <input type="text" id="rName" placeholder="أحمد محمد عبدالله" autocomplete="name" data-i18n-ph="phName">
-      </div>
-
-      <div class="field">
-        <label class="lbl">رقم الهاتف</label>
-        <div class="phone-row">
-          <select class="cc" id="rcc">
-            <option value="249">🇸🇩 249</option>
-            <option value="20">🇪🇬 20</option>
-            <option value="966">🇸🇦 966</option>
-            <option value="971">🇦🇪 971</option>
-            <option value="1">🇺🇸 1</option>
-            <option value="44">🇬🇧 44</option>
-          </select>
-          <input type="tel" id="rPhone" placeholder="91XXXXXXX" inputmode="numeric">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="lbl">كلمة السر</label>
-        <div class="pw-wrap">
-          <input type="password" id="rPass" placeholder="أدخل كلمة سر قوية" oninput="checkStrength(this.value)">
-          <span class="pw-eye" onclick="togglePw('rPass',this)">👁</span>
-        </div>
-        <div class="strength"><div class="strength-fill" id="strBar"></div></div>
-        <div id="strText" style="font-size:11px;color:var(--dim);margin-top:3px"></div>
-      </div>
-
-      <div class="field">
-        <label class="lbl">تأكيد كلمة السر</label>
-        <div class="pw-wrap">
-          <input type="password" id="rPass2" placeholder="أعد كتابة كلمة السر">
-          <span class="pw-eye" onclick="togglePw('rPass2',this)">👁</span>
-        </div>
-      </div>
-
-      <button class="btn-main" id="regBtn" onclick="doRegister()" data-i18n="regBtn">إنشاء الحساب ←</button>
-      <div class="or-divider" data-i18n="orHas">لديك حساب؟</div>
-      <button class="btn-outline" onclick="switchTab('login')" data-i18n="goLogin">تسجيل الدخول</button>
-    </div>
-
-  </div><!-- /card -->
-
-  <!-- ══ PROFILE SCREEN ══ -->
-  <div id="profileScreen">
-    <div class="card">
-      <div class="profile-hero">
-        <div class="avatar" id="profAvatar">
-          <span id="profEmoji">🌾</span>
-          <div class="avatar-badge" id="profBadge">✦</div>
-        </div>
-        <div class="profile-name" id="profName">—</div>
-        <div class="profile-type" id="profType">—</div>
-        <div style="font-size:12px;color:var(--dim);margin-top:6px" id="profPhone"></div>
-      </div>
-
-      <div class="profile-info">
-        <div class="info-row">
-          <div class="info-icon">📱</div>
-          <div>
-            <div class="info-label" data-i18n="piPhone">رقم الهاتف</div>
-            <div class="info-value" id="pi-phone">—</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-icon">👤</div>
-          <div>
-            <div class="info-label" data-i18n="piType">نوع الحساب</div>
-            <div class="info-value" id="pi-type">—</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-icon">📅</div>
-          <div>
-            <div class="info-label" data-i18n="piJoined">تاريخ الانضمام</div>
-            <div class="info-value" id="pi-created">—</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-icon">🕐</div>
-          <div>
-            <div class="info-label" data-i18n="piLast">آخر دخول</div>
-            <div class="info-value" id="pi-last">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Edit Profile -->
-      <div class="profile-actions">
-        <button class="btn-outline" onclick="toggleEdit()" data-i18n="editBtn">✏️ تعديل الملف الشخصي</button>
-
-        <div id="editPanel">
-          <div id="editAlert" class="alert"></div>
-          <div class="field">
-            <label class="lbl">الاسم الكامل</label>
-            <input type="text" id="editName" placeholder="الاسم الكامل">
-          </div>
-          <div class="field">
-            <label class="lbl">الدولة</label>
-            <input type="text" id="editCountry" placeholder="السودان">
-          </div>
-          <div class="field">
-            <label class="lbl">كلمة السر الجديدة (اتركها فارغة إن لم تُرد التغيير)</label>
-            <div class="pw-wrap">
-              <input type="password" id="editPass" placeholder="كلمة السر الجديدة (اختياري)">
-              <span class="pw-eye" onclick="togglePw('editPass',this)">👁</span>
-            </div>
-          </div>
-          <button class="btn-main" onclick="saveProfile()" style="margin-top:4px" data-i18n="saveBtn">💾 حفظ التعديلات</button>
-        </div>
-
-        <button class="btn-logout" onclick="doLogout()" data-i18n="logoutBtn">⬅ تسجيل الخروج</button>
-      </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
+      <span class="spinner"></span><span class="btn-text">دخول ←</span>
+    </button>
+    <div class="helper-links">
+      <button class="btn-ghost" onclick="switchTab('forgot')">نسيت كلمة المرور؟</button>
+      <button class="btn-ghost" onclick="switchTab('register')">إنشاء حساب</button>
     </div>
   </div>
 
-</div><!-- /wrapper -->
-  </div><!-- /auth-form -->
+  <!-- ══ التسجيل ══ -->
+  <div id="registerForm" style="display:none">
+    <div class="steps">
+      <div class="step active" id="rs1">١</div><div class="step-line"></div>
+      <div class="step" id="rs2">٢</div><div class="step-line"></div>
+      <div class="step" id="rs3">٣</div>
+    </div>
+    <div class="field">
+      <label>الاسم الكامل <span class="req">*</span></label>
+      <div class="input-wrap"><input type="text" id="rName" placeholder="أحمد محمد علي" autocomplete="name"/></div>
+      <div class="field-error" id="rNameErr">الاسم الكامل مطلوب</div>
+    </div>
+    <div class="field">
+      <label>رقم الهاتف <span class="req">*</span></label>
+      <div class="phone-wrap">
+        <select id="rCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="971">🇦🇪 +971</option><option value="1">🇺🇸 +1</option></select>
+        <div class="input-wrap"><input type="tel" id="rPhone" placeholder="918251171" autocomplete="tel"/></div>
+      </div>
+      <div class="field-error" id="rPhoneErr">يرجى إدخال رقم هاتف صحيح</div>
+    </div>
+    <div class="field">
+      <label>نوع الحساب <span class="req">*</span></label>
+      <div class="input-wrap"><select id="rRole"><option value="">جاري التحميل...</option></select></div>
+    </div>
+    <div class="field">
+      <label>كلمة المرور <span class="req">*</span></label>
+      <div class="input-wrap">
+        <input type="password" id="rPass" placeholder="6 أحرف على الأقل" oninput="checkStrength()" autocomplete="new-password"/>
+        <button class="toggle-pass" onclick="togglePass('rPass',this)" type="button">👁</button>
+      </div>
+      <div class="strength-bar"><div class="strength-seg" id="sg1"></div><div class="strength-seg" id="sg2"></div><div class="strength-seg" id="sg3"></div><div class="strength-seg" id="sg4"></div></div>
+      <div class="strength-label" id="strLabel"></div>
+      <div class="field-error" id="rPassErr">كلمة المرور 6 أحرف على الأقل</div>
+    </div>
+    <div class="field">
+      <label>تأكيد كلمة المرور <span class="req">*</span></label>
+      <div class="input-wrap">
+        <input type="password" id="rPassC" placeholder="••••••••" autocomplete="new-password"/>
+        <button class="toggle-pass" onclick="togglePass('rPassC',this)" type="button">👁</button>
+      </div>
+      <div class="field-error" id="rPassCErr">كلمتا المرور غير متطابقتين</div>
+    </div>
+    <div class="terms-wrap">
+      <input type="checkbox" id="rTerms"/>
+      <label for="rTerms">أوافق على <a href="#" onclick="return false">سياسة الاستخدام والخصوصية</a></label>
+    </div>
+    <button class="btn btn-primary" id="registerBtn" onclick="doRegister()">
+      <span class="spinner"></span><span class="btn-text">إنشاء الحساب ←</span>
+    </button>
+    <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--dim2)">
+      لديك حساب؟ <button class="btn-ghost" onclick="switchTab('login')">تسجيل الدخول</button>
+    </div>
+  </div>
+
+  <!-- ══ OTP ══ -->
+  <div id="otpForm" style="display:none">
+    <div class="steps">
+      <div class="step done">١</div><div class="step-line"></div>
+      <div class="step active">٢</div><div class="step-line"></div>
+      <div class="step" id="os3">٣</div>
+    </div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:40px;margin-bottom:10px">📱</div>
+      <h3 style="font-family:'Amiri',serif;font-size:20px;color:var(--eg);margin-bottom:8px">تحقق من هاتفك</h3>
+      <p style="font-size:13px;color:var(--dim2);line-height:1.7">
+        أرسلنا رمزاً مكوناً من 6 أرقام إلى<br/>
+        <strong id="otpPhone" style="color:var(--eg);direction:ltr;display:inline-block"></strong><br/>
+        عبر WhatsApp
+      </p>
+    </div>
+    <div class="otp-wrap">
+      <input type="tel" maxlength="1" class="otp-box" data-i="0"/>
+      <input type="tel" maxlength="1" class="otp-box" data-i="1"/>
+      <input type="tel" maxlength="1" class="otp-box" data-i="2"/>
+      <input type="tel" maxlength="1" class="otp-box" data-i="3"/>
+      <input type="tel" maxlength="1" class="otp-box" data-i="4"/>
+      <input type="tel" maxlength="1" class="otp-box" data-i="5"/>
+    </div>
+    <div class="otp-timer">الرمز صالح لـ <span id="otpCd">05:00</span></div>
+    <button class="btn btn-primary" id="otpBtn" onclick="doVerifyOTP()">
+      <span class="spinner"></span><span class="btn-text">تحقق ←</span>
+    </button>
+    <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--dim2)">
+      لم يصلك الرمز؟ <button class="btn-resend" id="resendBtn" onclick="doResend()" disabled>إعادة الإرسال</button>
+    </div>
+  </div>
+
+  <!-- ══ نسيت كلمة المرور ══ -->
+  <div id="forgotForm" style="display:none">
+    <!-- خطوة 1: الهاتف -->
+    <div id="fp1">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:10px">🔑</div>
+        <h3 style="font-family:'Amiri',serif;font-size:18px;color:var(--eg)">استعادة كلمة المرور</h3>
+        <p style="font-size:13px;color:var(--dim2);margin-top:6px">أدخل رقم هاتفك لإرسال رمز التحقق</p>
+      </div>
+      <div class="field">
+        <label>رقم الهاتف <span class="req">*</span></label>
+        <div class="phone-wrap">
+          <select id="fCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="1">🇺🇸 +1</option></select>
+          <div class="input-wrap"><input type="tel" id="fPhone" placeholder="918251171"/></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="forgotBtn" onclick="doForgot()">
+        <span class="spinner"></span><span class="btn-text">إرسال رمز التحقق ←</span>
+      </button>
+    </div>
+    <!-- خطوة 2: OTP -->
+    <div id="fp2" style="display:none">
+      <p style="text-align:center;font-size:13px;color:var(--dim2);margin-bottom:16px">أدخل الرمز المُرسَل لهاتفك</p>
+      <div class="otp-wrap">
+        <input type="tel" maxlength="1" class="fotp-box" data-i="0"/>
+        <input type="tel" maxlength="1" class="fotp-box" data-i="1"/>
+        <input type="tel" maxlength="1" class="fotp-box" data-i="2"/>
+        <input type="tel" maxlength="1" class="fotp-box" data-i="3"/>
+        <input type="tel" maxlength="1" class="fotp-box" data-i="4"/>
+        <input type="tel" maxlength="1" class="fotp-box" data-i="5"/>
+      </div>
+      <button class="btn btn-primary" id="fotpBtn" onclick="doForgotVerifyOTP()" style="margin-top:12px">
+        <span class="spinner"></span><span class="btn-text">تحقق من الرمز ←</span>
+      </button>
+    </div>
+    <!-- خطوة 3: كلمة مرور جديدة -->
+    <div id="fp3" style="display:none">
+      <div class="field">
+        <label>كلمة المرور الجديدة <span class="req">*</span></label>
+        <div class="input-wrap">
+          <input type="password" id="newPass" placeholder="6 أحرف على الأقل"/>
+          <button class="toggle-pass" onclick="togglePass('newPass',this)" type="button">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>تأكيد كلمة المرور <span class="req">*</span></label>
+        <div class="input-wrap">
+          <input type="password" id="newPassC" placeholder="••••••••"/>
+          <button class="toggle-pass" onclick="togglePass('newPassC',this)" type="button">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="resetBtn" onclick="doResetPassword()">
+        <span class="spinner"></span><span class="btn-text">تغيير كلمة المرور ←</span>
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-ghost" onclick="switchTab('login')">← العودة لتسجيل الدخول</button>
+    </div>
+  </div>
+
+  <!-- ══ نجاح ══ -->
+  <div id="successState" style="display:none">
+    <div class="success-state">
+      <div class="check">✅</div>
+      <h3 id="sucTitle">تم بنجاح!</h3>
+      <p id="sucMsg">تم تفعيل حسابك بنجاح.</p>
+      <button class="btn btn-primary" id="sucBtn" style="margin-top:24px" onclick="switchTab('login')">تسجيل الدخول ←</button>
+    </div>
+  </div>
+
+</div></div><!-- /wrapper /auth-form -->
 </div><!-- /auth-root -->
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════════════
-let API_URL = localStorage.getItem('sg_api_url') || '';
-let SESSION = JSON.parse(localStorage.getItem('sg_session') || 'null');
-let selectedType = 'مزارع';
+// ══════════════════════
+//  Config
+// ══════════════════════
+const API = '/.netlify/functions/auth';
+let SESSION     = null;
+let pendPhone   = '';
+let pendCC      = '249';
+let pendPurpose = 'REGISTER';
+let resetTok    = '';
+let otpTimer    = null;
 
-const typeEmojis = {
-  'مزارع':'🌾','مستثمر':'💼','شريك':'🤝',
-  'باحث':'🔬','مشتري':'🛒','مورد':'🚚','admin':'⚙️'
-};
-const typeBadges = {
-  'مزارع':'🌿','مستثمر':'💰','شريك':'🤝',
-  'باحث':'📊','مشتري':'🛒','مورد':'🚛','admin':'⚙️'
-};
+// ── Init ──
+(function(){
+  try {
+    const s = localStorage.getItem('sg_session');
+    if (s) {
+      SESSION = JSON.parse(s);
+      if (SESSION?.token && new Date(SESSION.expiresAt) > new Date()) {
+        location.href = '/dashboard.html'; return;
+      }
+    }
+  } catch {}
 
-// check ?api= param
-const urlApi = new URLSearchParams(location.search).get('api');
-if (urlApi) {
-  API_URL = decodeURIComponent(urlApi);
-  localStorage.setItem('sg_api_url', API_URL);
-  history.replaceState({}, '', location.pathname);
-}
+  // ?api= handler
+  const p = new URLSearchParams(location.search);
+  if (p.get('api')) { localStorage.setItem('sg_api', p.get('api')); history.replaceState({},document.title,location.pathname); }
 
-// STARS
-(function() {
-  const c = document.getElementById('stars');
-  for (let i = 0; i < 60; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const sz = Math.random() * 2 + 1;
-    Object.assign(s.style, {
-      left: Math.random()*100+'%', top: Math.random()*100+'%',
-      width: sz+'px', height: sz+'px',
-      '--d': (2 + Math.random()*4)+'s',
-      '--del': -(Math.random()*4)+'s',
-      '--op': (0.3 + Math.random()*0.7).toFixed(2)
-    });
-    c.appendChild(s);
-  }
+  loadRoles();
+  initOtpBoxes();
 })();
 
-// INIT
-window.addEventListener('DOMContentLoaded', () => {
-  // لا نفتح نافذة API تلقائياً — تفتح فقط عند محاولة الدخول
-  if (SESSION?.token) loadAndShowProfile();
-});
-
-// ══════════════════════════════════════════════════
-//  API
-// ══════════════════════════════════════════════════
-async function api(data) {
-  if (!API_URL) { openApiModal(); throw new Error('NO_API_URL'); }
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(data)
+function initOtpBoxes() {
+  document.querySelectorAll('.otp-box').forEach((el,i) => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/\D/,'').slice(-1);
+      const boxes = [...document.querySelectorAll('.otp-box')];
+      if (el.value && i < 5) boxes[i+1].focus();
+      if (boxes.every(b => b.value)) doVerifyOTP();
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0)
+        document.querySelectorAll('.otp-box')[i-1].focus();
+    });
   });
-  return res.json();
+  document.querySelectorAll('.fotp-box').forEach((el,i) => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/\D/,'').slice(-1);
+      const boxes = [...document.querySelectorAll('.fotp-box')];
+      if (el.value && i < 5) boxes[i+1].focus();
+      if (boxes.every(b => b.value)) doForgotVerifyOTP();
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0)
+        document.querySelectorAll('.fotp-box')[i-1].focus();
+    });
+  });
 }
 
-// ══════════════════════════════════════════════════
-//  AUTH
-// ══════════════════════════════════════════════════
+async function loadRoles() {
+  try {
+    const r = await call({ action: 'getRoles', publicOnly: true });
+    const sel = document.getElementById('rRole');
+    if (r.success && r.data?.roles?.length) {
+      sel.innerHTML = r.data.roles.map(ro =>
+        `<option value="${ro.roleId}">${ro.roleNameAr}${ro.requiresApproval ? ' (تحتاج موافقة)' : ''}</option>`
+      ).join('');
+    } else {
+      sel.innerHTML = '<option value="user">مستخدم عادي</option><option value="farmer">مزارع</option>';
+    }
+  } catch {
+    document.getElementById('rRole').innerHTML = '<option value="user">مستخدم عادي</option><option value="farmer">مزارع</option>';
+  }
+}
+
+// ══════════════════════
+//  API
+// ══════════════════════
+async function call(body) {
+  const r = await fetch(API, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+// ══════════════════════
+//  Login
+// ══════════════════════
 async function doLogin() {
-  const phone = document.getElementById('lPhone').value.trim().replace(/\D/g,'');
-  const password = document.getElementById('lPass').value.trim();
-  if (!phone || !password) { showAlert('authAlert','أدخل رقم الهاتف وكلمة السر','err'); return; }
-
-  setLoading('loginBtn', true, 'جاري الدخول...');
+  const phone = v('lPhone'), pass = v('lPass'), cc = v('lCC');
+  clearAlert();
+  if (!phone) { showErr('lPhoneErr'); return; }
+  if (!pass)  { showErr('lPassErr');  return; }
+  setLoad('loginBtn', true);
   try {
-    const r = await api({ action:'login', phone, password });
-    if (r.ok) {
-      SESSION = { token: r.token, fullName: r.fullName, userType: r.userType, phone };
-      localStorage.setItem('sg_session', JSON.stringify(SESSION));
-      await loadAndShowProfile();
-    } else {
-      const msgs = {
-        WRONG_PASSWORD: `كلمة السر خاطئة — ${r.attemptsLeft||'?'} محاولات متبقية`,
-        LOCKED:  `الحساب مقفول — انتظر ${r.minutesLeft} دقيقة`,
-        NOT_FOUND: 'الرقم غير مسجل — أنشئ حساباً جديداً',
-        INACTIVE: 'الحساب غير مُفعَّل، تواصل مع الإدارة'
-      };
-      showAlert('authAlert', msgs[r.error] || r.error, 'err');
-    }
-  } catch(e) {
-    showAlert('authAlert','تعذر الاتصال بالخادم','err');
-  }
-  setLoading('loginBtn', false, 'دخول ←');
+    const r = await call({ action:'login', phone, password:pass, countryCode:cc });
+    if (r.success) {
+      SESSION = r.data;
+      localStorage.setItem('sg_session', JSON.stringify(r.data));
+      showAlert('success', 'مرحباً ' + r.data.fullName + '! جاري التحويل...');
+      setTimeout(() => location.href = '/dashboard.html' + (r.data.mustChangePassword ? '?changePass=1' : ''), 1200);
+    } else { showAlert('error', r.message, r.code); }
+  } catch { showAlert('error', 'خطأ في الاتصال، تحقق من الشبكة'); }
+  setLoad('loginBtn', false);
 }
 
+// ══════════════════════
+//  Register
+// ══════════════════════
 async function doRegister() {
-  const name  = document.getElementById('rName').value.trim();
-  const phone = document.getElementById('rPhone').value.trim().replace(/\D/g,'');
-  const cc    = document.getElementById('rcc').value;
-  const pass  = document.getElementById('rPass').value.trim();
-  const pass2 = document.getElementById('rPass2').value.trim();
+  const name = v('rName'), phone = v('rPhone'), cc = v('rCC'),
+        role = v('rRole'), pass = v('rPass'), passC = v('rPassC'),
+        terms = document.getElementById('rTerms').checked;
+  clearAlert();
+  let ok = true;
+  if (!name)        { showErr('rNameErr');  ok=false; }
+  if (phone.length < 5) { showErr('rPhoneErr'); ok=false; }
+  if (pass.length < 6)  { showErr('rPassErr');  ok=false; }
+  if (pass !== passC)   { showErr('rPassCErr'); ok=false; }
+  if (!ok) return;
+  if (!terms) { showAlert('warn', 'يجب الموافقة على سياسة الاستخدام'); return; }
 
-  if (!name)          { showAlert('authAlert','أدخل اسمك الكامل','err'); return; }
-  if (phone.length<6) { showAlert('authAlert','رقم الهاتف غير صحيح','err'); return; }
-  if (pass.length<4)  { showAlert('authAlert','كلمة السر قصيرة جداً (4 أحرف على الأقل)','err'); return; }
-  if (pass !== pass2) { showAlert('authAlert','كلمتا السر غير متطابقتين','err'); return; }
-
-  setLoading('regBtn', true, 'جاري التسجيل...');
+  setLoad('registerBtn', true);
   try {
-    const r = await api({
-      action: 'registerDirect',
-      fullName: name, phone, country: cc,
-      password: pass, userType: selectedType
+    const r = await call({
+      action:'register', fullName:name, phone, password:pass,
+      confirmPassword:passC, roleId:role, acceptTerms:true, countryCode:cc
     });
-    if (r.ok) {
-      SESSION = { token: r.token, fullName: r.fullName, userType: r.userType, phone };
-      localStorage.setItem('sg_session', JSON.stringify(SESSION));
-      await loadAndShowProfile();
-    } else {
-      const msgs = {
-        PHONE_EXISTS:      'هذا الرقم مسجل مسبقاً — سجّل الدخول',
-        PASSWORD_TOO_SHORT:'كلمة السر قصيرة جداً',
-        INVALID_PHONE:     'رقم الهاتف غير صحيح',
-        MISSING_NAME:      'أدخل اسمك الكامل'
-      };
-      showAlert('authAlert', msgs[r.error] || r.error, 'err');
-    }
-  } catch(e) {
-    showAlert('authAlert','تعذر الاتصال بالخادم','err');
-  }
-  setLoading('regBtn', false, 'إنشاء الحساب ←');
+    if (r.success) {
+      pendPhone = phone; pendCC = cc; pendPurpose = 'REGISTER';
+      document.getElementById('otpPhone').textContent = '+' + cc + phone.replace(/^0+/,'');
+      showSection('otpForm');
+      startTimer(300);
+    } else { showAlert('error', r.message, r.code); }
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  setLoad('registerBtn', false);
 }
 
-async function doLogout() {
-  if (SESSION) api({ action:'logout', token:SESSION.token }).catch(()=>{});
-  SESSION = null;
-  localStorage.removeItem('sg_session');
-  document.getElementById('profileScreen').style.display = 'none';
-  document.getElementById('authCard').style.display = 'block';
-  switchTab('login');
-}
-
-// ══════════════════════════════════════════════════
-//  PROFILE
-// ══════════════════════════════════════════════════
-async function loadAndShowProfile() {
+// ══════════════════════
+//  Verify OTP
+// ══════════════════════
+async function doVerifyOTP() {
+  const otp = [...document.querySelectorAll('.otp-box')].map(b=>b.value).join('');
+  if (otp.length !== 6) { showAlert('warn', 'أدخل الرمز المكون من 6 أرقام'); return; }
+  clearAlert();
+  setLoad('otpBtn', true);
   try {
-    const r = await api({ action:'getProfile', token: SESSION.token });
-    if (r.ok) renderProfile(r.profile);
-    else renderProfile({ fullName: SESSION.fullName, userType: SESSION.userType, phone: SESSION.phone });
-  } catch(e) {
-    renderProfile({ fullName: SESSION?.fullName, userType: SESSION?.userType, phone: SESSION?.phone });
-  }
+    const r = await call({ action:'verifyOTP', phone:pendPhone, otp, purpose:pendPurpose, countryCode:pendCC });
+    if (r.success) {
+      clearInterval(otpTimer);
+      const req = r.data?.requiresApproval;
+      showSection('successState');
+      document.getElementById('sucTitle').textContent = req ? 'طلبك قيد المراجعة' : 'تم إنشاء الحساب!';
+      document.getElementById('sucMsg').textContent   = req
+        ? 'تم التحقق من هاتفك. سيراجع المدير طلبك ويُرسَل إليك إشعار عبر WhatsApp.'
+        : 'تم التحقق وتفعيل حسابك بنجاح. يمكنك الآن تسجيل الدخول.';
+      if (req) document.getElementById('sucBtn').style.display = 'none';
+    } else { showAlert('error', r.message, r.code); }
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  setLoad('otpBtn', false);
 }
 
-function renderProfile(p) {
-  const type = p.userType || 'مزارع';
-  document.getElementById('profEmoji').textContent  = typeEmojis[type] || '👤';
-  document.getElementById('profBadge').textContent  = typeBadges[type] || '✦';
-  document.getElementById('profName').textContent   = p.fullName || '—';
-  document.getElementById('profType').textContent   = type;
-  document.getElementById('profPhone').textContent  = '+' + (p.countryCode||'249') + ' ' + (p.phone||SESSION?.phone||'');
-  document.getElementById('pi-phone').textContent   = p.phone || SESSION?.phone || '—';
-  document.getElementById('pi-type').textContent    = type;
-  document.getElementById('pi-created').textContent = fmtDate(p.createdAt);
-  document.getElementById('pi-last').textContent    = fmtDate(p.lastLogin) || 'الآن';
-  document.getElementById('editName').value    = p.fullName || '';
-  document.getElementById('editCountry').value = p.country || 'السودان';
-
-  document.getElementById('authCard').style.display    = 'none';
-  document.getElementById('profileScreen').style.display = 'block';
-}
-
-function toggleEdit() {
-  const p = document.getElementById('editPanel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}
-
-async function saveProfile() {
-  const name    = document.getElementById('editName').value.trim();
-  const country = document.getElementById('editCountry').value.trim();
-  const newPass = document.getElementById('editPass').value.trim();
-
-  if (!name) { showAlert('editAlert','أدخل الاسم','err'); return; }
-
+async function doResend() {
+  document.getElementById('resendBtn').disabled = true;
+  clearAlert();
   try {
-    const r = await api({ action:'updateProfile', token:SESSION.token, fullName:name, country });
-    if (!r.ok) { showAlert('editAlert', r.error, 'err'); return; }
+    await call({ action:'requestOTP', phone:pendPhone, countryCode:pendCC, purpose:pendPurpose });
+    showAlert('info', 'تم إعادة إرسال الرمز');
+    startTimer(300);
+  } catch { showAlert('error', 'فشل الإرسال، حاول مجدداً'); }
+}
 
-    if (newPass) {
-      if (newPass.length < 4) { showAlert('editAlert','كلمة السر قصيرة','err'); return; }
-      const cp = await api({ action:'changePassword', token:SESSION.token, newPassword:newPass });
-      if (!cp.ok) { showAlert('editAlert', cp.error, 'err'); return; }
-    }
+// ══════════════════════
+//  Forgot Password
+// ══════════════════════
+async function doForgot() {
+  const phone = v('fPhone'), cc = v('fCC');
+  if (!phone) { showAlert('warn', 'أدخل رقم الهاتف'); return; }
+  setLoad('forgotBtn', true);
+  try {
+    await call({ action:'requestPasswordReset', phone, countryCode:cc });
+    pendPhone = phone; pendCC = cc;
+    document.getElementById('fp1').style.display = 'none';
+    document.getElementById('fp2').style.display = 'block';
+    showAlert('info', 'إذا كان الرقم مسجلاً ستصلك رسالة WhatsApp');
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  setLoad('forgotBtn', false);
+}
 
-    SESSION.fullName = name;
-    localStorage.setItem('sg_session', JSON.stringify(SESSION));
-    showAlert('editAlert','تم الحفظ بنجاح ✅','ok');
-    document.getElementById('profName').textContent = name;
-    document.getElementById('editPass').value = '';
-  } catch(e) {
-    showAlert('editAlert','خطأ في الاتصال','err');
+async function doForgotVerifyOTP() {
+  const otp = [...document.querySelectorAll('.fotp-box')].map(b=>b.value).join('');
+  if (otp.length !== 6) { showAlert('warn', 'أدخل الرمز المكون من 6 أرقام'); return; }
+  setLoad('fotpBtn', true);
+  try {
+    const r = await call({ action:'verifyPasswordResetOTP', phone:pendPhone, otp, countryCode:pendCC });
+    if (r.success && r.data?.verified) {
+      resetTok = r.data.resetToken || '';
+      document.getElementById('fp2').style.display = 'none';
+      document.getElementById('fp3').style.display = 'block';
+    } else { showAlert('error', r.message, r.code); }
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  setLoad('fotpBtn', false);
+}
+
+async function doResetPassword() {
+  const np = v('newPass'), npc = v('newPassC');
+  if (np.length < 6) { showAlert('warn', 'كلمة المرور 6 أحرف على الأقل'); return; }
+  if (np !== npc)    { showAlert('error', 'كلمتا المرور غير متطابقتين'); return; }
+  setLoad('resetBtn', true);
+  try {
+    const r = await call({ action:'resetPassword', phone:pendPhone, resetToken:resetTok, newPassword:np, countryCode:pendCC });
+    if (r.success) { showAlert('success', 'تم تغيير كلمة المرور بنجاح'); setTimeout(()=>switchTab('login'),2000); }
+    else showAlert('error', r.message, r.code);
+  } catch { showAlert('error', 'خطأ في الاتصال'); }
+  setLoad('resetBtn', false);
+}
+
+// ══════════════════════
+//  مؤشر قوة كلمة المرور
+// ══════════════════════
+function checkStrength() {
+  const p = v('rPass');
+  let s = 0;
+  if (p.length >= 6)  s++;
+  if (p.length >= 10) s++;
+  if (/[0-9]/.test(p) && /[a-zA-Z]/.test(p)) s++;
+  if (/[^a-zA-Z0-9]/.test(p)) s++;
+  const colors = ['#EF4444','#F59E0B','#10B981','#059669'];
+  const labels = ['ضعيفة','مقبولة','جيدة','قوية'];
+  ['sg1','sg2','sg3','sg4'].forEach((id,i) => {
+    document.getElementById(id).style.background = i < s ? colors[s-1] : '#E5E7EB';
+  });
+  document.getElementById('strLabel').textContent = p.length ? (labels[s-1]||'') : '';
+}
+
+// ══════════════════════
+//  Timer
+// ══════════════════════
+function startTimer(sec) {
+  clearInterval(otpTimer);
+  let r = sec;
+  const cd = document.getElementById('otpCd');
+  const rb = document.getElementById('resendBtn');
+  if (rb) rb.disabled = true;
+  const tick = () => {
+    if (cd) cd.textContent = String(Math.floor(r/60)).padStart(2,'0') + ':' + String(r%60).padStart(2,'0');
+    if (r <= 0) { clearInterval(otpTimer); if (rb) rb.disabled = false; }
+    r--;
+  };
+  tick();
+  otpTimer = setInterval(tick, 1000);
+}
+
+// ══════════════════════
+//  UI
+// ══════════════════════
+function switchTab(tab) {
+  ['loginForm','registerForm','otpForm','forgotForm','successState'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const tabs = document.getElementById('mainTabs');
+  tabs.style.display = ['login','register'].includes(tab) ? 'flex' : 'none';
+  clearAlert();
+  const map = { login:'loginForm', register:'registerForm', otp:'otpForm', forgot:'forgotForm', success:'successState' };
+  const el = document.getElementById(map[tab]);
+  if (el) el.style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (tab === 'login')    document.getElementById('tabLogin')?.classList.add('active');
+  if (tab === 'register') document.getElementById('tabReg')?.classList.add('active');
+  if (tab === 'forgot') {
+    document.getElementById('fp1').style.display='block';
+    document.getElementById('fp2').style.display='none';
+    document.getElementById('fp3').style.display='none';
   }
+  if (tab === 'success') document.getElementById('sucBtn').style.display = '';
 }
 
-// ══════════════════════════════════════════════════
-//  UI HELPERS
-// ══════════════════════════════════════════════════
-function switchTab(t) {
-  document.getElementById('tab-login').classList.toggle('active', t==='login');
-  document.getElementById('tab-reg').classList.toggle('active',   t==='reg');
-  document.getElementById('panel-login').classList.toggle('active', t==='login');
-  document.getElementById('panel-reg').classList.toggle('active',   t==='reg');
-  document.getElementById('authAlert').classList.remove('show');
+function showSection(id) {
+  ['loginForm','registerForm','otpForm','forgotForm','successState'].forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById('mainTabs').style.display = 'none';
+  document.getElementById(id).style.display = 'block';
 }
 
-function selectType(el) {
-  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedType = el.dataset.type;
+function showAlert(type, msg, code) {
+  const el = document.getElementById('mainAlert');
+  const icons = { success:'✅', error:'❌', warn:'⚠️', info:'ℹ️' };
+  el.className = 'alert alert-' + type + ' show';
+  document.getElementById('alertIcon').textContent = icons[type] || 'ℹ️';
+  document.getElementById('alertText').textContent = msg;
+  document.getElementById('alertCode').textContent = code ? 'رمز: ' + code : '';
 }
 
-function togglePw(id, eye) {
-  const inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  eye.textContent = inp.type === 'password' ? '👁' : '🙈';
+function clearAlert() {
+  document.getElementById('mainAlert').className = 'alert';
+  ['lPhoneErr','lPassErr','rNameErr','rPhoneErr','rPassErr','rPassCErr'].forEach(id => {
+    document.getElementById(id)?.classList.remove('show');
+  });
 }
 
-function checkStrength(v) {
-  let score = 0;
-  if (v.length >= 6)  score++;
-  if (v.length >= 8)  score++;
-  if (/[A-Za-z]/.test(v)) score++;
-  if (/[0-9]/.test(v))    score++;
-  if (/[^A-Za-z0-9]/.test(v)) score++;
-  const bar   = document.getElementById('strBar');
-  const txt   = document.getElementById('strText');
-  const levels = [
-    {w:'0%',  bg:'transparent', label:''},
-    {w:'25%', bg:'#E05050',     label:'ضعيفة'},
-    {w:'50%', bg:'#F0A030',     label:'متوسطة'},
-    {w:'75%', bg:'#D4A017',     label:'جيدة'},
-    {w:'100%',bg:'#2EE070',     label:'قوية جداً'},
-  ];
-  const l = levels[Math.min(score, 4)];
-  bar.style.width = l.w;
-  bar.style.background = l.bg;
-  txt.textContent = l.label;
-  txt.style.color = l.bg;
-}
-
-function setLoading(id, loading, text) {
+function showErr(id) { document.getElementById(id)?.classList.add('show'); }
+function setLoad(id, l) {
   const btn = document.getElementById(id);
-  btn.disabled = loading;
-  btn.textContent = text;
+  if (!btn) return;
+  btn.disabled = l;
+  btn.classList.toggle('loading', l);
 }
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  const isP = inp.type === 'password';
+  inp.type = isP ? 'text' : 'password';
+  btn.textContent = isP ? '🙈' : '👁';
+}
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
 
-function showAlert(id, msg, type) {
-  const el = document.getElementById(id);
-  el.className = `alert alert-${type==='ok'?'ok':type==='warn'?'warn':'err'} show`;
-  el.textContent = msg;
-  if (type === 'ok') setTimeout(() => el.classList.remove('show'), 4000);
-}
-
-function fmtDate(d) {
-  if (!d) return '—';
-  try {
-    return new Date(d).toLocaleDateString(_lang==='ar'?'ar':'en', {
-      year:'numeric', month:'long', day:'numeric'
-    });
-  } catch(e) { return d; }
-}
-
-// API MODAL
-function openApiModal() {
-  document.getElementById('apiInput').value = API_URL || '';
-  document.getElementById('apiModal').classList.add('show');
-}
-function saveApiModal() {
-  const url = document.getElementById('apiInput').value.trim();
-  if (!url.startsWith('https://')) return;
-  API_URL = url;
-  localStorage.setItem('sg_api_url', url);
-  document.getElementById('apiModal').classList.remove('show');
-  api({ action:'saveApiUrl', apiUrl: url }).catch(()=>{});
-}
-
-// Enter key shortcuts
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  if (document.getElementById('panel-login').classList.contains('active')) doLogin();
-  else if (document.getElementById('panel-reg').classList.contains('active')) doRegister();
-});
-
-// ══════════════════════════════════════════════════
-//  THEME & LANGUAGE
-// ══════════════════════════════════════════════════
-const TRANS = {
-  ar:{
-    appTitle:'السودان الأخضر', appSub:'المنصة الزراعية الوطنية',
-    tabLogin:'تسجيل الدخول', tabReg:'حساب جديد',
-    loginBtn:'دخول ←', orNo:'ليس لديك حساب؟', createBtn:'إنشاء حساب جديد',
-    lblType:'نوع الحساب', lblName:'الاسم الكامل',
-    regBtn:'إنشاء الحساب ←', orHas:'لديك حساب؟', goLogin:'تسجيل الدخول',
-    piPhone:'رقم الهاتف', piType:'نوع الحساب',
-    piJoined:'تاريخ الانضمام', piLast:'آخر دخول',
-    editBtn:'✏️ تعديل الملف الشخصي', saveBtn:'💾 حفظ التعديلات',
-    logoutBtn:'⬅ تسجيل الخروج',
-    apiTitle:'⚙️ إعداد رابط الـ API',
-    apiSub:'الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/',
-    apiSaveBtn:'حفظ الرابط',
-    farmer:'مزارع', investor:'مستثمر', partner:'شريك',
-    researcher:'باحث', buyer:'مشتري', supplier:'مورد',
-    phPhone:'918251171', phName:'أحمد محمد عبدالله',
-  },
-  en:{
-    appTitle:'Sudan Green', appSub:'National Agricultural Platform',
-    tabLogin:'Login', tabReg:'New Account',
-    loginBtn:'Login →', orNo:"Don't have an account?", createBtn:'Create New Account',
-    lblType:'Account Type', lblName:'Full Name',
-    regBtn:'Create Account →', orHas:'Already have an account?', goLogin:'Login',
-    piPhone:'Phone Number', piType:'Account Type',
-    piJoined:'Joined Date', piLast:'Last Login',
-    editBtn:'✏️ Edit Profile', saveBtn:'💾 Save Changes',
-    logoutBtn:'⬅ Logout',
-    apiTitle:'⚙️ API Setup',
-    apiSub:'Paste your Apps Script Web App URL — starts with https://script.google.com/macros/s/',
-    apiSaveBtn:'Save URL',
-    farmer:'Farmer', investor:'Investor', partner:'Partner',
-    researcher:'Researcher', buyer:'Buyer', supplier:'Supplier',
-    phPhone:'918251171', phName:'Ahmad Mohammed Abdullah',
-  }
-};
-
-const TYPE_AR = {'Farmer':'مزارع','Investor':'مستثمر','Partner':'شريك','Researcher':'باحث','Buyer':'مشتري','Supplier':'مورد'};
-
-let _theme = localStorage.getItem('sg_theme') || 'light';
-let _lang  = localStorage.getItem('sg_lang')  || 'ar';
-
-function toggleTheme() { applyTheme(_theme==='dark'?'light':'dark'); }
-function toggleLang()  { applyLang(_lang==='ar'?'en':'ar'); }
-
-function applyTheme(t) {
-  _theme = t;
-  document.documentElement.dataset.theme = t;
-  localStorage.setItem('sg_theme', t);
-  const b = document.getElementById('themeBtn');
-  if (b) b.textContent = t==='dark'?'☀️':'🌙';
-}
-
-function applyLang(lang) {
-  _lang = lang;
-  localStorage.setItem('sg_lang', lang);
-  const L = TRANS[lang];
-  document.documentElement.lang = lang==='ar'?'ar':'en';
-  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
-  const lb = document.getElementById('langBtn');
-  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = L[el.dataset.i18n];
-    if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    const v = L[el.dataset.i18nPh];
-    if (v !== undefined) el.placeholder = v;
-  });
-  // translate type card display names (keep data-type in Arabic for backend)
-  const km = {'مزارع':'farmer','مستثمر':'investor','شريك':'partner','باحث':'researcher','مشتري':'buyer','مورد':'supplier'};
-  document.querySelectorAll('.type-card').forEach(c => {
-    const ne = c.querySelector('.type-name');
-    const arType = c.dataset.type;
-    if (ne && km[arType]) ne.textContent = L[km[arType]] || ne.textContent;
-  });
-}
-
-// ── Login panel labels (set by ID context)
-function _lbls(lang) {
-  const L = TRANS[lang];
-  // login panel
-  const lpl = document.querySelectorAll('#panel-login .lbl');
-  if (lpl[0]) lpl[0].textContent = L.lblPhone || lpl[0].textContent;
-  if (lpl[1]) lpl[1].textContent = (lang==='ar'?'كلمة السر':'Password');
-  // register panel
-  const rpl = document.querySelectorAll('#panel-reg .lbl');
-  if (rpl[1]) rpl[1].textContent = L.lblPhone || rpl[1].textContent;
-  if (rpl[2]) rpl[2].textContent = (lang==='ar'?'كلمة السر':'Password');
-  if (rpl[3]) rpl[3].textContent = (lang==='ar'?'تأكيد كلمة السر':'Confirm Password');
-  // profile edit labels
-  const epl = document.querySelectorAll('#editPanel .lbl');
-  if (epl[0]) epl[0].textContent = (lang==='ar'?'الاسم الكامل':'Full Name');
-  if (epl[1]) epl[1].textContent = (lang==='ar'?'الدولة':'Country');
-  if (epl[2]) epl[2].textContent = (lang==='ar'?'كلمة السر الجديدة (اتركها فارغة)':'New Password (leave empty)');
-}
-
-// Override applyLang to also call _lbls
-const _origApplyLang = applyLang;
-// Extend:
-function applyLang(lang) {
-  _lang = lang;
-  localStorage.setItem('sg_lang', lang);
-  const L = TRANS[lang];
-  document.documentElement.lang = lang==='ar'?'ar':'en';
-  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
-  const lb = document.getElementById('langBtn');
-  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = L[el.dataset.i18n];
-    if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    const v = L[el.dataset.i18nPh];
-    if (v !== undefined) el.placeholder = v;
-  });
-  const km = {'مزارع':'farmer','مستثمر':'investor','شريك':'partner','باحث':'researcher','مشتري':'buyer','مورد':'supplier'};
-  document.querySelectorAll('.type-card').forEach(c => {
-    const ne = c.querySelector('.type-name');
-    const arType = c.dataset.type;
-    if (ne && km[arType]) ne.textContent = L[km[arType]] || ne.textContent;
-  });
-  _lbls(lang);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  applyTheme(_theme);
-  applyLang(_lang);
+  if (document.getElementById('loginForm').style.display !== 'none') doLogin();
+  if (document.getElementById('registerForm').style.display !== 'none') doRegister();
 });
 </script>
 </body>
