@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم — السودان الأخضر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
+  --vg:#2EE070;--lg:#5AEEA0;
+  --gold:#D4A017;--gold-l:#F0C84A;
+  --nile:#1260A0;
+  --text:#F0FFF4;--dim:#9DCCA8;
+  --bg:#041209;--bg2:#071C0D;
+  --card:rgba(18,58,32,.85);--card2:rgba(13,74,40,.7);
+  --border:rgba(46,224,112,.18);--border2:rgba(46,224,112,.08);
+  --red:#E05050;--amber:#F0A030;
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:0;right:0;height:100vh;width:240px;
+  background:var(--card);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;
+  transition:transform .3s;
+}
+.logo{
+  padding:20px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.logo-icon{font-size:28px}
+.logo-text h1{font-family:'Reem Kufi',sans-serif;font-size:16px;color:var(--vg)}
+.logo-text p{font-size:11px;color:var(--dim)}
+nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;cursor:pointer;transition:.2s;
+  font-size:13px;color:var(--dim);border-right:3px solid transparent;
+}
+.nav-item:hover{background:rgba(46,224,112,.08);color:var(--text)}
+.nav-item.active{
+  background:rgba(46,224,112,.12);color:var(--vg);
+  border-right-color:var(--vg);
+}
+.nav-icon{width:18px;text-align:center;font-size:15px}
+.sidebar-user{
+  padding:12px 16px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--dim);
+}
+.sidebar-user strong{display:block;color:var(--text);margin-bottom:2px}
+
+/* ── MAIN ── */
+.main{margin-right:240px;min-height:100vh}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;background:var(--card2);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:'Reem Kufi',sans-serif;font-size:18px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:6px;font-size:13px;
+  border:none;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.btn-primary{background:var(--vg);color:#041209;font-weight:600}
+.btn-primary:hover{background:var(--lg)}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--vg)}
+.btn-danger{background:rgba(224,80,80,.15);color:var(--red);border:1px solid rgba(224,80,80,.3)}
+.btn-danger:hover{background:rgba(224,80,80,.25)}
+
+/* ── PAGES ── */
+.page{display:none;padding:24px}
+.page.active{display:block}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--r);padding:20px;margin-bottom:16px;
+}
+.card-title{
+  font-family:'Reem Kufi',sans-serif;font-size:15px;
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.card-title span{color:var(--vg)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--r);padding:16px;
+}
+.stat-label{font-size:11px;color:var(--dim);margin-bottom:6px}
+.stat-value{font-size:26px;font-weight:700;font-family:'Reem Kufi',sans-serif;color:var(--vg)}
+.stat-sub{font-size:11px;color:var(--dim);margin-top:4px}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;color:var(--dim)}
+input,select,textarea{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:6px;padding:9px 12px;color:var(--text);
+  font-family:inherit;font-size:13px;transition:.2s;width:100%;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--vg);
+  box-shadow:0 0 0 3px rgba(46,224,112,.12);
+}
+input[type=password]{letter-spacing:2px}
+.form-note{font-size:11px;color:var(--dim);margin-top:2px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.section-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:1px;
+  color:var(--gold);margin-bottom:12px;font-weight:600;
+}
+
+/* ── ALERTS ── */
+.alert{
+  padding:10px 14px;border-radius:6px;font-size:13px;
+  margin-bottom:16px;display:none;
+}
+.alert.show{display:flex;align-items:center;gap:8px}
+.alert-ok{background:rgba(46,224,112,.12);border:1px solid rgba(46,224,112,.3);color:var(--vg)}
+.alert-err{background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.3);color:var(--red)}
+.alert-warn{background:rgba(240,160,48,.12);border:1px solid rgba(240,160,48,.3);color:var(--amber)}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  background:rgba(0,0,0,.3);padding:10px 12px;text-align:right;
+  color:var(--dim);font-weight:500;border-bottom:1px solid var(--border);
+}
+td{padding:10px 12px;border-bottom:1px solid var(--border2);vertical-align:middle}
+tr:hover td{background:rgba(46,224,112,.04)}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;
+}
+.badge-green{background:rgba(46,224,112,.15);color:var(--vg)}
+.badge-red{background:rgba(224,80,80,.15);color:var(--red)}
+.badge-amber{background:rgba(240,160,48,.15);color:var(--amber)}
+.badge-blue{background:rgba(18,96,160,.25);color:#6EC0F0}
+
+/* ── LOGIN ── */
+#loginPage{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:var(--bg);
+}
+.login-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:40px;width:100%;max-width:380px;
+}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .emoji{font-size:48px}
+.login-logo h1{font-family:'Reem Kufi',sans-serif;color:var(--vg);font-size:22px;margin-top:8px}
+.login-logo p{color:var(--dim);font-size:13px;margin-top:4px}
+
+/* ── API SETUP MODAL ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  display:flex;align-items:center;justify-content:center;z-index:200;
+  display:none;
+}
+.overlay.show{display:flex}
+.modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:28px;width:480px;max-width:95vw;
+}
+.modal-title{font-family:'Reem Kufi',sans-serif;font-size:18px;margin-bottom:20px}
+
+/* ── CROPS TABLE ── */
+.price-up{color:var(--vg)}
+.price-down{color:var(--red)}
+
+/* responsive */
+@media(max-width:768px){
+  .sidebar{transform:translateX(100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-right:0}
+  .form-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .topbar{padding:12px 16px}
+  .page{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="emoji">🌿</div>
+      <h1>السودان الأخضر</h1>
+      <p>لوحة تحكم المدير</p>
+    </div>
+    <div id="loginAlert" class="alert"></div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>رقم الهاتف</label>
+      <input type="tel" id="loginPhone" placeholder="918251171" autocomplete="off">
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label>كلمة السر</label>
+      <input type="password" id="loginPass" placeholder="••••••">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()">
+      دخول ←
+    </button>
+  </div>
+</div>
+
+<!-- API SETUP MODAL -->
+<div class="overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ إعداد رابط الـ API</div>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:16px">
+      الصق رابط Apps Script (Web App URL) من Google Apps Script
+    </p>
+    <div class="alert alert-warn show" style="margin-bottom:16px">
+      ⚠️ تأكد أن النشر بإعداد "Anyone" وليس "Anyone with Google account"
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label>رابط الـ API</label>
+      <input type="url" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+      <span class="form-note">يبدأ بـ https://script.google.com/macros/s/</span>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="saveApiUrl()">حفظ</button>
+      <button class="btn btn-ghost" onclick="closeApiModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" style="display:none">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">
+        <h1>السودان الأخضر</h1>
+        <p>لوحة التحكم</p>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-item active" onclick="showPage('stats')" data-page="stats">
+        <span class="nav-icon">📊</span> الإحصائيات
+      </div>
+      <div class="nav-item" onclick="showPage('crops')" data-page="crops">
+        <span class="nav-icon">🌾</span> المحاصيل والأسعار
+      </div>
+      <div class="nav-item" onclick="showPage('projects')" data-page="projects">
+        <span class="nav-icon">💼</span> المشاريع الاستثمارية
+      </div>
+      <div class="nav-item" onclick="showPage('users')" data-page="users">
+        <span class="nav-icon">👥</span> المستخدمون
+      </div>
+      <div class="nav-item" onclick="showPage('broadcast')" data-page="broadcast">
+        <span class="nav-icon">📢</span> الإعلانات
+      </div>
+      <div class="nav-item" onclick="showPage('settings')" data-page="settings">
+        <span class="nav-icon">⚙️</span> الإعدادات
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <strong id="sidebarName">—</strong>
+      <span id="sidebarPhone" style="font-size:11px"></span>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12px;justify-content:center" onclick="logout()">
+        خروج
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn btn-ghost" id="menuBtn" onclick="toggleSidebar()" style="display:none">☰</button>
+        <span class="topbar-title" id="pageTitle">الإحصائيات</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="openApiModal()" title="إعداد API">⚙️ API</button>
+      </div>
+    </div>
+
+    <!-- ═══ STATS PAGE ═══ -->
+    <div class="page active" id="page-stats">
+      <div id="statsAlert" class="alert"></div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-label">إجمالي المستخدمين</div><div class="stat-value" id="st-users">—</div></div>
+        <div class="stat-card"><div class="stat-label">المستخدمون النشطون</div><div class="stat-value" id="st-active">—</div></div>
+        <div class="stat-card"><div class="stat-label">المزارعون</div><div class="stat-value" id="st-farmers">—</div></div>
+        <div class="stat-card"><div class="stat-label">المستثمرون</div><div class="stat-value" id="st-investors">—</div></div>
+        <div class="stat-card"><div class="stat-label">المحاصيل المُتتبَّعة</div><div class="stat-value" id="st-crops">—</div></div>
+        <div class="stat-card"><div class="stat-label">المشاريع</div><div class="stat-value" id="st-projects">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📋</span> آخر الأسعار</div>
+        <div class="table-wrap"><table id="priceTable">
+          <thead><tr><th>المحصول</th><th>المنطقة</th><th>السعر اليوم</th><th>التغيير</th><th>آخر تحديث</th></tr></thead>
+          <tbody id="priceTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══ CROPS PAGE ═══ -->
+    <div class="page" id="page-crops">
+      <div id="cropsAlert" class="alert"></div>
+      <div class="card">
+        <div class="card-title"><span>🌾</span> إضافة محصول جديد</div>
+        <div class="form-grid">
+          <div class="form-group"><label>اسم المحصول (عربي)</label><input id="c-nameAr" placeholder="سمسم كسلا"></div>
+          <div class="form-group"><label>اسم المحصول (إنجليزي)</label><input id="c-nameEn" placeholder="Kassala Sesame"></div>
+          <div class="form-group"><label>المنطقة</label><input id="c-region" placeholder="كسلا"></div>
+          <div class="form-group"><label>السعر الحالي (SDG/طن)</label><input id="c-price" type="number" placeholder="225000"></div>
+          <div class="form-group"><label>الوحدة</label><input id="c-unit" placeholder="طن" value="طن"></div>
+          <div class="form-group"><label>العملة</label>
+            <select id="c-currency"><option>SDG</option><option>USD</option><option>EUR</option></select>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="addCrop()">+ إضافة المحصول</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📈</span> تحديث الأسعار</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>المحصول</th><th>المنطقة</th><th>السعر الحالي</th><th>التغيير%</th><th>تحديث السعر</th></tr></thead>
+          <tbody id="cropsTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══ PROJECTS PAGE ═══ -->
+    <div class="page" id="page-projects">
+      <div id="projectsAlert" class="alert"></div>
+      <div class="card">
+        <div class="card-title"><span>💼</span> إضافة مشروع استثماري</div>
+        <div class="form-grid">
+          <div class="form-group"><label>عنوان المشروع (عربي)</label><input id="p-titleAr" placeholder="مشروع ري الجزيرة الموسع"></div>
+          <div class="form-group"><label>عنوان المشروع (إنجليزي)</label><input id="p-titleEn" placeholder="Gezira Expanded Irrigation"></div>
+          <div class="form-group"><label>المنطقة</label><input id="p-region" placeholder="الجزيرة"></div>
+          <div class="form-group"><label>الفئة</label>
+            <select id="p-category">
+              <option>ري وبنية تحتية</option><option>إنتاج محاصيل</option>
+              <option>تصنيع غذائي</option><option>تكنولوجيا زراعية</option>
+              <option>تصدير</option><option>ثروة حيوانية</option>
+            </select>
+          </div>
+          <div class="form-group form-grid single"><label>الوصف</label><textarea id="p-desc" rows="2" placeholder="وصف مختصر للمشروع..."></textarea></div>
+          <div class="form-group"><label>المبلغ المستهدف</label><input id="p-target" type="number" placeholder="500000"></div>
+          <div class="form-group"><label>العملة</label>
+            <select id="p-currency"><option>USD</option><option>SDG</option><option>EUR</option></select>
+          </div>
+          <div class="form-group"><label>تاريخ البدء</label><input id="p-start" type="date"></div>
+          <div class="form-group"><label>تاريخ الانتهاء</label><input id="p-end" type="date"></div>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="addProject()">+ إضافة المشروع</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📋</span> المشاريع الحالية</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>العنوان</th><th>المنطقة</th><th>الفئة</th><th>المستهدف</th><th>تم جمعه</th><th>الحالة</th></tr></thead>
+          <tbody id="projectsTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══ USERS PAGE ═══ -->
+    <div class="page" id="page-users">
+      <div id="usersAlert" class="alert"></div>
+      <div class="card">
+        <div class="card-title"><span>👥</span> قائمة المستخدمين</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>الاسم</th><th>الهاتف</th><th>النوع</th><th>الحالة</th><th>آخر دخول</th><th>إجراء</th></tr></thead>
+          <tbody id="usersTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══ BROADCAST PAGE ═══ -->
+    <div class="page" id="page-broadcast">
+      <div id="broadcastAlert" class="alert"></div>
+      <div class="card" style="max-width:600px">
+        <div class="card-title"><span>📢</span> إرسال إعلان عبر واتساب</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>عنوان الإعلان</label>
+          <input id="b-title" placeholder="إعلان عن موسم الحصاد">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>المستهدفون</label>
+          <select id="b-target">
+            <option value="all">جميع المستخدمين</option>
+            <option value="مزارع">المزارعون فقط</option>
+            <option value="مستثمر">المستثمرون فقط</option>
+            <option value="شريك">الشركاء فقط</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label>نص الإعلان</label>
+          <textarea id="b-msg" rows="5" placeholder="اكتب الإعلان هنا...&#10;يدعم markdown: *غامق* _مائل_"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendBroadcast()">📤 إرسال الإعلان</button>
+        <p style="font-size:11px;color:var(--dim);margin-top:10px">يُرسَل عبر واتساب Cloud API — تأكد من ضبط التوكن في الإعدادات</p>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS PAGE ═══ -->
+    <div class="page" id="page-settings">
+      <div id="settingsAlert" class="alert"></div>
+
+      <!-- API URL -->
+      <div class="card">
+        <div class="card-title"><span>🔗</span> رابط الـ API</div>
+        <div class="section-label">رابط Web App من Google Apps Script</div>
+        <div class="form-group form-grid single" style="margin-bottom:12px">
+          <label>API URL</label>
+          <input id="s-apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <div class="alert alert-warn show" style="margin-bottom:12px;font-size:12px">
+          ⚠️ النشر يجب أن يكون: Execute as = Me &nbsp;|&nbsp; Who has access = <strong>Anyone</strong>
+        </div>
+        <button class="btn btn-primary" onclick="saveApiUrlSetting()">💾 حفظ الرابط</button>
+      </div>
+
+      <!-- واتساب -->
+      <div class="card">
+        <div class="card-title"><span>💬</span> واتساب Cloud API</div>
+        <div class="section-label">Meta Business — Graph API v19.0</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Phone Number ID</label>
+            <input id="s-waPhoneId" placeholder="1234567890123456">
+            <span class="form-note">من Meta Business Manager → WhatsApp → Phone Numbers</span>
+          </div>
+          <div class="form-group">
+            <label>Access Token (Permanent)</label>
+            <input type="password" id="s-waToken" placeholder="EAABsbCS...">
+            <span class="form-note">System User Token — صلاحية دائمة</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>تفعيل واتساب</label>
+          <select id="s-waEnabled">
+            <option value="true">مُفعَّل ✅</option>
+            <option value="false">مُعطَّل ❌</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="saveWhatsapp()">💾 حفظ إعدادات واتساب</button>
+      </div>
+
+      <!-- الجلسات والأمان -->
+      <div class="card">
+        <div class="card-title"><span>🔒</span> الأمان والجلسات</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>مدة الجلسة (ساعات)</label>
+            <input type="number" id="s-sessionHours" min="1" max="168" value="12">
+          </div>
+          <div class="form-group">
+            <label>حد محاولات الدخول الفاشلة</label>
+            <input type="number" id="s-maxFails" min="3" max="20" value="5">
+          </div>
+          <div class="form-group">
+            <label>مدة القفل (دقائق)</label>
+            <input type="number" id="s-lockout" min="5" max="1440" value="30">
+          </div>
+          <div class="form-group">
+            <label>العملة الافتراضية</label>
+            <select id="s-currency">
+              <option value="SDG">SDG — جنيه سوداني</option>
+              <option value="USD">USD — دولار أمريكي</option>
+              <option value="EUR">EUR — يورو</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="saveSecuritySettings()">💾 حفظ إعدادات الأمان</button>
+      </div>
+
+      <!-- تغيير كلمة السر -->
+      <div class="card" style="max-width:460px">
+        <div class="card-title"><span>🔑</span> تغيير كلمة السر</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>كلمة السر الجديدة</label>
+          <input type="password" id="s-newPass" placeholder="4 أحرف على الأقل">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label>تأكيد كلمة السر</label>
+          <input type="password" id="s-confirmPass" placeholder="أعد الكتابة">
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">🔑 تغيير كلمة السر</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+let API_URL = localStorage.getItem('sg_api_url') || '';
+let SESSION = JSON.parse(localStorage.getItem('sg_session') || 'null');
+
+// Logo click counter for secret API panel
+let logoClicks = 0, logoTimer = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const logo = document.querySelector('.logo');
+  if (logo) logo.addEventListener('click', () => {
+    logoClicks++;
+    clearTimeout(logoTimer);
+    logoTimer = setTimeout(() => logoClicks = 0, 2000);
+    if (logoClicks >= 5) { logoClicks = 0; openApiModal(); }
+  });
+  // check ?api= param
+  const urlApi = new URLSearchParams(location.search).get('api');
+  if (urlApi) {
+    API_URL = decodeURIComponent(urlApi);
+    localStorage.setItem('sg_api_url', API_URL);
+    history.replaceState({}, '', location.pathname);
+  }
+  init();
+});
+
+function init() {
+  if (!API_URL) { openApiModal(); }
+  if (SESSION && SESSION.token) {
+    showApp();
+  } else {
+    document.getElementById('loginPage').style.display = 'flex';
+  }
+  // responsive
+  if (window.innerWidth <= 768) {
+    document.getElementById('menuBtn').style.display = 'block';
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  API
+// ══════════════════════════════════════════════════
+async function api(data) {
+  if (!API_URL) { openApiModal(); throw new Error('NO_API_URL'); }
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
+// ══════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════
+async function doLogin() {
+  const phone = document.getElementById('loginPhone').value.trim().replace(/\D/g,'');
+  const password = document.getElementById('loginPass').value.trim();
+  if (!phone || !password) { showAlert('loginAlert', 'أدخل رقم الهاتف وكلمة السر', 'err'); return; }
+  showAlert('loginAlert', 'جاري الدخول...', 'warn');
+  try {
+    const r = await api({ action: 'login', phone, password });
+    if (r.ok) {
+      SESSION = { token: r.token, fullName: r.fullName, userType: r.userType, phone };
+      localStorage.setItem('sg_session', JSON.stringify(SESSION));
+      if (r.mustChangePassword) {
+        showAlert('loginAlert', 'يجب تغيير كلمة السر أولاً', 'warn');
+        showApp(); showPage('settings');
+        return;
+      }
+      showApp();
+    } else {
+      const msgs = {
+        WRONG_PASSWORD: `كلمة السر خاطئة (${r.attemptsLeft || '?'} محاولات متبقية)`,
+        LOCKED: `الحساب مقفول — انتظر ${r.minutesLeft} دقيقة`,
+        NOT_FOUND: 'الرقم غير مسجل',
+        INACTIVE: 'الحساب غير مُفعَّل'
+      };
+      showAlert('loginAlert', msgs[r.error] || r.error, 'err');
+    }
+  } catch(e) { showAlert('loginAlert', 'تعذر الاتصال بالخادم — تحقق من رابط الـ API', 'err'); }
+}
+
+function logout() {
+  if (SESSION) api({ action: 'logout', token: SESSION.token }).catch(()=>{});
+  SESSION = null;
+  localStorage.removeItem('sg_session');
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sidebarName').textContent = SESSION?.fullName || 'المدير';
+  document.getElementById('sidebarPhone').textContent = SESSION?.phone || '';
+  loadStats();
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+const pageTitles = {
+  stats: 'الإحصائيات',
+  crops: 'المحاصيل والأسعار',
+  projects: 'المشاريع الاستثمارية',
+  users: 'المستخدمون',
+  broadcast: 'إرسال الإعلانات',
+  settings: 'الإعدادات'
+};
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[name];
+  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+  // lazy load
+  if (name === 'stats')    loadStats();
+  if (name === 'crops')    loadCrops();
+  if (name === 'projects') loadProjects();
+  if (name === 'users')    loadUsers();
+  if (name === 'settings') loadSettings();
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════════
+async function loadStats() {
+  if (!SESSION) return;
+  try {
+    const r = await api({ action: 'getStats', token: SESSION.token });
+    if (r.ok) {
+      const s = r.stats;
+      document.getElementById('st-users').textContent    = fmt(s.totalUsers);
+      document.getElementById('st-active').textContent   = fmt(s.activeUsers);
+      document.getElementById('st-farmers').textContent  = fmt(s.farmerCount);
+      document.getElementById('st-investors').textContent= fmt(s.investorCount);
+      document.getElementById('st-crops').textContent    = fmt(s.totalCrops);
+      document.getElementById('st-projects').textContent = fmt(s.totalProjects);
+    }
+    // also load prices for the table
+    const cr = await api({ action: 'getCrops', token: SESSION.token });
+    if (cr.ok) {
+      const tbody = document.getElementById('priceTbody');
+      tbody.innerHTML = cr.crops.map(c => {
+        const up = c.Change && !c.Change.startsWith('-');
+        return `<tr>
+          <td><strong>${c.NameAr}</strong></td>
+          <td>${c.Region||'—'}</td>
+          <td>${fmt(c.PriceToday)} ${c.Currency}</td>
+          <td class="${up ? 'price-up' : 'price-down'}">${c.Change} (${c.ChangePercent})</td>
+          <td>${fmtDate(c.UpdatedAt)}</td>
+        </tr>`;
+      }).join('');
+    }
+  } catch(e) { showAlert('statsAlert', 'تعذر تحميل البيانات', 'err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  CROPS
+// ══════════════════════════════════════════════════
+async function loadCrops() {
+  if (!SESSION) return;
+  try {
+    const r = await api({ action: 'getCrops', token: SESSION.token });
+    if (!r.ok) return;
+    const tbody = document.getElementById('cropsTbody');
+    tbody.innerHTML = r.crops.map(c => {
+      const up = c.Change && !c.Change.startsWith('-');
+      return `<tr>
+        <td><strong>${c.NameAr}</strong><br><small style="color:var(--dim)">${c.NameEn}</small></td>
+        <td>${c.Region||'—'}</td>
+        <td>${fmt(c.PriceToday)} ${c.Currency}</td>
+        <td class="${up ? 'price-up' : 'price-down'}">${c.ChangePercent}</td>
+        <td style="width:180px">
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="pr-${c.CropID}" value="${c.PriceToday}"
+              style="width:110px;padding:5px 8px" placeholder="السعر الجديد">
+            <button class="btn btn-primary" style="padding:5px 10px;font-size:12px"
+              onclick="updatePrice('${c.CropID}')">✓</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { showAlert('cropsAlert', 'تعذر تحميل المحاصيل', 'err'); }
+}
+
+async function addCrop() {
+  const d = {
+    action:'addCrop', token:SESSION.token,
+    nameAr:  document.getElementById('c-nameAr').value.trim(),
+    nameEn:  document.getElementById('c-nameEn').value.trim(),
+    region:  document.getElementById('c-region').value.trim(),
+    price:   document.getElementById('c-price').value,
+    unit:    document.getElementById('c-unit').value,
+    currency:document.getElementById('c-currency').value,
+  };
+  if (!d.nameAr || !d.price) { showAlert('cropsAlert','أدخل اسم المحصول والسعر','err'); return; }
+  try {
+    const r = await api(d);
+    if (r.ok) { showAlert('cropsAlert','تمت إضافة المحصول بنجاح ✅','ok'); loadCrops(); }
+    else showAlert('cropsAlert', r.error, 'err');
+  } catch(e) { showAlert('cropsAlert', 'خطأ في الاتصال', 'err'); }
+}
+
+async function updatePrice(cropId) {
+  const price = document.getElementById('pr-' + cropId)?.value;
+  if (!price) return;
+  try {
+    const r = await api({ action:'updateCrop', token:SESSION.token, cropId, price });
+    if (r.ok) { showAlert('cropsAlert','تم تحديث السعر ✅','ok'); loadCrops(); loadStats(); }
+    else showAlert('cropsAlert', r.error || 'خطأ', 'err');
+  } catch(e) { showAlert('cropsAlert','خطأ في الاتصال','err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  PROJECTS
+// ══════════════════════════════════════════════════
+async function loadProjects() {
+  if (!SESSION) return;
+  try {
+    const r = await api({ action:'getProjects', token:SESSION.token });
+    if (!r.ok) return;
+    const tbody = document.getElementById('projectsTbody');
+    const statusBadge = s => s === 'active'
+      ? `<span class="badge badge-green">نشط</span>`
+      : `<span class="badge badge-amber">${s}</span>`;
+    tbody.innerHTML = r.projects.map(p => `<tr>
+      <td><strong>${p.TitleAr}</strong><br><small style="color:var(--dim)">${p.TitleEn}</small></td>
+      <td>${p.Region||'—'}</td>
+      <td>${p.Category||'—'}</td>
+      <td>${fmt(p.TargetAmount)} ${p.Currency}</td>
+      <td>${fmt(p.RaisedAmount)} ${p.Currency}</td>
+      <td>${statusBadge(p.Status)}</td>
+    </tr>`).join('');
+  } catch(e) { showAlert('projectsAlert','تعذر تحميل المشاريع','err'); }
+}
+
+async function addProject() {
+  const d = {
+    action:'addProject', token:SESSION.token,
+    titleAr:     document.getElementById('p-titleAr').value.trim(),
+    titleEn:     document.getElementById('p-titleEn').value.trim(),
+    region:      document.getElementById('p-region').value.trim(),
+    category:    document.getElementById('p-category').value,
+    description: document.getElementById('p-desc').value.trim(),
+    targetAmount:document.getElementById('p-target').value,
+    currency:    document.getElementById('p-currency').value,
+    startDate:   document.getElementById('p-start').value,
+    endDate:     document.getElementById('p-end').value,
+    status:      'active',
+  };
+  if (!d.titleAr || !d.targetAmount) { showAlert('projectsAlert','أدخل عنوان المشروع والمبلغ','err'); return; }
+  try {
+    const r = await api(d);
+    if (r.ok) { showAlert('projectsAlert','تمت إضافة المشروع ✅','ok'); loadProjects(); }
+    else showAlert('projectsAlert', r.error, 'err');
+  } catch(e) { showAlert('projectsAlert','خطأ في الاتصال','err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  USERS
+// ══════════════════════════════════════════════════
+async function loadUsers() {
+  if (!SESSION) return;
+  try {
+    const r = await api({ action:'getUsers', token:SESSION.token });
+    if (!r.ok) { showAlert('usersAlert', r.error, 'err'); return; }
+    const tbody = document.getElementById('usersTbody');
+    tbody.innerHTML = r.users.map(u => {
+      const statusBadge = u.Active
+        ? `<span class="badge badge-green">نشط</span>`
+        : `<span class="badge badge-red">معطل</span>`;
+      const typeBadge = u.UserType === 'admin'
+        ? `<span class="badge badge-blue">${u.UserType}</span>`
+        : `<span class="badge">${u.UserType}</span>`;
+      return `<tr>
+        <td>${u.FullName}</td>
+        <td style="direction:ltr;text-align:right">${u.Phone}</td>
+        <td>${typeBadge}</td>
+        <td>${statusBadge}</td>
+        <td>${fmtDate(u.LastLogin)}</td>
+        <td>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 8px"
+            onclick="toggleUser('${u.UserID}', ${!u.Active})">
+            ${u.Active ? 'تعطيل' : 'تفعيل'}
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { showAlert('usersAlert','تعذر تحميل المستخدمين','err'); }
+}
+
+async function toggleUser(userId, newActive) {
+  try {
+    const r = await api({ action:'updateUser', token:SESSION.token, userId, active: newActive });
+    if (r.ok) loadUsers();
+    else showAlert('usersAlert', r.error, 'err');
+  } catch(e) { showAlert('usersAlert','خطأ','err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  BROADCAST
+// ══════════════════════════════════════════════════
+async function sendBroadcast() {
+  const d = {
+    action:'broadcast', token:SESSION.token,
+    title:  document.getElementById('b-title').value.trim(),
+    message:document.getElementById('b-msg').value.trim(),
+    targetType: document.getElementById('b-target').value,
+  };
+  if (!d.message) { showAlert('broadcastAlert','اكتب نص الإعلان','err'); return; }
+  showAlert('broadcastAlert','جاري الإرسال...','warn');
+  try {
+    const r = await api(d);
+    if (r.ok) showAlert('broadcastAlert',`تم الإرسال بنجاح لـ ${r.sentCount} مستخدم ✅`,'ok');
+    else showAlert('broadcastAlert', r.error, 'err');
+  } catch(e) { showAlert('broadcastAlert','خطأ في الإرسال','err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════════
+async function loadSettings() {
+  if (!SESSION) return;
+  // fill API URL
+  document.getElementById('s-apiUrl').value = API_URL || '';
+  try {
+    const r = await api({ action:'getSettings', token:SESSION.token });
+    if (!r.ok) return;
+    const s = r.settings;
+    document.getElementById('s-waPhoneId').value   = s.WHATSAPP_PHONE_ID || '';
+    document.getElementById('s-waToken').value     = ''; // never show token
+    document.getElementById('s-waEnabled').value   = s.WHATSAPP_ENABLED || 'false';
+    document.getElementById('s-sessionHours').value= s.SESSION_HOURS || '12';
+    document.getElementById('s-maxFails').value    = s.MAX_FAILED_ATTEMPTS || '5';
+    document.getElementById('s-lockout').value     = s.LOCKOUT_MINUTES || '30';
+    document.getElementById('s-currency').value    = s.DEFAULT_CURRENCY || 'SDG';
+  } catch(e) {}
+}
+
+async function saveApiUrlSetting() {
+  const url = document.getElementById('s-apiUrl').value.trim();
+  if (!url) { showAlert('settingsAlert','أدخل رابط الـ API','err'); return; }
+  API_URL = url;
+  localStorage.setItem('sg_api_url', url);
+  try {
+    await api({ action:'saveApiUrl', apiUrl: url });
+  } catch(e) {}
+  showAlert('settingsAlert','تم حفظ الرابط ✅','ok');
+}
+
+async function saveWhatsapp() {
+  const d = {
+    action:'saveSettings', token:SESSION.token,
+    WHATSAPP_PHONE_ID: document.getElementById('s-waPhoneId').value.trim(),
+    WHATSAPP_ENABLED:  document.getElementById('s-waEnabled').value,
+  };
+  const tok = document.getElementById('s-waToken').value.trim();
+  if (tok) d.WHATSAPP_TOKEN = tok;
+  try {
+    const r = await api(d);
+    if (r.ok) showAlert('settingsAlert','تم حفظ إعدادات واتساب ✅','ok');
+    else showAlert('settingsAlert', r.error, 'err');
+  } catch(e) { showAlert('settingsAlert','خطأ في الحفظ','err'); }
+}
+
+async function saveSecuritySettings() {
+  const d = {
+    action:'saveSettings', token:SESSION.token,
+    SESSION_HOURS:       document.getElementById('s-sessionHours').value,
+    MAX_FAILED_ATTEMPTS: document.getElementById('s-maxFails').value,
+    LOCKOUT_MINUTES:     document.getElementById('s-lockout').value,
+    DEFAULT_CURRENCY:    document.getElementById('s-currency').value,
+  };
+  try {
+    const r = await api(d);
+    if (r.ok) showAlert('settingsAlert','تم حفظ الإعدادات ✅','ok');
+    else showAlert('settingsAlert', r.error, 'err');
+  } catch(e) { showAlert('settingsAlert','خطأ في الحفظ','err'); }
+}
+
+async function changePassword() {
+  const np = document.getElementById('s-newPass').value.trim();
+  const cp = document.getElementById('s-confirmPass').value.trim();
+  if (!np || np.length < 4) { showAlert('settingsAlert','كلمة السر قصيرة جداً','err'); return; }
+  if (np !== cp) { showAlert('settingsAlert','كلمتا السر غير متطابقتين','err'); return; }
+  try {
+    const r = await api({ action:'changePassword', token:SESSION.token, newPassword:np });
+    if (r.ok) {
+      showAlert('settingsAlert','تم تغيير كلمة السر بنجاح ✅','ok');
+      document.getElementById('s-newPass').value = '';
+      document.getElementById('s-confirmPass').value = '';
+    } else showAlert('settingsAlert', r.error, 'err');
+  } catch(e) { showAlert('settingsAlert','خطأ','err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  API MODAL
+// ══════════════════════════════════════════════════
+function openApiModal() {
+  document.getElementById('apiUrlInput').value = API_URL || '';
+  document.getElementById('apiModal').classList.add('show');
+}
+function closeApiModal() {
+  if (!API_URL) return; // don't allow closing without a URL
+  document.getElementById('apiModal').classList.remove('show');
+}
+function saveApiUrl() {
+  const url = document.getElementById('apiUrlInput').value.trim();
+  if (!url.startsWith('https://')) { alert('أدخل رابطاً صحيحاً يبدأ بـ https://'); return; }
+  API_URL = url;
+  localStorage.setItem('sg_api_url', url);
+  document.getElementById('apiModal').classList.remove('show');
+  // try to save in sheet
+  api({ action:'saveApiUrl', apiUrl: url }).catch(()=>{});
+  if (!SESSION) init();
+}
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+function fmt(n) {
+  if (n === '' || n === undefined || n === null) return '—';
+  return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('ar-SD', {year:'numeric',month:'short',day:'numeric'}); }
+  catch(e) { return d; }
+}
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert alert-${type === 'ok' ? 'ok' : type === 'warn' ? 'warn' : 'err'} show`;
+  el.textContent = msg;
+  if (type === 'ok') setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// Enter key for login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin();
+});
+</script>
+</body>
+</html>
