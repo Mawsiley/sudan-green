@@ -19,6 +19,32 @@
   --red:#C83030;--amber:#C07800;
   --r:10px;
 }
+/* ── DARK MODE ── */
+html[data-theme="dark"]{
+  --text:#D8EEE0;--dim:#7DB88A;
+  --bg:#0A1510;--bg2:#12221A;
+  --card:#12221A;--card2:#1A2E22;
+  --border:rgba(26,154,72,.4);--border2:rgba(26,154,72,.2);
+  --gold:#D4A017;--gold-l:#E8B820;
+}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{
+  background:#1A2E1F!important;border-color:rgba(26,154,72,.35)!important;color:#D8EEE0!important;
+}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#4A7A5A!important}
+html[data-theme="dark"] .login-box{background:#12221A}
+html[data-theme="dark"] th{background:#1A2E22!important}
+html[data-theme="dark"] tr:hover td{background:rgba(26,154,72,.06)}
+html[data-theme="dark"] .badge-blue{color:#7EC8F0}
+/* ── TOGGLE BAR ── */
+.toggle-bar{position:fixed;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
+.tgl-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.tgl-btn:hover{border-color:var(--vg);color:var(--vg)}
+.tgl-btn.lang{width:auto;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:.5px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'IBM Plex Sans Arabic',sans-serif;
@@ -198,24 +224,30 @@ tr:hover td{background:rgba(46,224,112,.04)}
 </head>
 <body>
 
+<!-- TOGGLE BAR -->
+<div class="toggle-bar">
+  <button class="tgl-btn" id="themeBtn" onclick="toggleTheme()" title="وضع ليلي / نهاري">🌙</button>
+  <button class="tgl-btn lang" id="langBtn" onclick="toggleLang()">EN</button>
+</div>
+
 <!-- LOGIN PAGE -->
 <div id="loginPage">
   <div class="login-box">
     <div class="login-logo">
       <div class="emoji">🌿</div>
-      <h1>السودان الأخضر</h1>
-      <p>لوحة تحكم المدير</p>
+      <h1 data-i18n="appTitle">السودان الأخضر</h1>
+      <p data-i18n="loginSub">لوحة تحكم المدير</p>
     </div>
     <div id="loginAlert" class="alert"></div>
     <div class="form-group" style="margin-bottom:12px">
-      <label>رقم الهاتف</label>
+      <label data-i18n="lblPhone">رقم الهاتف</label>
       <input type="tel" id="loginPhone" placeholder="918251171" autocomplete="off">
     </div>
     <div class="form-group" style="margin-bottom:20px">
-      <label>كلمة السر</label>
+      <label data-i18n="lblPass">كلمة السر</label>
       <input type="password" id="loginPass" placeholder="••••••">
     </div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()" data-i18n="loginBtn">
       دخول ←
     </button>
   </div>
@@ -355,28 +387,28 @@ tr:hover td{background:rgba(46,224,112,.04)}
     </div>
     <nav>
       <div class="nav-item active" onclick="showPage('stats')" data-page="stats">
-        <span class="nav-icon">📊</span> الإحصائيات
+        <span class="nav-icon">📊</span><span data-i18n="navStats"> الإحصائيات</span>
       </div>
       <div class="nav-item" onclick="showPage('crops')" data-page="crops">
-        <span class="nav-icon">🌾</span> المحاصيل والأسعار
+        <span class="nav-icon">🌾</span><span data-i18n="navCrops"> المحاصيل والأسعار</span>
       </div>
       <div class="nav-item" onclick="showPage('projects')" data-page="projects">
-        <span class="nav-icon">💼</span> المشاريع الاستثمارية
+        <span class="nav-icon">💼</span><span data-i18n="navProjects"> المشاريع الاستثمارية</span>
       </div>
       <div class="nav-item" onclick="showPage('users')" data-page="users">
-        <span class="nav-icon">👥</span> المستخدمون
+        <span class="nav-icon">👥</span><span data-i18n="navUsers"> المستخدمون</span>
       </div>
       <div class="nav-item" onclick="showPage('broadcast')" data-page="broadcast">
-        <span class="nav-icon">📢</span> الإعلانات
+        <span class="nav-icon">📢</span><span data-i18n="navBroadcast"> الإعلانات</span>
       </div>
       <div class="nav-item" onclick="showPage('settings')" data-page="settings">
-        <span class="nav-icon">⚙️</span> الإعدادات
+        <span class="nav-icon">⚙️</span><span data-i18n="navSettings"> الإعدادات</span>
       </div>
     </nav>
     <div class="sidebar-user">
       <strong id="sidebarName">—</strong>
       <span id="sidebarPhone" style="font-size:11px"></span>
-      <button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12px;justify-content:center" onclick="logout()">
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12px;justify-content:center" onclick="logout()" data-i18n="logoutBtn">
         خروج
       </button>
     </div>
@@ -747,6 +779,7 @@ function showApp() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('sidebarName').textContent = SESSION?.fullName || 'المدير';
   document.getElementById('sidebarPhone').textContent = SESSION?.phone || '';
+  guardSettings();
   loadStats();
 }
 
@@ -1164,7 +1197,7 @@ function fmt(n) {
 }
 function fmtDate(d) {
   if (!d) return '—';
-  try { return new Date(d).toLocaleDateString('ar-SD', {year:'numeric',month:'short',day:'numeric'}); }
+  try { return new Date(d).toLocaleDateString(_lang==='ar'?'ar-SD':'en-GB', {year:'numeric',month:'short',day:'numeric'}); }
   catch(e) { return d; }
 }
 function showAlert(id, msg, type) {
@@ -1179,6 +1212,87 @@ function showAlert(id, msg, type) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin();
 });
+
+// ══════════════════════════════════════════════════
+//  THEME & LANGUAGE
+// ══════════════════════════════════════════════════
+const DTRANS = {
+  ar:{
+    appTitle:'السودان الأخضر', loginSub:'لوحة تحكم المدير',
+    lblPhone:'رقم الهاتف', lblPass:'كلمة السر', loginBtn:'دخول ←',
+    navStats:' الإحصائيات', navCrops:' المحاصيل والأسعار',
+    navProjects:' المشاريع الاستثمارية', navUsers:' المستخدمون',
+    navBroadcast:' الإعلانات', navSettings:' الإعدادات',
+    logoutBtn:'خروج',
+    pageTitles:{
+      stats:'الإحصائيات', crops:'المحاصيل والأسعار',
+      projects:'المشاريع الاستثمارية', users:'المستخدمون',
+      broadcast:'إرسال الإعلانات', settings:'الإعدادات'
+    }
+  },
+  en:{
+    appTitle:'Sudan Green', loginSub:'Admin Dashboard',
+    lblPhone:'Phone Number', lblPass:'Password', loginBtn:'Login →',
+    navStats:' Statistics', navCrops:' Crops & Prices',
+    navProjects:' Investments', navUsers:' Users',
+    navBroadcast:' Broadcast', navSettings:' Settings',
+    logoutBtn:'Logout',
+    pageTitles:{
+      stats:'Statistics', crops:'Crops & Prices',
+      projects:'Investments', users:'Users',
+      broadcast:'Broadcast', settings:'Settings'
+    }
+  }
+};
+
+const ADMIN_PHONE_KEY = '918251171';
+let _theme = localStorage.getItem('sg_theme') || 'light';
+let _lang  = localStorage.getItem('sg_lang')  || 'ar';
+
+function toggleTheme() { applyTheme(_theme==='dark'?'light':'dark'); }
+function toggleLang()  { applyLang(_lang==='ar'?'en':'ar'); }
+
+function applyTheme(t) {
+  _theme = t;
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('sg_theme', t);
+  const b = document.getElementById('themeBtn');
+  if (b) b.textContent = t==='dark'?'☀️':'🌙';
+}
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('sg_lang', lang);
+  const L = DTRANS[lang];
+  document.documentElement.lang = lang==='ar'?'ar':'en';
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  const lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = L[el.dataset.i18n];
+    if (v !== undefined) el.textContent = v;
+  });
+  // update pageTitles object so showPage() uses correct language
+  Object.assign(pageTitles, L.pageTitles);
+  // update current page title
+  const pt = document.getElementById('pageTitle');
+  if (pt) {
+    const activePage = document.querySelector('.nav-item.active');
+    if (activePage) pt.textContent = L.pageTitles[activePage.dataset.page] || pt.textContent;
+  }
+}
+
+// ── Admin-only settings guard
+function guardSettings() {
+  const phone = SESSION?.phone || '';
+  const isAdmin = phone === ADMIN_PHONE_KEY || phone === '0' + ADMIN_PHONE_KEY;
+  const settingsNav = document.querySelector('[data-page="settings"]');
+  if (settingsNav) settingsNav.style.display = isAdmin ? '' : 'none';
+}
+
+// init
+applyTheme(_theme);
+applyLang(_lang);
 </script>
 </body>
 </html>

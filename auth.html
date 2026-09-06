@@ -18,6 +18,34 @@
   --red:#D03030;--amber:#C07800;
   --r:12px;
 }
+/* ── DARK MODE ── */
+html[data-theme="dark"]{
+  --text:#D8EEE0;--dim:#7DB88A;--dim2:#5A9A6A;
+  --bg:#0A1510;--bg2:#0D1A12;
+  --card:#12221A;--card2:#1A2E22;
+  --border:rgba(26,154,72,.4);--border2:rgba(26,154,72,.2);
+}
+html[data-theme="dark"] input,html[data-theme="dark"] select{
+  background:#1A2E1F!important;border-color:rgba(26,154,72,.35)!important;color:#D8EEE0!important;
+}
+html[data-theme="dark"] input::placeholder{color:#4A7A5A!important}
+html[data-theme="dark"] .type-card{background:#1A2E1F;border-color:rgba(26,154,72,.3)}
+html[data-theme="dark"] .type-card.selected{background:rgba(26,154,72,.2)}
+html[data-theme="dark"] .profile-info{background:#1A2E1F;border-color:rgba(26,154,72,.3)}
+html[data-theme="dark"] .info-row{border-color:rgba(26,154,72,.2)}
+html[data-theme="dark"] .btn-outline{background:#1A2E1F;border-color:rgba(26,154,72,.3);color:#7DB88A}
+html[data-theme="dark"] .btn-logout{background:rgba(200,48,48,.12)}
+html[data-theme="dark"] .modal{background:#12221A}
+/* ── TOGGLE BAR ── */
+.toggle-bar{position:fixed;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
+.tgl-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.tgl-btn:hover{border-color:var(--vg);color:var(--vg)}
+.tgl-btn.lang{width:auto;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:.5px}
 *{box-sizing:border-box;margin:0;padding:0}
 
 body{
@@ -248,21 +276,27 @@ select option{background:#fff;color:var(--text)}
 </head>
 <body>
 
+<!-- TOGGLE BAR -->
+<div class="toggle-bar">
+  <button class="tgl-btn" id="themeBtn" onclick="toggleTheme()" title="وضع ليلي / نهاري">🌙</button>
+  <button class="tgl-btn lang" id="langBtn" onclick="toggleLang()">EN</button>
+</div>
+
 <div class="bg-glow"></div>
 <div class="stars" id="stars"></div>
 
 <!-- API MODAL -->
 <div class="modal-overlay" id="apiModal">
   <div class="modal">
-    <div class="modal-title">⚙️ إعداد رابط الـ API</div>
-    <p style="font-size:13px;color:var(--dim);margin-bottom:14px">
+    <div class="modal-title" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:14px" data-i18n="apiSub">
       الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/
     </p>
     <div class="field">
       <label class="lbl">API URL</label>
       <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec">
     </div>
-    <button class="btn-main" onclick="saveApiModal()">حفظ الرابط</button>
+    <button class="btn-main" onclick="saveApiModal()" data-i18n="apiSaveBtn">حفظ الرابط</button>
   </div>
 </div>
 
@@ -271,8 +305,8 @@ select option{background:#fff;color:var(--text)}
   <!-- ══ LOGO ══ -->
   <div class="logo">
     <div class="logo-badge">🌿</div>
-    <h1>السودان الأخضر</h1>
-    <p>المنصة الزراعية الوطنية</p>
+    <h1 data-i18n="appTitle">السودان الأخضر</h1>
+    <p data-i18n="appSub">المنصة الزراعية الوطنية</p>
   </div>
 
   <!-- ══ AUTH CARD ══ -->
@@ -280,8 +314,8 @@ select option{background:#fff;color:var(--text)}
 
     <!-- TABS -->
     <div class="tabs">
-      <div class="tab active" id="tab-login" onclick="switchTab('login')">تسجيل الدخول</div>
-      <div class="tab"        id="tab-reg"   onclick="switchTab('reg')">حساب جديد</div>
+      <div class="tab active" id="tab-login" onclick="switchTab('login')" data-i18n="tabLogin">تسجيل الدخول</div>
+      <div class="tab"        id="tab-reg"   onclick="switchTab('reg')"   data-i18n="tabReg">حساب جديد</div>
     </div>
 
     <div id="authAlert" class="alert"></div>
@@ -299,7 +333,7 @@ select option{background:#fff;color:var(--text)}
             <option value="1">🇺🇸 1</option>
             <option value="44">🇬🇧 44</option>
           </select>
-          <input type="tel" id="lPhone" placeholder="918251171" inputmode="numeric">
+          <input type="tel" id="lPhone" placeholder="918251171" inputmode="numeric" data-i18n-ph="phPhone">
         </div>
       </div>
       <div class="field">
@@ -309,9 +343,9 @@ select option{background:#fff;color:var(--text)}
           <span class="pw-eye" onclick="togglePw('lPass',this)">👁</span>
         </div>
       </div>
-      <button class="btn-main" id="loginBtn" onclick="doLogin()">دخول ←</button>
-      <div class="or-divider">ليس لديك حساب؟</div>
-      <button class="btn-outline" onclick="switchTab('reg')">إنشاء حساب جديد</button>
+      <button class="btn-main" id="loginBtn" onclick="doLogin()" data-i18n="loginBtn">دخول ←</button>
+      <div class="or-divider" data-i18n="orNo">ليس لديك حساب؟</div>
+      <button class="btn-outline" onclick="switchTab('reg')" data-i18n="createBtn">إنشاء حساب جديد</button>
     </div>
 
     <!-- ══ REGISTER PANEL ══ -->
@@ -319,7 +353,7 @@ select option{background:#fff;color:var(--text)}
 
       <!-- نوع الحساب -->
       <div class="field">
-        <label class="lbl">نوع الحساب</label>
+        <label class="lbl" data-i18n="lblType">نوع الحساب</label>
         <div class="type-grid" id="typeGrid">
           <div class="type-card selected" data-type="مزارع" onclick="selectType(this)">
             <div class="type-icon">🌾</div>
@@ -349,8 +383,8 @@ select option{background:#fff;color:var(--text)}
       </div>
 
       <div class="field">
-        <label class="lbl">الاسم الكامل</label>
-        <input type="text" id="rName" placeholder="أحمد محمد عبدالله" autocomplete="name">
+        <label class="lbl" data-i18n="lblName">الاسم الكامل</label>
+        <input type="text" id="rName" placeholder="أحمد محمد عبدالله" autocomplete="name" data-i18n-ph="phName">
       </div>
 
       <div class="field">
@@ -386,9 +420,9 @@ select option{background:#fff;color:var(--text)}
         </div>
       </div>
 
-      <button class="btn-main" id="regBtn" onclick="doRegister()">إنشاء الحساب ←</button>
-      <div class="or-divider">لديك حساب؟</div>
-      <button class="btn-outline" onclick="switchTab('login')">تسجيل الدخول</button>
+      <button class="btn-main" id="regBtn" onclick="doRegister()" data-i18n="regBtn">إنشاء الحساب ←</button>
+      <div class="or-divider" data-i18n="orHas">لديك حساب؟</div>
+      <button class="btn-outline" onclick="switchTab('login')" data-i18n="goLogin">تسجيل الدخول</button>
     </div>
 
   </div><!-- /card -->
@@ -410,28 +444,28 @@ select option{background:#fff;color:var(--text)}
         <div class="info-row">
           <div class="info-icon">📱</div>
           <div>
-            <div class="info-label">رقم الهاتف</div>
+            <div class="info-label" data-i18n="piPhone">رقم الهاتف</div>
             <div class="info-value" id="pi-phone">—</div>
           </div>
         </div>
         <div class="info-row">
           <div class="info-icon">👤</div>
           <div>
-            <div class="info-label">نوع الحساب</div>
+            <div class="info-label" data-i18n="piType">نوع الحساب</div>
             <div class="info-value" id="pi-type">—</div>
           </div>
         </div>
         <div class="info-row">
           <div class="info-icon">📅</div>
           <div>
-            <div class="info-label">تاريخ الانضمام</div>
+            <div class="info-label" data-i18n="piJoined">تاريخ الانضمام</div>
             <div class="info-value" id="pi-created">—</div>
           </div>
         </div>
         <div class="info-row">
           <div class="info-icon">🕐</div>
           <div>
-            <div class="info-label">آخر دخول</div>
+            <div class="info-label" data-i18n="piLast">آخر دخول</div>
             <div class="info-value" id="pi-last">—</div>
           </div>
         </div>
@@ -439,7 +473,7 @@ select option{background:#fff;color:var(--text)}
 
       <!-- Edit Profile -->
       <div class="profile-actions">
-        <button class="btn-outline" onclick="toggleEdit()">✏️ تعديل الملف الشخصي</button>
+        <button class="btn-outline" onclick="toggleEdit()" data-i18n="editBtn">✏️ تعديل الملف الشخصي</button>
 
         <div id="editPanel">
           <div id="editAlert" class="alert"></div>
@@ -458,10 +492,10 @@ select option{background:#fff;color:var(--text)}
               <span class="pw-eye" onclick="togglePw('editPass',this)">👁</span>
             </div>
           </div>
-          <button class="btn-main" onclick="saveProfile()" style="margin-top:4px">💾 حفظ التعديلات</button>
+          <button class="btn-main" onclick="saveProfile()" style="margin-top:4px" data-i18n="saveBtn">💾 حفظ التعديلات</button>
         </div>
 
-        <button class="btn-logout" onclick="doLogout()">⬅ تسجيل الخروج</button>
+        <button class="btn-logout" onclick="doLogout()" data-i18n="logoutBtn">⬅ تسجيل الخروج</button>
       </div>
     </div>
   </div>
@@ -732,7 +766,7 @@ function showAlert(id, msg, type) {
 function fmtDate(d) {
   if (!d) return '—';
   try {
-    return new Date(d).toLocaleDateString('ar', {
+    return new Date(d).toLocaleDateString(_lang==='ar'?'ar':'en', {
       year:'numeric', month:'long', day:'numeric'
     });
   } catch(e) { return d; }
@@ -757,6 +791,139 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   if (document.getElementById('panel-login').classList.contains('active')) doLogin();
   else if (document.getElementById('panel-reg').classList.contains('active')) doRegister();
+});
+
+// ══════════════════════════════════════════════════
+//  THEME & LANGUAGE
+// ══════════════════════════════════════════════════
+const TRANS = {
+  ar:{
+    appTitle:'السودان الأخضر', appSub:'المنصة الزراعية الوطنية',
+    tabLogin:'تسجيل الدخول', tabReg:'حساب جديد',
+    loginBtn:'دخول ←', orNo:'ليس لديك حساب؟', createBtn:'إنشاء حساب جديد',
+    lblType:'نوع الحساب', lblName:'الاسم الكامل',
+    regBtn:'إنشاء الحساب ←', orHas:'لديك حساب؟', goLogin:'تسجيل الدخول',
+    piPhone:'رقم الهاتف', piType:'نوع الحساب',
+    piJoined:'تاريخ الانضمام', piLast:'آخر دخول',
+    editBtn:'✏️ تعديل الملف الشخصي', saveBtn:'💾 حفظ التعديلات',
+    logoutBtn:'⬅ تسجيل الخروج',
+    apiTitle:'⚙️ إعداد رابط الـ API',
+    apiSub:'الصق رابط Apps Script من Google Apps Script — يبدأ بـ https://script.google.com/macros/s/',
+    apiSaveBtn:'حفظ الرابط',
+    farmer:'مزارع', investor:'مستثمر', partner:'شريك',
+    researcher:'باحث', buyer:'مشتري', supplier:'مورد',
+    phPhone:'918251171', phName:'أحمد محمد عبدالله',
+  },
+  en:{
+    appTitle:'Sudan Green', appSub:'National Agricultural Platform',
+    tabLogin:'Login', tabReg:'New Account',
+    loginBtn:'Login →', orNo:"Don't have an account?", createBtn:'Create New Account',
+    lblType:'Account Type', lblName:'Full Name',
+    regBtn:'Create Account →', orHas:'Already have an account?', goLogin:'Login',
+    piPhone:'Phone Number', piType:'Account Type',
+    piJoined:'Joined Date', piLast:'Last Login',
+    editBtn:'✏️ Edit Profile', saveBtn:'💾 Save Changes',
+    logoutBtn:'⬅ Logout',
+    apiTitle:'⚙️ API Setup',
+    apiSub:'Paste your Apps Script Web App URL — starts with https://script.google.com/macros/s/',
+    apiSaveBtn:'Save URL',
+    farmer:'Farmer', investor:'Investor', partner:'Partner',
+    researcher:'Researcher', buyer:'Buyer', supplier:'Supplier',
+    phPhone:'918251171', phName:'Ahmad Mohammed Abdullah',
+  }
+};
+
+const TYPE_AR = {'Farmer':'مزارع','Investor':'مستثمر','Partner':'شريك','Researcher':'باحث','Buyer':'مشتري','Supplier':'مورد'};
+
+let _theme = localStorage.getItem('sg_theme') || 'light';
+let _lang  = localStorage.getItem('sg_lang')  || 'ar';
+
+function toggleTheme() { applyTheme(_theme==='dark'?'light':'dark'); }
+function toggleLang()  { applyLang(_lang==='ar'?'en':'ar'); }
+
+function applyTheme(t) {
+  _theme = t;
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('sg_theme', t);
+  const b = document.getElementById('themeBtn');
+  if (b) b.textContent = t==='dark'?'☀️':'🌙';
+}
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('sg_lang', lang);
+  const L = TRANS[lang];
+  document.documentElement.lang = lang==='ar'?'ar':'en';
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  const lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = L[el.dataset.i18n];
+    if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = L[el.dataset.i18nPh];
+    if (v !== undefined) el.placeholder = v;
+  });
+  // translate type card display names (keep data-type in Arabic for backend)
+  const km = {'مزارع':'farmer','مستثمر':'investor','شريك':'partner','باحث':'researcher','مشتري':'buyer','مورد':'supplier'};
+  document.querySelectorAll('.type-card').forEach(c => {
+    const ne = c.querySelector('.type-name');
+    const arType = c.dataset.type;
+    if (ne && km[arType]) ne.textContent = L[km[arType]] || ne.textContent;
+  });
+}
+
+// ── Login panel labels (set by ID context)
+function _lbls(lang) {
+  const L = TRANS[lang];
+  // login panel
+  const lpl = document.querySelectorAll('#panel-login .lbl');
+  if (lpl[0]) lpl[0].textContent = L.lblPhone || lpl[0].textContent;
+  if (lpl[1]) lpl[1].textContent = (lang==='ar'?'كلمة السر':'Password');
+  // register panel
+  const rpl = document.querySelectorAll('#panel-reg .lbl');
+  if (rpl[1]) rpl[1].textContent = L.lblPhone || rpl[1].textContent;
+  if (rpl[2]) rpl[2].textContent = (lang==='ar'?'كلمة السر':'Password');
+  if (rpl[3]) rpl[3].textContent = (lang==='ar'?'تأكيد كلمة السر':'Confirm Password');
+  // profile edit labels
+  const epl = document.querySelectorAll('#editPanel .lbl');
+  if (epl[0]) epl[0].textContent = (lang==='ar'?'الاسم الكامل':'Full Name');
+  if (epl[1]) epl[1].textContent = (lang==='ar'?'الدولة':'Country');
+  if (epl[2]) epl[2].textContent = (lang==='ar'?'كلمة السر الجديدة (اتركها فارغة)':'New Password (leave empty)');
+}
+
+// Override applyLang to also call _lbls
+const _origApplyLang = applyLang;
+// Extend:
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('sg_lang', lang);
+  const L = TRANS[lang];
+  document.documentElement.lang = lang==='ar'?'ar':'en';
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  const lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = L[el.dataset.i18n];
+    if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = L[el.dataset.i18nPh];
+    if (v !== undefined) el.placeholder = v;
+  });
+  const km = {'مزارع':'farmer','مستثمر':'investor','شريك':'partner','باحث':'researcher','مشتري':'buyer','مورد':'supplier'};
+  document.querySelectorAll('.type-card').forEach(c => {
+    const ne = c.querySelector('.type-name');
+    const arType = c.dataset.type;
+    if (ne && km[arType]) ne.textContent = L[km[arType]] || ne.textContent;
+  });
+  _lbls(lang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(_theme);
+  applyLang(_lang);
 });
 </script>
 </body>
