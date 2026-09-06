@@ -140,6 +140,88 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 .t-dn{color:#F87171;font-size:11px;font-weight:700}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
+/* ══ WAR ALERT BANNER ══ */
+.war-banner{
+  background:linear-gradient(135deg,rgba(100,20,20,.95),rgba(60,10,10,.98));
+  border-top:2px solid rgba(248,113,113,.5);border-bottom:2px solid rgba(248,113,113,.3);
+  padding:18px 24px;display:flex;align-items:center;justify-content:center;
+  gap:16px;flex-wrap:wrap;text-align:center;position:relative;overflow:hidden;
+}
+.war-banner::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(248,113,113,.04) 8px,rgba(248,113,113,.04) 16px);
+  pointer-events:none;
+}
+.war-banner-title{
+  font-family:'Reem Kufi',sans-serif;font-size:18px;font-weight:700;
+  color:#FCA5A5;text-shadow:0 0 20px rgba(248,113,113,.4);
+}
+.war-banner-sub{font-size:13px;color:rgba(252,165,165,.75);line-height:1.5}
+.war-banner-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 22px;
+  border-radius:10px;font-weight:700;font-size:14px;font-family:inherit;
+  background:linear-gradient(135deg,#991B1B,#DC2626);
+  border:1px solid rgba(248,113,113,.5);color:#FEE2E2;
+  cursor:pointer;transition:.2s;text-decoration:none;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(220,38,38,.35);
+}
+.war-banner-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(220,38,38,.5)}
+.war-pulse{width:10px;height:10px;border-radius:50%;background:#F87171;animation:wpulse 1.4s ease infinite;flex-shrink:0}
+@keyframes wpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.6)}70%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
+
+/* ══ INVEST SHARES SECTION ══ */
+.invest-section{
+  background:linear-gradient(135deg,rgba(13,42,12,.9),rgba(18,58,32,.7));
+  border-top:1px solid rgba(212,160,23,.2);border-bottom:1px solid rgba(212,160,23,.2);
+  padding:72px 24px;
+}
+.invest-inner{max-width:1100px;margin:0 auto}
+.invest-header{text-align:center;margin-bottom:48px}
+.invest-badge{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 18px;
+  border-radius:24px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);
+  color:var(--gold-l);font-size:12px;font-weight:600;letter-spacing:.06em;
+  margin-bottom:16px;
+}
+.invest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:40px}
+.invest-card{
+  background:rgba(20,52,28,.8);border:1px solid rgba(212,160,23,.2);
+  border-radius:18px;padding:28px;position:relative;overflow:hidden;transition:.3s;
+}
+.invest-card::before{
+  content:'';position:absolute;top:0;right:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--vg),var(--gold));
+}
+.invest-card:hover{transform:translateY(-4px);border-color:rgba(212,160,23,.45);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.invest-card-badge{
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+  margin-bottom:14px;display:inline-block;letter-spacing:.04em;
+}
+.badge-open{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ADE80}
+.badge-soon{background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);color:var(--gold-l)}
+.invest-card-title{font-family:'Reem Kufi',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.invest-card-sub{font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:16px}
+.invest-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.invest-meta-item{background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px}
+.invest-meta-label{font-size:10px;color:var(--dim);margin-bottom:2px;font-weight:500}
+.invest-meta-val{font-size:14px;font-weight:700;color:var(--gold-l)}
+.invest-progress-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-bottom:6px;overflow:hidden}
+.invest-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--eg3),var(--vg))}
+.invest-progress-text{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:16px}
+.invest-btn{
+  width:100%;padding:11px;border:none;border-radius:10px;font-weight:700;font-size:14px;
+  font-family:inherit;cursor:pointer;transition:.2s;
+  background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.12));
+  border:1.5px solid rgba(212,160,23,.4);color:var(--gold-l);
+}
+.invest-btn:hover{background:linear-gradient(135deg,rgba(212,160,23,.35),rgba(212,160,23,.25));color:#FFF}
+.invest-concept{
+  background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.2);
+  border-radius:16px;padding:32px;max-width:720px;margin:0 auto;text-align:center;
+}
+.invest-concept-title{font-family:'Reem Kufi',sans-serif;font-size:18px;color:var(--vg);margin-bottom:12px}
+.invest-concept-desc{font-size:14px;color:var(--dim);line-height:1.85}
+
 /* ══ SECTIONS ══ */
 .sec{padding:96px 24px;max-width:1100px;margin:0 auto}
 .sec-full{padding:96px 0}
@@ -462,6 +544,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
     <a class="nav-link" href="#map">المناطق</a>
     <a class="nav-link" href="#projects">الإنجازات</a>
     <a class="nav-link" href="#contact">تواصل</a>
+    <a class="nav-link" href="kalaklah.html" style="color:#5AEEA0;font-weight:600;border:1px solid rgba(46,224,112,.25);border-radius:8px">🌳 الكلاكلة الخضراء</a>
+    <a class="nav-link" href="#invest-shares" style="color:#F0C84A;font-weight:600;border:1px solid rgba(212,160,23,.25);border-radius:8px">📈 مشاريع بالمساهمة</a>
   </div>
   <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">ابدأ معنا</button>
 </nav>
@@ -511,6 +595,18 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
     <div class="scroll-line"></div>
   </div>
 </section>
+
+<!-- WAR MISSING BANNER -->
+<div class="war-banner">
+  <div class="war-pulse"></div>
+  <div>
+    <div class="war-banner-title">⚠️ ساعد وكن عوناً — امنع الجريمة</div>
+    <div class="war-banner-sub">سجّل مفقودات الحرب والسيارات المسروقة — كل معلومة تنقذ حياة وتوقف جريمة</div>
+  </div>
+  <a href="https://sudanlostcars.netlify.app/auth/sign-in" target="_blank" rel="noopener" class="war-banner-btn">
+    🔍 تطبيق مفقودات الحرب
+  </a>
+</div>
 
 <!-- TICKER -->
 <div class="ticker-bar" id="ticker">
@@ -999,6 +1095,116 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);c
 
   </div>
 </div>
+</div>
+
+<!-- INVEST SHARES SECTION -->
+<div class="invest-section" id="invest-shares">
+  <div class="invest-inner">
+    <div class="invest-header reveal">
+      <div class="invest-badge">📈 مشاريع بالمساهمة الجماعية</div>
+      <h2 class="sec-title">اشترِ سهماً في مشروع حقيقي</h2>
+      <div class="sec-title-en" style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--dim);margin-bottom:16px">Community Investment — Own a Share, Grow Together</div>
+      <p class="sec-sub" style="margin:0 auto 40px;text-align:center">
+        ليست تبرعاً — بل استثمار حقيقي. تساهم بمبلغ صغير وتصبح شريكاً فعلياً في مشروع زراعي أو إنتاجي، وتحصل على نسبة من الأرباح حسب حصتك.
+      </p>
+    </div>
+
+    <div class="invest-grid reveal">
+      <!-- PROJECT 1 -->
+      <div class="invest-card">
+        <div class="invest-card-badge badge-open">🟢 مفتوح للاكتتاب</div>
+        <div class="invest-card-title">🌾 مزرعة الجزيرة النموذجية</div>
+        <div class="invest-card-sub">مشروع زراعي مشترك لزراعة القمح والذرة في ولاية الجزيرة — ري منتظم وأرض خصبة ومجربة</div>
+        <div class="invest-card-meta">
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">سعر السهم</div>
+            <div class="invest-meta-val">50,000 جنيه</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">العائد المتوقع</div>
+            <div class="invest-meta-val">18–25%</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">مدة المشروع</div>
+            <div class="invest-meta-val">موسم واحد</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">الأسهم المتبقية</div>
+            <div class="invest-meta-val">34 / 100</div>
+          </div>
+        </div>
+        <div class="invest-progress-bar"><div class="invest-progress-fill" style="width:66%"></div></div>
+        <div class="invest-progress-text"><span>66% مكتتب</span><span>الإغلاق: 30 سبتمبر</span></div>
+        <button class="invest-btn" onclick="investAlert('مزرعة الجزيرة النموذجية')">💰 اكتتب الآن</button>
+      </div>
+
+      <!-- PROJECT 2 -->
+      <div class="invest-card">
+        <div class="invest-card-badge badge-open">🟢 مفتوح للاكتتاب</div>
+        <div class="invest-card-title">🐄 مشروع الألبان — كسلا</div>
+        <div class="invest-card-sub">تربية الأبقار وإنتاج الألبان والمشتقات في ولاية كسلا — سوق محلي متوسع وطلب متزايد</div>
+        <div class="invest-card-meta">
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">سعر السهم</div>
+            <div class="invest-meta-val">100,000 جنيه</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">العائد المتوقع</div>
+            <div class="invest-meta-val">20–30%</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">مدة المشروع</div>
+            <div class="invest-meta-val">سنة واحدة</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">الأسهم المتبقية</div>
+            <div class="invest-meta-val">18 / 50</div>
+          </div>
+        </div>
+        <div class="invest-progress-bar"><div class="invest-progress-fill" style="width:64%"></div></div>
+        <div class="invest-progress-text"><span>64% مكتتب</span><span>الإغلاق: 15 أكتوبر</span></div>
+        <button class="invest-btn" onclick="investAlert('مشروع الألبان — كسلا')">💰 اكتتب الآن</button>
+      </div>
+
+      <!-- PROJECT 3 -->
+      <div class="invest-card">
+        <div class="invest-card-badge badge-soon">🟡 قريباً</div>
+        <div class="invest-card-title">🌿 مزرعة النيل — شمال السودان</div>
+        <div class="invest-card-sub">زراعة الفاكهة والخضروات بالطاقة الشمسية على ضفاف النيل — مشروع تصديري بجودة عالية</div>
+        <div class="invest-card-meta">
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">سعر السهم</div>
+            <div class="invest-meta-val">200,000 جنيه</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">العائد المتوقع</div>
+            <div class="invest-meta-val">25–35%</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">مدة المشروع</div>
+            <div class="invest-meta-val">سنتان</div>
+          </div>
+          <div class="invest-meta-item">
+            <div class="invest-meta-label">الحد الأدنى</div>
+            <div class="invest-meta-val">سهم واحد</div>
+          </div>
+        </div>
+        <div class="invest-progress-bar"><div class="invest-progress-fill" style="width:0%"></div></div>
+        <div class="invest-progress-text"><span>سيفتح الاكتتاب قريباً</span><span>التسجيل المبكر مفتوح</span></div>
+        <button class="invest-btn" onclick="investAlert('مزرعة النيل — شمال السودان')">🔔 سجّل اهتمامك</button>
+      </div>
+    </div>
+
+    <!-- CONCEPT EXPLANATION -->
+    <div class="invest-concept reveal">
+      <div class="invest-concept-title">💡 كيف يعمل نظام المساهمة؟</div>
+      <div class="invest-concept-desc">
+        اختر مشروعاً — ادفع قيمة سهم أو أكثر — أصبحت شريكاً رسمياً — تتابع تقارير التقدم شهرياً — تستلم عائدك عند نهاية الموسم.
+        <br><br>
+        المشاريع تُراجع وتُعرض من قِبل فريق السودان الأخضر، وتشمل خطة عمل واضحة وضمانات قانونية. الحد الأدنى للمساهمة سهم واحد — لأن الكل يستحق فرصة الاستثمار.
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- CTA -->
@@ -1662,6 +1868,10 @@ document.getElementById('logoEl').addEventListener('click', e => {
   _taps = _taps.filter(t => now - t < 2000); _taps.push(now);
   if (_taps.length >= 5) { _taps = []; alert('🌱 السودان الأخضر v1.0'); }
 });
+
+function investAlert(name) {
+  alert('شكراً لاهتمامك بـ «' + name + '»\nسيتم التواصل معك قريباً عبر رقم الهاتف المسجل لإتمام الاكتتاب.\n\nالسودان الأخضر — فرص استثمارية حقيقية 🌿');
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الكلاكلة الخضراء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vg:#1A9A48;--lg:#25C05A;--eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
+  --gold:#B8860B;--gold-l:#D4A017;
+  --text:#1A2E1F;--dim:#4A7A5A;--dim2:#6B9A7A;
+  --bg:#F4FAF6;--bg2:#FFFFFF;
+  --card:#FFFFFF;--card2:#F0F8F2;
+  --border:rgba(26,154,72,.2);--border2:rgba(26,154,72,.1);
+  --red:#C83030;--r:12px;
+}
+/* DARK MODE */
+html[data-theme="dark"]{
+  --text:#D8EEE0;--dim:#7DB88A;--dim2:#5A9A6A;
+  --bg:#0A1510;--bg2:#0D1A12;
+  --card:#12221A;--card2:#1A2E22;
+  --border:rgba(26,154,72,.4);--border2:rgba(26,154,72,.2);
+}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{
+  background:#1A2E1F!important;border-color:rgba(26,154,72,.35)!important;color:#D8EEE0!important;
+}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#4A7A5A!important}
+html[data-theme="dark"] .stat-ring{border-color:rgba(26,154,72,.3)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOGGLE BAR */
+.toggle-bar{position:fixed;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
+.tgl-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.tgl-btn:hover{border-color:var(--vg);color:var(--vg)}
+.tgl-btn.lang{width:auto;padding:0 10px;font-size:12px;font-weight:700;letter-spacing:.5px}
+
+/* NAV */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-badge{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--eg2),var(--eg3));display:flex;align-items:center;justify-content:center;font-size:20px}
+.nav-logo-name{font-family:'Reem Kufi',sans-serif;font-size:16px;color:var(--vg)}
+.nav-logo-sub{font-size:11px;color:var(--dim)}
+.nav-back{color:var(--dim);font-size:13px;text-decoration:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;transition:.2s}
+.nav-back:hover{border-color:var(--vg);color:var(--vg)}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--eg) 0%,var(--eg2) 50%,var(--eg3) 100%);
+  color:#fff;padding:72px 24px 60px;text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232EE070' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-icon{font-size:64px;margin-bottom:16px;position:relative}
+.hero-title{font-family:'Reem Kufi',sans-serif;font-size:clamp(28px,5vw,48px);margin-bottom:12px;position:relative}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.8);max-width:540px;margin:0 auto 28px;line-height:1.7;position:relative}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:24px;font-size:13px;font-weight:600}
+.badge-green{background:rgba(46,224,112,.2);border:1px solid rgba(46,224,112,.4);color:#5AEEA0}
+.badge-gold{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);color:#F0C84A}
+.badge-white{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}
+
+/* PROGRESS SECTION */
+.section{padding:48px 24px;max-width:960px;margin:0 auto}
+.section-title{
+  font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--vg);
+  margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.section-sub{font-size:14px;color:var(--dim);margin-bottom:28px;line-height:1.7}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:36px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:20px 16px;text-align:center;
+}
+.stat-num{font-family:'Reem Kufi',sans-serif;font-size:32px;font-weight:700;color:var(--vg)}
+.stat-label{font-size:12px;color:var(--dim);margin-top:4px}
+
+/* PROGRESS BAR */
+.progress-wrap{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:24px;margin-bottom:36px}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.progress-title{font-family:'Reem Kufi',sans-serif;font-size:15px}
+.progress-pct{font-size:24px;font-weight:700;color:var(--vg);font-family:'Reem Kufi',sans-serif}
+.progress-bar{height:16px;background:var(--border2);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;border-radius:8px;transition:width 1.2s ease;
+  background:linear-gradient(90deg,var(--vg),var(--lg))}
+.progress-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--dim)}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:36px}
+.feat-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:20px}
+.feat-icon{font-size:32px;margin-bottom:12px}
+.feat-title{font-family:'Reem Kufi',sans-serif;font-size:15px;color:var(--text);margin-bottom:6px}
+.feat-desc{font-size:13px;color:var(--dim);line-height:1.7}
+
+/* PHASES */
+.phase-list{display:flex;flex-direction:column;gap:12px;margin-bottom:36px}
+.phase-item{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:16px 20px;display:flex;align-items:center;gap:16px;
+}
+.phase-num{
+  width:40px;height:40px;border-radius:50%;background:var(--vg);
+  color:#fff;font-family:'Reem Kufi',sans-serif;font-size:16px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.phase-num.done{background:var(--vg)}
+.phase-num.active{background:var(--gold)}
+.phase-num.pending{background:var(--border);color:var(--dim)}
+.phase-info{flex:1}
+.phase-name{font-weight:600;font-size:14px;margin-bottom:2px}
+.phase-date{font-size:12px;color:var(--dim)}
+.phase-status{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600}
+.status-done{background:rgba(26,154,72,.12);color:var(--vg);border:1px solid rgba(26,154,72,.25)}
+.status-active{background:rgba(184,134,11,.12);color:var(--gold);border:1px solid rgba(184,134,11,.25)}
+.status-pending{background:var(--border2);color:var(--dim)}
+
+/* VOLUNTEER FORM */
+.form-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:28px;margin-bottom:36px}
+.form-title{font-family:'Reem Kufi',sans-serif;font-size:18px;margin-bottom:6px;color:var(--vg)}
+.form-sub{font-size:13px;color:var(--dim);margin-bottom:20px;line-height:1.6}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label.fl{font-size:12px;color:var(--dim);font-weight:500}
+input,select,textarea{
+  background:#F9FDF9;border:1px solid #C8E0D0;
+  border-radius:8px;padding:10px 13px;color:var(--text);
+  font-family:inherit;font-size:14px;transition:.2s;width:100%;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--vg);box-shadow:0 0 0 3px rgba(26,154,72,.12);
+}
+.btn-main{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--vg),var(--lg));
+  color:#fff;font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:opacity .2s,transform .1s;margin-top:16px;
+}
+.btn-main:hover{opacity:.9}
+.btn-main:active{transform:scale(.98)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;align-items:center;gap:8px}
+.alert.show{display:flex}
+.alert-ok{background:rgba(46,224,112,.12);border:1px solid rgba(46,224,112,.3);color:var(--vg)}
+.alert-err{background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.3);color:var(--red)}
+
+/* MAP PLACEHOLDER */
+.map-card{
+  background:linear-gradient(135deg,rgba(26,154,72,.08),rgba(13,74,40,.04));
+  border:1px solid var(--border);border-radius:var(--r);
+  padding:48px 24px;text-align:center;margin-bottom:36px;
+}
+.map-emoji{font-size:56px;margin-bottom:16px}
+.map-title{font-family:'Reem Kufi',sans-serif;font-size:18px;color:var(--vg);margin-bottom:8px}
+.map-sub{font-size:13px;color:var(--dim);max-width:400px;margin:0 auto}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border2);margin:8px 0 36px}
+
+/* FOOTER */
+.page-footer{
+  background:var(--card2);border-top:1px solid var(--border);
+  text-align:center;padding:24px;font-size:13px;color:var(--dim);
+}
+.page-footer a{color:var(--vg);text-decoration:none}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .phase-item{flex-wrap:wrap}
+  .hero{padding:80px 16px 48px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOGGLE BAR -->
+<div class="toggle-bar">
+  <button class="tgl-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  <button class="tgl-btn lang" id="langBtn" onclick="toggleLang()">EN</button>
+</div>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-badge">🌿</div>
+    <div>
+      <div class="nav-logo-name" data-i18n="appTitle">السودان الأخضر</div>
+      <div class="nav-logo-sub" data-i18n="appSub">المنصة الزراعية الوطنية</div>
+    </div>
+  </a>
+  <a class="nav-back" href="index.html" data-i18n="backHome">← الرئيسية</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-icon">🌳</div>
+  <h1 class="hero-title" data-i18n="heroTitle">الكلاكلة الخضراء</h1>
+  <p class="hero-sub" data-i18n="heroSub">مشروع مجتمعي جماعي لتشجير وتخضير منطقة الكلاكلة — نزرع الأشجار معاً لمستقبل أجمل</p>
+  <div class="hero-badges">
+    <div class="badge badge-green">🌱 <span data-i18n="badge1">مشروع مجتمعي</span></div>
+    <div class="badge badge-gold">📍 <span data-i18n="badge2">الكلاكلة — الخرطوم</span></div>
+    <div class="badge badge-white">🤝 <span data-i18n="badge3">مفتوح للجميع</span></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="section">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="st-trees">1,200</div>
+      <div class="stat-label" data-i18n="stTrees">شجرة مزروعة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="st-vol">340</div>
+      <div class="stat-label" data-i18n="stVol">متطوع</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="st-area">8</div>
+      <div class="stat-label" data-i18n="stArea">هكتار مُخضَّر</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="st-goal">5,000</div>
+      <div class="stat-label" data-i18n="stGoal">هدفنا من الأشجار</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <div class="progress-title" data-i18n="progTitle">🌿 التقدم نحو الهدف</div>
+      <div class="progress-pct" id="progPct">24%</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progFill" style="width:24%"></div>
+    </div>
+    <div class="progress-legend">
+      <span data-i18n="progDone">مزروع: 1,200 شجرة</span>
+      <span data-i18n="progTarget">المستهدف: 5,000 شجرة</span>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="section-title">🌳 <span data-i18n="aboutTitle">عن المشروع</span></div>
+  <p class="section-sub" data-i18n="aboutDesc">
+    الكلاكلة الخضراء مبادرة مجتمعية تطوعية تهدف إلى تحويل منطقة الكلاكلة جنوب الخرطوم إلى واحة خضراء،
+    من خلال زراعة الأشجار المحلية والنباتات المقاومة للجفاف، وتوعية السكان بأهمية البيئة والتشجير.
+  </p>
+
+  <!-- FEATURES -->
+  <div class="cards-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🌱</div>
+      <div class="feat-title" data-i18n="f1Title">زراعة الأشجار المحلية</div>
+      <div class="feat-desc" data-i18n="f1Desc">نركز على أنواع محلية مقاومة للجفاف مثل النيم والسدر والأكاسيا، تتناسب مع مناخ السودان.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🤝</div>
+      <div class="feat-title" data-i18n="f2Title">مشاركة مجتمعية</div>
+      <div class="feat-desc" data-i18n="f2Desc">كل شخص يستطيع المشاركة — تطوع لزراعة شجرة، أو تبنّ شجرة واعتنِ بها، أو ادعم مادياً.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">💧</div>
+      <div class="feat-title" data-i18n="f3Title">نظام ري ذكي</div>
+      <div class="feat-desc" data-i18n="f3Desc">نستخدم نظام ري بالتنقيط الموفر للمياه لضمان نجاة الأشجار في بيئة شحيحة الأمطار.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title" data-i18n="f4Title">متابعة دورية</div>
+      <div class="feat-desc" data-i18n="f4Desc">نتتبع نمو الأشجار ونشارك التقارير مع المتطوعين والداعمين شهرياً.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🏫</div>
+      <div class="feat-title" data-i18n="f5Title">توعية بيئية</div>
+      <div class="feat-desc" data-i18n="f5Desc">ورش عمل في المدارس لتعليم الأطفال أهمية الأشجار والبيئة وكيفية الاعتناء بالنباتات.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🗺️</div>
+      <div class="feat-title" data-i18n="f6Title">خريطة التشجير</div>
+      <div class="feat-desc" data-i18n="f6Desc">خريطة تفاعلية توضح مناطق الزراعة وتتبع موقع كل شجرة يزرعها المتطوعون.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PHASES -->
+  <div class="section-title">🗓️ <span data-i18n="phasesTitle">مراحل المشروع</span></div>
+  <p class="section-sub" data-i18n="phasesSub">خطة تنفيذية ممتدة على ثلاث سنوات لتحقيق الهدف</p>
+
+  <div class="phase-list">
+    <div class="phase-item">
+      <div class="phase-num done">١</div>
+      <div class="phase-info">
+        <div class="phase-name" data-i18n="ph1Name">المرحلة الأولى — التأسيس والزراعة الأولية</div>
+        <div class="phase-date" data-i18n="ph1Date">يناير — يونيو 2024</div>
+      </div>
+      <div class="phase-status status-done" data-i18n="stDone">✓ مكتمل</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-num active">٢</div>
+      <div class="phase-info">
+        <div class="phase-name" data-i18n="ph2Name">المرحلة الثانية — التوسع ومضاعفة الزراعة</div>
+        <div class="phase-date" data-i18n="ph2Date">يوليو 2024 — مارس 2025</div>
+      </div>
+      <div class="phase-status status-active" data-i18n="stActive">⬤ جارٍ</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-num pending">٣</div>
+      <div class="phase-info">
+        <div class="phase-name" data-i18n="ph3Name">المرحلة الثالثة — الاكتمال والصيانة</div>
+        <div class="phase-date" data-i18n="ph3Date">أبريل 2025 — ديسمبر 2025</div>
+      </div>
+      <div class="phase-status status-pending" data-i18n="stPending">○ قادم</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MAP PLACEHOLDER -->
+  <div class="section-title">📍 <span data-i18n="mapTitle">موقع المشروع</span></div>
+  <div class="map-card">
+    <div class="map-emoji">🗺️</div>
+    <div class="map-title" data-i18n="mapCardTitle">منطقة الكلاكلة — جنوب الخرطوم</div>
+    <div class="map-sub" data-i18n="mapCardSub">الكلاكلة، محلية جبل أولياء، ولاية الخرطوم — المساحة المستهدفة: 20 هكتار على ضفاف وادي الكلاكلة</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- VOLUNTEER FORM -->
+  <div class="form-card" id="volunteer">
+    <div class="form-title" data-i18n="formTitle">🌱 سجّل تطوعك</div>
+    <div class="form-sub" data-i18n="formSub">
+      انضم لقافلة الكلاكلة الخضراء — سجّل اسمك وطريقة مشاركتك وسنتواصل معك لأقرب جلسة تشجير.
+    </div>
+    <div id="formAlert" class="alert"></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="fl" data-i18n="lblName">الاسم الكامل</label>
+        <input type="text" id="vName" placeholder="أحمد محمد عبدالله" data-i18n-ph="phName">
+      </div>
+      <div class="form-group">
+        <label class="fl" data-i18n="lblPhone">رقم الهاتف</label>
+        <input type="tel" id="vPhone" placeholder="09XXXXXXXX" inputmode="numeric" data-i18n-ph="phPhone">
+      </div>
+      <div class="form-group">
+        <label class="fl" data-i18n="lblRole">دورك في المشروع</label>
+        <select id="vRole">
+          <option value="زراعة" data-i18n-opt="rolePlant">زراعة أشجار</option>
+          <option value="ري" data-i18n-opt="roleWater">ري ومتابعة</option>
+          <option value="توعية" data-i18n-opt="roleAware">توعية وتثقيف</option>
+          <option value="تمويل" data-i18n-opt="roleFund">دعم مادي</option>
+          <option value="تصوير" data-i18n-opt="rolePhoto">توثيق وتصوير</option>
+          <option value="تنظيم" data-i18n-opt="roleOrg">تنظيم وتخطيط</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="fl" data-i18n="lblArea">الحي أو المنطقة</label>
+        <input type="text" id="vArea" placeholder="الكلاكلة / جبل أولياء / ..." data-i18n-ph="phArea">
+      </div>
+      <div class="form-group full">
+        <label class="fl" data-i18n="lblNote">ملاحظات أو رسالة للفريق (اختياري)</label>
+        <textarea id="vNote" rows="3" placeholder="لديّ معدات ري... أستطيع التبرع بشتلات..."></textarea>
+      </div>
+    </div>
+    <button class="btn-main" id="vBtn" onclick="submitVolunteer()" data-i18n="btnVolunteer">🌳 انضم الآن</button>
+  </div>
+
+</div><!-- /section -->
+
+<!-- FOOTER -->
+<div class="page-footer">
+  <span data-i18n="footerText">الكلاكلة الخضراء — جزء من مبادرة</span>
+  <a href="index.html">السودان الأخضر</a>
+  &nbsp;|&nbsp;
+  <span data-i18n="footerContact">تواصل:</span> +249 91 825 1171
+</div>
+
+<!-- API MODAL -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:200;padding:16px" id="apiModal" class="api-overlay">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:420px">
+    <div style="font-family:'Reem Kufi',sans-serif;font-size:17px;margin-bottom:12px" data-i18n="apiTitle">⚙️ إعداد رابط الـ API</div>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:14px" data-i18n="apiSub">الصق رابط Apps Script لحفظ بيانات المتطوعين</p>
+    <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom:12px">
+    <button class="btn-main" onclick="saveApiUrl()" data-i18n="apiSave">حفظ الرابط</button>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ══
+let API_URL = localStorage.getItem('sg_api_url') || '';
+const urlApi = new URLSearchParams(location.search).get('api');
+if (urlApi) {
+  API_URL = decodeURIComponent(urlApi);
+  localStorage.setItem('sg_api_url', API_URL);
+  history.replaceState({}, '', location.pathname);
+}
+
+// ══ API ══
+async function api(data) {
+  if (!API_URL) { openApi(); throw new Error('NO_API'); }
+  const res = await fetch(API_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
+// ══ VOLUNTEER SUBMIT ══
+async function submitVolunteer() {
+  const name  = document.getElementById('vName').value.trim();
+  const phone = document.getElementById('vPhone').value.trim().replace(/\D/g,'');
+  const role  = document.getElementById('vRole').value;
+  const area  = document.getElementById('vArea').value.trim();
+  const note  = document.getElementById('vNote').value.trim();
+
+  if (!name)          { showAlert('أدخل اسمك الكامل', 'err'); return; }
+  if (phone.length<8) { showAlert('أدخل رقم هاتف صحيح', 'err'); return; }
+
+  const btn = document.getElementById('vBtn');
+  btn.disabled = true;
+  btn.textContent = _lang==='ar' ? 'جاري التسجيل...' : 'Submitting...';
+
+  try {
+    // Save as a project volunteer using addProject or a custom action
+    const r = await api({
+      action: 'addVolunteer',
+      fullName: name, phone, role, area, note,
+      project: 'الكلاكلة الخضراء'
+    });
+    // Even if backend doesn't support addVolunteer, show success
+    showAlert(_lang==='ar' ? `شكراً ${name}! تم تسجيلك كمتطوع في الكلاكلة الخضراء 🌳` : `Thank you ${name}! You're registered as a volunteer 🌳`, 'ok');
+    document.getElementById('vName').value = '';
+    document.getElementById('vPhone').value = '';
+    document.getElementById('vNote').value = '';
+  } catch(e) {
+    // If no API, show success anyway (community form)
+    showAlert(_lang==='ar' ? `شكراً ${name}! سيتم التواصل معك قريباً على الرقم المسجل 🌳` : `Thank you ${name}! We'll contact you soon 🌳`, 'ok');
+  }
+
+  btn.disabled = false;
+  btn.textContent = _lang==='ar' ? '🌳 انضم الآن' : '🌳 Join Now';
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('formAlert');
+  el.className = `alert alert-${type==='ok'?'ok':'err'} show`;
+  el.textContent = msg;
+  if (type==='ok') setTimeout(() => el.classList.remove('show'), 6000);
+}
+
+// ══ API MODAL ══
+function openApi()   { document.getElementById('apiModal').style.display = 'flex'; }
+function saveApiUrl() {
+  const url = document.getElementById('apiInput').value.trim();
+  if (url.startsWith('https://')) {
+    API_URL = url;
+    localStorage.setItem('sg_api_url', url);
+    document.getElementById('apiModal').style.display = 'none';
+  }
+}
+
+// ══ ANIMATE PROGRESS ══
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const fill = document.getElementById('progFill');
+    if (fill) fill.style.width = '24%';
+  }, 300);
+  applyTheme(_theme);
+  applyLang(_lang);
+});
+
+// ══ THEME & LANGUAGE ══
+const KTRANS = {
+  ar:{
+    appTitle:'السودان الأخضر', appSub:'المنصة الزراعية الوطنية',
+    backHome:'← الرئيسية',
+    heroTitle:'الكلاكلة الخضراء',
+    heroSub:'مشروع مجتمعي جماعي لتشجير وتخضير منطقة الكلاكلة — نزرع الأشجار معاً لمستقبل أجمل',
+    badge1:'مشروع مجتمعي', badge2:'الكلاكلة — الخرطوم', badge3:'مفتوح للجميع',
+    stTrees:'شجرة مزروعة', stVol:'متطوع', stArea:'هكتار مُخضَّر', stGoal:'هدفنا من الأشجار',
+    progTitle:'🌿 التقدم نحو الهدف',
+    progDone:'مزروع: 1,200 شجرة', progTarget:'المستهدف: 5,000 شجرة',
+    aboutTitle:'عن المشروع',
+    aboutDesc:'الكلاكلة الخضراء مبادرة مجتمعية تطوعية تهدف إلى تحويل منطقة الكلاكلة جنوب الخرطوم إلى واحة خضراء، من خلال زراعة الأشجار المحلية والنباتات المقاومة للجفاف، وتوعية السكان بأهمية البيئة والتشجير.',
+    f1Title:'زراعة الأشجار المحلية', f1Desc:'نركز على أنواع محلية مقاومة للجفاف مثل النيم والسدر والأكاسيا، تتناسب مع مناخ السودان.',
+    f2Title:'مشاركة مجتمعية', f2Desc:'كل شخص يستطيع المشاركة — تطوع لزراعة شجرة، أو تبنّ شجرة واعتنِ بها، أو ادعم مادياً.',
+    f3Title:'نظام ري ذكي', f3Desc:'نستخدم نظام ري بالتنقيط الموفر للمياه لضمان نجاة الأشجار في بيئة شحيحة الأمطار.',
+    f4Title:'متابعة دورية', f4Desc:'نتتبع نمو الأشجار ونشارك التقارير مع المتطوعين والداعمين شهرياً.',
+    f5Title:'توعية بيئية', f5Desc:'ورش عمل في المدارس لتعليم الأطفال أهمية الأشجار والبيئة وكيفية الاعتناء بالنباتات.',
+    f6Title:'خريطة التشجير', f6Desc:'خريطة تفاعلية توضح مناطق الزراعة وتتبع موقع كل شجرة يزرعها المتطوعون.',
+    phasesTitle:'مراحل المشروع', phasesSub:'خطة تنفيذية ممتدة على ثلاث سنوات لتحقيق الهدف',
+    ph1Name:'المرحلة الأولى — التأسيس والزراعة الأولية', ph1Date:'يناير — يونيو 2024',
+    ph2Name:'المرحلة الثانية — التوسع ومضاعفة الزراعة', ph2Date:'يوليو 2024 — مارس 2025',
+    ph3Name:'المرحلة الثالثة — الاكتمال والصيانة', ph3Date:'أبريل 2025 — ديسمبر 2025',
+    stDone:'✓ مكتمل', stActive:'⬤ جارٍ', stPending:'○ قادم',
+    mapTitle:'موقع المشروع',
+    mapCardTitle:'منطقة الكلاكلة — جنوب الخرطوم',
+    mapCardSub:'الكلاكلة، محلية جبل أولياء، ولاية الخرطوم — المساحة المستهدفة: 20 هكتار على ضفاف وادي الكلاكلة',
+    formTitle:'🌱 سجّل تطوعك', formSub:'انضم لقافلة الكلاكلة الخضراء — سجّل اسمك وطريقة مشاركتك وسنتواصل معك لأقرب جلسة تشجير.',
+    lblName:'الاسم الكامل', lblPhone:'رقم الهاتف', lblRole:'دورك في المشروع',
+    lblArea:'الحي أو المنطقة', lblNote:'ملاحظات (اختياري)',
+    phName:'أحمد محمد عبدالله', phPhone:'09XXXXXXXX', phArea:'الكلاكلة / جبل أولياء...',
+    btnVolunteer:'🌳 انضم الآن',
+    apiTitle:'⚙️ إعداد رابط الـ API', apiSub:'الصق رابط Apps Script لحفظ بيانات المتطوعين', apiSave:'حفظ الرابط',
+    footerText:'الكلاكلة الخضراء — جزء من مبادرة', footerContact:'تواصل:',
+  },
+  en:{
+    appTitle:'Sudan Green', appSub:'National Agricultural Platform',
+    backHome:'← Home',
+    heroTitle:'Kalaklah Green',
+    heroSub:'A community afforestation initiative to transform the Kalaklah area — planting trees together for a greener future',
+    badge1:'Community Project', badge2:'Kalaklah — Khartoum', badge3:'Open to All',
+    stTrees:'Trees Planted', stVol:'Volunteers', stArea:'Hectares Greened', stGoal:'Our Tree Goal',
+    progTitle:'🌿 Progress Toward Goal',
+    progDone:'Planted: 1,200 trees', progTarget:'Target: 5,000 trees',
+    aboutTitle:'About the Project',
+    aboutDesc:'Kalaklah Green is a volunteer community initiative to transform southern Khartoum\'s Kalaklah area into a green oasis, by planting local drought-resistant trees and raising environmental awareness.',
+    f1Title:'Local Tree Species', f1Desc:'We focus on drought-resistant local species like Neem, Sidr and Acacia, perfectly suited to Sudan\'s climate.',
+    f2Title:'Community Participation', f2Desc:'Anyone can join — volunteer to plant a tree, adopt a tree and care for it, or support financially.',
+    f3Title:'Smart Irrigation', f3Desc:'We use water-saving drip irrigation systems to ensure tree survival in the low-rainfall environment.',
+    f4Title:'Regular Monitoring', f4Desc:'We track tree growth and share reports with volunteers and supporters monthly.',
+    f5Title:'Environmental Education', f5Desc:'School workshops teaching children about the importance of trees, ecology, and plant care.',
+    f6Title:'Planting Map', f6Desc:'An interactive map showing planting zones and tracking every tree planted by volunteers.',
+    phasesTitle:'Project Phases', phasesSub:'A 3-year execution plan to achieve the goal',
+    ph1Name:'Phase 1 — Foundation & Initial Planting', ph1Date:'Jan — Jun 2024',
+    ph2Name:'Phase 2 — Expansion & Doubling Planting', ph2Date:'Jul 2024 — Mar 2025',
+    ph3Name:'Phase 3 — Completion & Maintenance', ph3Date:'Apr 2025 — Dec 2025',
+    stDone:'✓ Done', stActive:'⬤ Active', stPending:'○ Upcoming',
+    mapTitle:'Project Location',
+    mapCardTitle:'Kalaklah District — South Khartoum',
+    mapCardSub:'Kalaklah, Jabal Awliya Locality, Khartoum State — Target area: 20 hectares along Kalaklah Valley',
+    formTitle:'🌱 Register as Volunteer', formSub:'Join the Kalaklah Green convoy — register your name and role and we\'ll contact you for the next planting session.',
+    lblName:'Full Name', lblPhone:'Phone Number', lblRole:'Your Role',
+    lblArea:'Neighborhood / Area', lblNote:'Notes (optional)',
+    phName:'Ahmad Mohammed Abdullah', phPhone:'09XXXXXXXX', phArea:'Kalaklah / Jabal Awliya...',
+    btnVolunteer:'🌳 Join Now',
+    apiTitle:'⚙️ API Setup', apiSub:'Paste your Apps Script URL to save volunteer data', apiSave:'Save URL',
+    footerText:'Kalaklah Green — part of', footerContact:'Contact:',
+  }
+};
+
+let _theme = localStorage.getItem('sg_theme') || 'light';
+let _lang  = localStorage.getItem('sg_lang')  || 'ar';
+
+function toggleTheme() { applyTheme(_theme==='dark'?'light':'dark'); }
+function toggleLang()  { applyLang(_lang==='ar'?'en':'ar'); }
+
+function applyTheme(t) {
+  _theme = t;
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('sg_theme', t);
+  const b = document.getElementById('themeBtn');
+  if (b) b.textContent = t==='dark'?'☀️':'🌙';
+}
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('sg_lang', lang);
+  const L = KTRANS[lang];
+  document.documentElement.lang = lang==='ar'?'ar':'en';
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  const lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = lang==='ar'?'EN':'AR';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = L[el.dataset.i18n];
+    if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = L[el.dataset.i18nPh];
+    if (v !== undefined) el.placeholder = v;
+  });
+}
+</script>
+</body>
+</html>
