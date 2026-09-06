@@ -9,14 +9,14 @@
 <style>
 :root{
   --eg:#0D4A28;--eg2:#1A5E38;--eg3:#228048;
-  --vg:#2EE070;--lg:#5AEEA0;
-  --gold:#D4A017;--gold-l:#F0C84A;
+  --vg:#1A9A48;--lg:#25C05A;
+  --gold:#B8860B;--gold-l:#D4A017;
   --nile:#1260A0;
-  --text:#F0FFF4;--dim:#9DCCA8;
-  --bg:#041209;--bg2:#071C0D;
-  --card:rgba(18,58,32,.85);--card2:rgba(13,74,40,.7);
-  --border:rgba(46,224,112,.18);--border2:rgba(46,224,112,.08);
-  --red:#E05050;--amber:#F0A030;
+  --text:#1A2E1F;--dim:#4A7A5A;
+  --bg:#F4FAF6;--bg2:#FFFFFF;
+  --card:#FFFFFF;--card2:#F0F8F2;
+  --border:rgba(26,154,72,.2);--border2:rgba(26,154,72,.1);
+  --red:#C83030;--amber:#C07800;
   --r:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -72,7 +72,7 @@ nav{flex:1;overflow-y:auto;padding:12px 0}
   padding:7px 14px;border-radius:6px;font-size:13px;
   border:none;cursor:pointer;font-family:inherit;transition:.2s;
 }
-.btn-primary{background:var(--vg);color:#041209;font-weight:600}
+.btn-primary{background:var(--vg);color:#fff;font-weight:600}
 .btn-primary:hover{background:var(--lg)}
 .btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}
 .btn-ghost:hover{color:var(--text);border-color:var(--vg)}
@@ -110,13 +110,13 @@ nav{flex:1;overflow-y:auto;padding:12px 0}
 .form-group{display:flex;flex-direction:column;gap:6px}
 label{font-size:12px;color:var(--dim)}
 input,select,textarea{
-  background:rgba(0,0,0,.3);border:1px solid var(--border);
+  background:#F9FDF9;border:1px solid #C8E0D0;
   border-radius:6px;padding:9px 12px;color:var(--text);
   font-family:inherit;font-size:13px;transition:.2s;width:100%;
 }
 input:focus,select:focus,textarea:focus{
   outline:none;border-color:var(--vg);
-  box-shadow:0 0 0 3px rgba(46,224,112,.12);
+  box-shadow:0 0 0 3px rgba(26,154,72,.12);
 }
 input[type=password]{letter-spacing:2px}
 .form-note{font-size:11px;color:var(--dim);margin-top:2px}
@@ -140,7 +140,7 @@ input[type=password]{letter-spacing:2px}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{
-  background:rgba(0,0,0,.3);padding:10px 12px;text-align:right;
+  background:#F0F8F2;padding:10px 12px;text-align:right;
   color:var(--dim);font-weight:500;border-bottom:1px solid var(--border);
 }
 td{padding:10px 12px;border-bottom:1px solid var(--border2);vertical-align:middle}
@@ -245,7 +245,7 @@ tr:hover td{background:rgba(46,224,112,.04)}
       <p style="font-size:13px;color:var(--dim);margin-bottom:16px">انشر Code.gs كـ Web App ثم الصق الرابط هنا</p>
 
       <!-- mini guide -->
-      <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.9">
+      <div style="background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.15);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.9">
         <div style="color:var(--gold);font-weight:600;margin-bottom:6px">📋 خطوات نشر Apps Script:</div>
         <div>١. افتح <strong style="color:var(--vg)">script.google.com</strong> وأنشئ مشروعاً جديداً</div>
         <div>٢. الصق كود <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">Code.gs</code> من المستودع</div>
@@ -281,13 +281,13 @@ tr:hover td{background:rgba(46,224,112,.04)}
         <div style="font-size:13px;color:var(--gold);font-weight:600;margin-bottom:12px">🔐 بيانات دخول المدير الافتراضية</div>
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;justify-content:space-between;align-items:center;
-                      background:rgba(0,0,0,.25);border-radius:8px;padding:10px 14px">
+                      background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.15);border-radius:8px;padding:10px 14px">
             <span style="font-size:12px;color:var(--dim)">رقم الهاتف</span>
             <span style="font-family:monospace;font-size:15px;color:var(--vg);font-weight:700;
                          letter-spacing:1px" id="disp-phone">0918251171</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;
-                      background:rgba(0,0,0,.25);border-radius:8px;padding:10px 14px">
+                      background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.15);border-radius:8px;padding:10px 14px">
             <span style="font-size:12px;color:var(--dim)">كلمة السر</span>
             <span style="font-family:monospace;font-size:15px;color:var(--gold);font-weight:700;
                          letter-spacing:2px" id="disp-pass">551234</span>
@@ -299,7 +299,7 @@ tr:hover td{background:rgba(46,224,112,.04)}
       </div>
 
       <!-- ensureSheets guide -->
-      <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.9">
+      <div style="background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.15);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.9">
         <div style="color:var(--gold);font-weight:600;margin-bottom:6px">⚙️ تهيئة الأوراق (مرة واحدة):</div>
         <div>١. افتح مشروع Apps Script</div>
         <div>٢. في القائمة اختر الدالة <strong style="color:var(--vg)">ensureSheets_</strong></div>
@@ -526,12 +526,12 @@ tr:hover td{background:rgba(46,224,112,.04)}
       <div class="card">
         <div class="card-title"><span>👤</span> بيانات المدير</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-          <div style="background:rgba(0,0,0,.25);border:1px solid var(--border2);border-radius:8px;padding:14px">
+          <div style="background:rgba(26,154,72,.06);border:1px solid var(--border2);border-radius:8px;padding:14px">
             <div style="font-size:11px;color:var(--dim);margin-bottom:4px">رقم هاتف المدير</div>
             <div style="font-size:18px;font-weight:700;color:var(--vg);font-family:monospace;letter-spacing:1px">0918251171</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px">رمز السودان: +249</div>
           </div>
-          <div style="background:rgba(0,0,0,.25);border:1px solid var(--border2);border-radius:8px;padding:14px">
+          <div style="background:rgba(26,154,72,.06);border:1px solid var(--border2);border-radius:8px;padding:14px">
             <div style="font-size:11px;color:var(--dim);margin-bottom:4px">كلمة السر الافتراضية</div>
             <div style="font-size:18px;font-weight:700;color:var(--gold);font-family:monospace;letter-spacing:2px" id="adminPassDisplay">••••••</div>
             <button onclick="togglePassDisplay()" style="font-size:10px;background:none;border:none;color:var(--dim);cursor:pointer;padding:2px 0;margin-top:2px">👁 إظهار</button>
@@ -557,7 +557,7 @@ tr:hover td{background:rgba(46,224,112,.04)}
       <!-- ── رابط API ── -->
       <div class="card">
         <div class="card-title"><span>🔗</span> رابط الـ API (Apps Script)</div>
-        <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;line-height:1.8">
+        <div style="background:rgba(26,154,72,.06);border:1px solid rgba(26,154,72,.15);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;line-height:1.8">
           <div style="color:var(--gold);font-weight:600;margin-bottom:4px">خطوات الحصول على الرابط:</div>
           <div>١. script.google.com → مشروع جديد → الصق Code.gs</div>
           <div>٢. Deploy → New deployment → Web app</div>
