@@ -1,15 +1,30 @@
 // ═══════════════════════════════════════════════════════════════
-//  السودان الأخضر — Code.gs  v2.0
-//  Google Apps Script API
-//  يستقبل طلبات من Netlify Function فقط (عبر _secret)
+//  السودان الأخضر — Code.gs  v2.1
+//  Google Apps Script API — ملف واحد كامل
+//  يستقبل طلبات من Netlify Function فقط (عبر API_SHARED_SECRET)
 // ═══════════════════════════════════════════════════════════════
 
-const APP_NAME = 'السودان الأخضر';
-const APP_VER  = '2.0.0';
+// ── § 1  تعريف التطبيق وإصدار المخطط ─────────────────────────
+const APP_NAME       = 'السودان الأخضر';
+const APP_VER        = '2.1.0';
+const APP_ID         = 'SUDAN_GREEN_V2';
+const SCHEMA_VERSION = 2;
 
-// ── الثوابت ──────────────────────────────────────────────────
+// ── § 2  Script Properties ────────────────────────────────────
+function getProps_() {
+  const p = PropertiesService.getScriptProperties().getProperties();
+  return {
+    API_SHARED_SECRET: p.API_SHARED_SECRET || '',
+    PASSWORD_PEPPER:   p.PASSWORD_PEPPER   || '',
+    SPREADSHEET_ID:    p.SPREADSHEET_ID    || '',
+    APP_ID:            p.APP_ID            || APP_ID,
+    SCHEMA_VERSION:    parseInt(p.SCHEMA_VERSION || '1'),
+  };
+}
+
+// السر المشترك يُقرأ من Script Properties فقط — لا يُخزَّن في Sheets
 function getApiSecret_() {
-  return getSetting_('API_SECRET') || '';
+  return getProps_().API_SHARED_SECRET;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -103,7 +118,27 @@ function doPost(e) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  ensureSheets_ — إنشاء الأوراق تلقائياً
+//  § 3  setup — تُشغَّل يدوياً مرة واحدة لمنح الصلاحيات
+// ═══════════════════════════════════════════════════════════════
+function setup() {
+  ensureSheets_();
+  // تعيين القيم الافتراضية لـ Script Properties إن لم تكن موجودة
+  const sp = PropertiesService.getScriptProperties();
+  const existing = sp.getProperties();
+  const defaults = {
+    API_SHARED_SECRET: existing.API_SHARED_SECRET || 'CHANGE_ME',
+    PASSWORD_PEPPER:   existing.PASSWORD_PEPPER   || 'CHANGE_ME',
+    SCHEMA_VERSION:    String(SCHEMA_VERSION),
+    APP_ID:            APP_ID,
+    SPREADSHEET_ID:    SpreadsheetApp.getActiveSpreadsheet().getId(),
+  };
+  sp.setProperties(defaults, false); // false = لا تحذف الموجود
+  Logger.log('setup() complete — APP_ID: ' + APP_ID + ' — SCHEMA_VERSION: ' + SCHEMA_VERSION);
+  return jsonOut({ ok: true, app: APP_ID, schema: SCHEMA_VERSION });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ensureSheets_ — إنشاء الأوراق تلقائياً (آمن وقابل للتكرار)
 // ═══════════════════════════════════════════════════════════════
 function ensureSheets_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -155,7 +190,8 @@ function ensureSheets_() {
     ],
     'Announcements': [
       'AnnID','Title','Message','TargetType','SentAt','SentBy','SentCount','Status'
-    ]
+    ],
+    'Schema': ['key','value','updatedAt']
   };
 
   for (const [name, headers] of Object.entries(defs)) {
@@ -181,7 +217,6 @@ function ensureSheets_() {
     'WHATSAPP_ENABLED':    'false',
     'DEFAULT_CURRENCY':    'SDG',
     'APP_NAME':            APP_NAME,
-    'API_SECRET':          '',
     'API_URL':             '',
     'MAINTENANCE_MODE':    'false',
     'REGISTER_ENABLED':    'true',
@@ -797,8 +832,8 @@ function getSettings_(p) {
     .getSheetByName('Settings').getDataRange().getValues();
   const hdr = data[0]; const idx = c => hdr.indexOf(c);
 
-  // لا نُرجع الأسرار
-  const hidden = new Set(['API_SECRET']);
+  // لا نُرجع أي مفاتيح محجوبة
+  const hidden = new Set([]);
   const settings = {};
   data.slice(1).forEach(r => {
     const k = r[idx('key')];
@@ -813,7 +848,7 @@ function updateSettings_(p) {
   const sh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Settings');
   const data = sh.getDataRange().getValues();
   const hdr  = data[0]; const idx = c => hdr.indexOf(c);
-  const hidden = new Set(['API_SECRET']); // لا تُعدَّل من الواجهة
+  const hidden = new Set([]); // الأسرار في Script Properties فقط
 
   const updates = p.settings || {};
   for (const [k, v] of Object.entries(updates)) {
