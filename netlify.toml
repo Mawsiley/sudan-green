@@ -11,6 +11,30 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
+# Legacy .html paths → SPA routes (301 permanent)
+[[redirects]]
+  from = "/admin.html"
+  to = "/admin"
+  status = 301
+
+[[redirects]]
+  from = "/auth.html"
+  to = "/auth"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard"
+  status = 301
+
+[[redirects]]
+  from = "/kalaklah.html"
+  to = "/kalaklah"
+  status = 301
+
+# SPA catch-all — MUST remain last and WITHOUT a role/country condition.
+# Adding conditions (e.g. Role = ["admin"]) makes Netlify return 404 for
+# every visitor who lacks that role, taking the entire site offline.
 [[redirects]]
   from = "/*"
   to = "/index.html"
