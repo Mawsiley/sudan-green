@@ -6,19 +6,19 @@
 'use strict';
 const crypto = require('crypto');
 
-// ── متغيرات البيئة ───────────────────────────────────────────
-const GAS_URL      = process.env.APPS_SCRIPT_API_URL  || '';
-const GAS_SECRET   = process.env.APPS_SCRIPT_API_SECRET || '';
-const PEPPER       = process.env.PASSWORD_PEPPER       || 'default-pepper-CHANGE-ME';
-const JWT_SECRET   = process.env.JWT_SECRET            || 'default-jwt-CHANGE-ME';
-const OTP_SECRET   = process.env.OTP_SECRET            || 'default-otp-CHANGE-ME';
-const WA_PHONE_ID  = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
-const WA_TOKEN     = process.env.WHATSAPP_ACCESS_TOKEN || '';
-const WA_ADMIN     = process.env.WHATSAPP_ADMIN_PHONE  || '';
-const ALLOWED      = process.env.ALLOWED_ORIGIN        || 'https://green-sudan.netlify.app';
-const ADMIN_PHONE  = process.env.ADMIN_PHONE           || '+249918251171';
-const ADMIN_PASS   = process.env.ADMIN_INITIAL_PASSWORD || '';
-const ADMIN_ROLE   = process.env.ADMIN_ROLE            || 'super_admin';
+// ── متغيرات البيئة (أسماء موحدة مع القالب الأساسي) ──────────
+const GAS_URL        = process.env.APPS_SCRIPT_URL            || '';
+const GAS_SECRET     = process.env.APPS_SCRIPT_SHARED_SECRET  || '';
+const PEPPER         = process.env.AUTH_PASSWORD_PEPPER        || '';
+const JWT_SECRET     = process.env.SETTINGS_SESSION_SECRET     || '';
+const OTP_SECRET     = process.env.AUTH_OTP_SECRET             || '';
+const WA_PHONE_ID    = process.env.WHATSAPP_PHONE_NUMBER_ID    || '';
+const WA_TOKEN       = process.env.WHATSAPP_ACCESS_TOKEN       || '';
+const WA_ADMIN       = process.env.WHATSAPP_ADMIN_PHONE        || '';
+const ALLOWED        = process.env.ALLOWED_ORIGIN              || '*';
+// مدير الإعدادات — يُتحقق منه هنا فقط، لا يُحفظ في Sheets أبداً
+const SETTINGS_ADMIN = process.env.SETTINGS_ADMIN_ACCOUNT      || '';
+const SETTINGS_PIN   = process.env.SETTINGS_ADMIN_PIN          || '';
 
 // ── تشفير كلمات المرور (PBKDF2) ─────────────────────────────
 function hashPassword(password, salt) {
@@ -159,7 +159,6 @@ exports.handler = async (event) => {
   try {
     let result;
     switch (action) {
-      case 'init':                  result = await doInit();                         break;
       case 'register':              result = await doRegister(body);                 break;
       case 'requestOTP':            result = await doRequestOTP(body);               break;
       case 'verifyOTP':             result = await doVerifyOTP(body);                break;
@@ -186,25 +185,6 @@ exports.handler = async (event) => {
     return R(500, fail('SERVER_ERROR','خطأ داخلي، يرجى المحاولة لاحقاً'), H);
   }
 };
-
-// ═══════════════════════════════════════════════════════════════
-//  init — تهيئة أولى (تنشئ المدير إذا لم يكن موجوداً)
-// ═══════════════════════════════════════════════════════════════
-async function doInit() {
-  if (!ADMIN_PASS) return fail('NO_ADMIN_PASS', 'ADMIN_INITIAL_PASSWORD غير محدد في متغيرات البيئة');
-
-  const salt = newSalt();
-  const hash = hashPassword(ADMIN_PASS, salt);
-
-  const r = await gas('initAdmin', {
-    phone: ADMIN_PHONE, passwordHash: hash, salt,
-    roleId: ADMIN_ROLE, fullName: 'مدير النظام'
-  });
-
-  if (r.alreadyExists) return ok({ skipped: true }, 'حساب المدير موجود مسبقاً');
-  if (!r.ok) return fail('INIT_ERROR', r.error || 'خطأ في التهيئة');
-  return ok({ created: true }, 'تم إنشاء حساب المدير الأساسي');
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  register — تسجيل مستخدم جديد
@@ -360,6 +340,29 @@ async function doLogin(b) {
   if (!phone || !password) return fail('MISSING_FIELDS', 'رقم الهاتف وكلمة المرور مطلوبان');
 
   const nPhone = normalizePhone(phone, countryCode);
+
+  // ── مدير الإعدادات: يُتحقق منه هنا فقط، لا يصل لـ Sheets ────
+  if (SETTINGS_ADMIN && nPhone === SETTINGS_ADMIN && SETTINGS_PIN) {
+    if (!crypto.timingSafeEqual(Buffer.from(password), Buffer.from(SETTINGS_PIN))) {
+      return fail('INVALID_CREDENTIALS', 'رقم الهاتف أو كلمة المرور غير صحيحة');
+    }
+    const token = signJWT({
+      userId:   'settings_admin',
+      phone:    SETTINGS_ADMIN,
+      fullName: 'مدير الإعدادات',
+      roleId:   'settings_admin',
+      roleName: 'مدير الإعدادات'
+    }, 24);
+    return ok({
+      token,
+      fullName:           'مدير الإعدادات',
+      phone:              SETTINGS_ADMIN,
+      roleId:             'settings_admin',
+      roleName:           'مدير الإعدادات',
+      mustChangePassword: false,
+      expiresAt:          new Date(Date.now() + 24 * 3600000).toISOString()
+    });
+  }
 
   // جلب بيانات المستخدم (مع hash — للخادم فقط)
   const r = await gas('getUserForAuth', { phone: nPhone });
@@ -572,7 +575,7 @@ async function doProxy(b, token) {
 
   if (ADMIN_ACTIONS.has(action)) {
     if (!p) return fail('UNAUTHORIZED', 'يجب تسجيل الدخول');
-    if (!['admin','super_admin'].includes(p.roleId)) return fail('FORBIDDEN', 'ليس لديك صلاحية');
+    if (!['admin','super_admin','settings_admin'].includes(p.roleId)) return fail('FORBIDDEN', 'ليس لديك صلاحية');
   } else if (AUTH_ACTIONS.has(action)) {
     if (!p) return fail('UNAUTHORIZED', 'يجب تسجيل الدخول');
   }

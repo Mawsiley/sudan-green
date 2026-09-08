@@ -38,9 +38,6 @@ function doPost(e) {
     }
 
     switch (action) {
-      // ── تهيئة
-      case 'initAdmin':           return jsonOut(initAdmin_(data));
-
       // ── التحقق
       case 'checkPhone':          return jsonOut(checkPhone_(data));
       case 'savePendingUser':     return jsonOut(savePendingUser_(data));
@@ -229,35 +226,6 @@ function ensureSheets_() {
       ['R003','كردفان','Kordofan','فول سوداني·صمغ','3.5M هكتار','30%',420000,'#F97316','12.5','27.0'],
     ].forEach(r => regions.appendRow(r));
   }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  initAdmin_ — تهيئة المدير الأساسي
-// ═══════════════════════════════════════════════════════════════
-function initAdmin_(p) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sh = ss.getSheetByName('Users');
-    const data = sh.getDataRange().getValues();
-    const hdr = data[0]; const idx = c => hdr.indexOf(c);
-
-    // هل المدير موجود؟
-    const exists = data.slice(1).some(r => r[idx('phone')] === p.phone);
-    if (exists) return { ok: true, alreadyExists: true };
-
-    sh.appendRow([
-      Utilities.getUuid(), p.phone, p.passwordHash, p.salt,
-      p.fullName || 'مدير النظام', p.roleId || 'super_admin',
-      'ACTIVE', true, true, // mustChangePassword = true
-      0, '', '', '', '',
-      new Date().toISOString(), ''
-    ]);
-
-    writeAuditLog_({ userId: 'system', action: 'INIT_ADMIN', targetType: 'USER', targetId: p.phone, details: 'إنشاء حساب المدير الأساسي' });
-    return { ok: true, created: true };
-  } finally { lock.releaseLock(); }
 }
 
 // ═══════════════════════════════════════════════════════════════

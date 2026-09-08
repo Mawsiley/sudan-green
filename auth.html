@@ -175,7 +175,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:v
       <label>رقم الهاتف <span class="req">*</span></label>
       <div class="phone-wrap">
         <select id="lCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="971">🇦🇪 +971</option><option value="1">🇺🇸 +1</option></select>
-        <div class="input-wrap"><input type="tel" id="lPhone" placeholder="918251171" autocomplete="tel"/></div>
+        <div class="input-wrap"><input type="tel" id="lPhone" placeholder="9XXXXXXXX" autocomplete="tel"/></div>
       </div>
       <div class="field-error" id="lPhoneErr">يرجى إدخال رقم هاتف صحيح</div>
     </div>
@@ -212,7 +212,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:v
       <label>رقم الهاتف <span class="req">*</span></label>
       <div class="phone-wrap">
         <select id="rCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="971">🇦🇪 +971</option><option value="1">🇺🇸 +1</option></select>
-        <div class="input-wrap"><input type="tel" id="rPhone" placeholder="918251171" autocomplete="tel"/></div>
+        <div class="input-wrap"><input type="tel" id="rPhone" placeholder="9XXXXXXXX" autocomplete="tel"/></div>
       </div>
       <div class="field-error" id="rPhoneErr">يرجى إدخال رقم هاتف صحيح</div>
     </div>
@@ -296,7 +296,7 @@ body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg2);color:v
         <label>رقم الهاتف <span class="req">*</span></label>
         <div class="phone-wrap">
           <select id="fCC"><option value="249">🇸🇩 +249</option><option value="20">🇪🇬 +20</option><option value="966">🇸🇦 +966</option><option value="1">🇺🇸 +1</option></select>
-          <div class="input-wrap"><input type="tel" id="fPhone" placeholder="918251171"/></div>
+          <div class="input-wrap"><input type="tel" id="fPhone" placeholder="9XXXXXXXX"/></div>
         </div>
       </div>
       <button class="btn btn-primary" id="forgotBtn" onclick="doForgot()">
@@ -487,10 +487,18 @@ async function doRegister() {
       confirmPassword:passC, roleId:role, acceptTerms:true, countryCode:cc
     });
     if (r.success) {
-      pendPhone = phone; pendCC = cc; pendPurpose = 'REGISTER';
-      document.getElementById('otpPhone').textContent = '+' + cc + phone.replace(/^0+/,'');
-      showSection('otpForm');
-      startTimer(300);
+      if (r.data?.whatsappSent === false) {
+        // WhatsApp غير مُهيأ — الحساب بانتظار موافقة المدير يدوياً
+        showSection('successState');
+        document.getElementById('sucTitle').textContent = 'تم استلام طلبك';
+        document.getElementById('sucMsg').textContent   = 'تم تسجيل حسابك بنجاح. سيتواصل معك المدير لتفعيل الحساب.';
+        document.getElementById('sucBtn').style.display = 'none';
+      } else {
+        pendPhone = phone; pendCC = cc; pendPurpose = 'REGISTER';
+        document.getElementById('otpPhone').textContent = '+' + cc + phone.replace(/^0+/,'');
+        showSection('otpForm');
+        startTimer(300);
+      }
     } else { showAlert('error', r.message, r.code); }
   } catch { showAlert('error', 'خطأ في الاتصال'); }
   setLoad('registerBtn', false);
