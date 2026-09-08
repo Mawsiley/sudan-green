@@ -94,6 +94,16 @@ function doPost(e) {
       case 'getStats':            return jsonOut(getStats_(data));
       case 'broadcast':           return jsonOut(broadcast_(data));
 
+      // ── تزامن السر المشترك (من Netlify Function — settings_admin)
+      case 'syncSecretGas':       return jsonOut(syncSecretGas_(data));
+
+      // ── إجراءات Dashboard الجديدة
+      case 'getDashboard':        return jsonOut(getDashboard_(data));
+      case 'updateCropPrice':     return jsonOut(updateCropPrice_(data));
+      case 'updateUserStatus':    return jsonOut(updateUserStatus_(data));
+      case 'updateSetting':       return jsonOut(updateSetting_(data));
+      case 'volunteerRegister':   return jsonOut(volunteerRegister_(data));
+
       default:
         return jsonOut({ ok: false, error: 'UNKNOWN_ACTION', action });
     }
@@ -998,6 +1008,129 @@ function getSetting_(key) {
     const row = data.slice(1).find(r => r[idx('key')] === key);
     return row ? String(row[idx('value')]) : '';
   } catch { return ''; }
+}
+
+// ── syncSecretGas_ — يُحدِّث API_SHARED_SECRET (مخوَّل من Netlify فقط) ──
+function syncSecretGas_(p) {
+  const newSecret = p.newSecret || '';
+  if (!newSecret || newSecret.length < 16)
+    return { ok: false, error: 'TOO_SHORT', message: 'السر أقل من 16 حرفاً' };
+  if (newSecret === 'CHANGE_ME_STRONG_SECRET')
+    return { ok: false, error: 'DEFAULT_SECRET', message: 'لا تستخدم السر الافتراضي' };
+
+  try {
+    const ss   = SpreadsheetApp.getActiveSpreadsheet();
+    const sh   = ss.getSheetByName('Settings');
+    const data = sh.getDataRange().getValues();
+    const hdr  = data[0];
+    const keyIdx = hdr.indexOf('key');
+    const valIdx = hdr.indexOf('value');
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][keyIdx] === 'API_SHARED_SECRET') {
+        sh.getRange(i + 1, valIdx + 1).setValue(newSecret);
+        writeAuditLog_({
+          userId: p._userId || 'settings_admin',
+          action: 'SYNC_API_SECRET',
+          targetType: 'SETTING',
+          targetId: 'API_SHARED_SECRET',
+          details: 'تم تغيير السر المشترك من لوحة الإدارة'
+        });
+        return { ok: true, success: true };
+      }
+    }
+    // الصف غير موجود — أضفه
+    sh.appendRow(['API_SHARED_SECRET', newSecret, 'السر المشترك بين Netlify وApps Script']);
+    return { ok: true, success: true };
+  } catch (err) {
+    Logger.log('syncSecretGas_ error: ' + err);
+    return { ok: false, error: 'INTERNAL_ERROR', message: err.toString() };
+  }
+}
+
+// ── getDashboard_ ─────────────────────────────────────────────
+function getDashboard_(p) {
+  const crops    = getCrops_(p);
+  const projects = getProjects_(p);
+  const stats    = getStats_(p);
+  const users    = getUsers_(p);
+  return {
+    ok: true, success: true,
+    data: {
+      stats: {
+        totalUsers:     (users.users || []).length,
+        totalCrops:     (crops.crops || []).length,
+        activeProjects: (projects.projects || []).filter(x => x.status === 'active').length,
+        lastUpdate:     new Date().toISOString(),
+      },
+      crops:    crops.crops    || [],
+      projects: projects.projects || [],
+    }
+  };
+}
+
+// ── updateCropPrice_ ─────────────────────────────────────────
+function updateCropPrice_(p) {
+  const sh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Crops');
+  const data = sh.getDataRange().getValues();
+  const hdr  = data[0];
+  const idI  = hdr.indexOf('ID');
+  const prI  = hdr.indexOf('Price');
+  const unI  = hdr.indexOf('Unit');
+  const upI  = hdr.indexOf('UpdatedAt');
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][idI] === p.id) {
+      if (p.price !== undefined && prI >= 0) sh.getRange(i+1, prI+1).setValue(Number(p.price));
+      if (p.unit  !== undefined && unI >= 0) sh.getRange(i+1, unI+1).setValue(p.unit);
+      if (upI >= 0) sh.getRange(i+1, upI+1).setValue(new Date().toISOString());
+      return { ok: true, success: true };
+    }
+  }
+  return { ok: false, message: 'المحصول غير موجود' };
+}
+
+// ── updateUserStatus_ ────────────────────────────────────────
+function updateUserStatus_(p) {
+  const sh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Users');
+  const data = sh.getDataRange().getValues();
+  const hdr  = data[0];
+  const idI  = hdr.indexOf('ID');
+  const stI  = hdr.indexOf('Status');
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][idI] === p.userId) {
+      if (stI >= 0) sh.getRange(i+1, stI+1).setValue(p.status);
+      writeAuditLog_({ userId: p._userId, action: 'UPDATE_STATUS', targetType: 'USER', targetId: p.userId, details: 'حالة جديدة: ' + p.status });
+      return { ok: true, success: true };
+    }
+  }
+  return { ok: false, message: 'المستخدم غير موجود' };
+}
+
+// ── updateSetting_ ───────────────────────────────────────────
+function updateSetting_(p) {
+  if (p.key === 'API_SHARED_SECRET')
+    return { ok: false, message: 'استخدم syncApiSecret لتغيير السر المشترك' };
+  const ss   = SpreadsheetApp.getActiveSpreadsheet();
+  const sh   = ss.getSheetByName('Settings');
+  const data = sh.getDataRange().getValues();
+  const hdr  = data[0];
+  const kI   = hdr.indexOf('key');
+  const vI   = hdr.indexOf('value');
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][kI] === p.key) {
+      sh.getRange(i+1, vI+1).setValue(p.value);
+      return { ok: true, success: true };
+    }
+  }
+  sh.appendRow([p.key, p.value, '']);
+  return { ok: true, success: true };
+}
+
+// ── volunteerRegister_ ───────────────────────────────────────
+function volunteerRegister_(p) {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Volunteers');
+  if (!sh) return { ok: false, message: 'ورقة المتطوعين غير موجودة' };
+  sh.appendRow(['V'+Date.now(), p.name||'', p.phone||'', p.skill||'', new Date().toISOString()]);
+  return { ok: true, success: true };
 }
 
 function jsonOut(obj) {

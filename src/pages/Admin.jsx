@@ -255,6 +255,9 @@ function SettingsTab({ api, toast }) {
   const [settings, setSettings] = useState([]);
   const [saving, setSaving] = useState(null);
   const [vals, setVals] = useState({});
+  const [secret, setSecret] = useState({ newSecret: '', confirmSecret: '' });
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
 
   useEffect(() => {
     api('getSettings').then(r => {
@@ -277,8 +280,106 @@ function SettingsTab({ api, toast }) {
     finally { setSaving(null); }
   }
 
+  async function syncSecret(e) {
+    e.preventDefault();
+    if (!secret.newSecret || secret.newSecret.length < 16)
+      return toast('السر يجب أن يكون 16 حرفاً على الأقل');
+    if (secret.newSecret !== secret.confirmSecret)
+      return toast('السران غير متطابقان');
+    if (secret.newSecret === 'CHANGE_ME_STRONG_SECRET')
+      return toast('لا تستخدم السر الافتراضي');
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const r = await api('syncApiSecret', secret);
+      if (r.success) {
+        setSyncResult(r.data);
+        toast(r.message, 'success');
+        setSecret({ newSecret: '', confirmSecret: '' });
+      } else {
+        toast(r.message || 'فشل التزامن');
+      }
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setSyncing(false); }
+  }
+
+  const secretStrength = secret.newSecret.length >= 32 ? 'قوي جداً' : secret.newSecret.length >= 24 ? 'جيد' : secret.newSecret.length >= 16 ? 'مقبول' : '';
+  const secretColor    = secret.newSecret.length >= 32 ? '#16A34A' : secret.newSecret.length >= 24 ? '#D97706' : '#DC2626';
+
   return (
     <div style={{ maxWidth: 600 }}>
+      {/* ── قسم تزامن السر المشترك ── */}
+      <div style={{ ...S.panel, border: '2px solid rgba(220,38,38,.2)', background: '#FFF8F8' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 24 }}>🔐</span>
+          <div>
+            <h3 style={{ ...S.panelTitle, marginBottom: 2, color: '#991B1B' }}>تغيير السر المشترك</h3>
+            <p style={{ fontSize: 12, color: '#587A68' }}>يُحدِّث <code style={{ background: '#FEE2E2', padding: '1px 6px', borderRadius: 4 }}>API_SHARED_SECRET</code> في جداول البيانات و<code style={{ background: '#FEE2E2', padding: '1px 6px', borderRadius: 4 }}>APPS_SCRIPT_SHARED_SECRET</code> في Netlify</p>
+          </div>
+        </div>
+
+        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
+          ⚠️ بعد التزامن سيُعاد تشغيل الموقع خلال ~دقيقتين. تأكد من أن <strong>NETLIFY_SITE_ID</strong> و<strong>NETLIFY_ACCESS_TOKEN</strong> محددان في متغيرات البيئة.
+        </div>
+
+        <form onSubmit={syncSecret}>
+          <div className="field">
+            <label>السر الجديد <span style={{ fontSize: 11, color: '#587A68' }}>(16 حرفاً على الأقل)</span></label>
+            <div style={{ position: 'relative' }}>
+              <input type="password" value={secret.newSecret}
+                onChange={e => setSecret(s => ({ ...s, newSecret: e.target.value }))}
+                placeholder="سر قوي وعشوائي..." />
+              {secret.newSecret.length >= 16 && (
+                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 600, color: secretColor }}>
+                  {secretStrength}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="field">
+            <label>تأكيد السر الجديد</label>
+            <input type="password" value={secret.confirmSecret}
+              onChange={e => setSecret(s => ({ ...s, confirmSecret: e.target.value }))}
+              placeholder="أعِد كتابة السر..." />
+            {secret.confirmSecret && secret.newSecret !== secret.confirmSecret && (
+              <span style={{ fontSize: 12, color: '#DC2626' }}>السران غير متطابقان</span>
+            )}
+          </div>
+          <button type="submit" className="btn btn-danger" disabled={syncing || secret.newSecret !== secret.confirmSecret || secret.newSecret.length < 16}>
+            {syncing ? 'جاري التزامن...' : '🔄 تزامن السر'}
+          </button>
+        </form>
+
+        {/* نتيجة التزامن */}
+        {syncResult && (
+          <div style={{ marginTop: 16, background: syncResult.netlifyUpdated ? '#DCFCE7' : '#FEF9C3', border: `1px solid ${syncResult.netlifyUpdated ? '#BBF7D0' : '#FEF08A'}`, borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+            {syncResult.netlifyUpdated ? (
+              <>
+                <div style={{ color: '#166534', fontWeight: 600, marginBottom: 4 }}>✅ تم تحديث Netlify</div>
+                {syncResult.redeploying && <div style={{ color: '#166534' }}>🔄 جارٍ إعادة النشر — انتظر دقيقتين</div>}
+              </>
+            ) : (
+              <>
+                <div style={{ color: '#92400E', fontWeight: 600, marginBottom: 8 }}>⚠️ تم تحديث جداول البيانات فقط</div>
+                <p style={{ color: '#92400E', marginBottom: 6 }}>انسخ السر التالي وأضفه يدوياً في Netlify → Environment variables:</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <code style={{ flex: 1, background: '#fff', padding: '8px 12px', borderRadius: 6, border: '1px solid #FDE68A', fontSize: 13, wordBreak: 'break-all' }}>
+                    {syncResult.newSecret}
+                  </code>
+                  <button className="btn btn-ghost btn-sm" onClick={() => navigator.clipboard.writeText(syncResult.newSecret).then(() => toast('تم النسخ', 'success'))}>
+                    نسخ
+                  </button>
+                </div>
+                <p style={{ fontSize: 12, color: '#92400E', marginTop: 8 }}>
+                  المتغير: <code>APPS_SCRIPT_SHARED_SECRET</code> — أضفه ثم انشر من Netlify
+                </p>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── الإعدادات العامة ── */}
       <div style={S.panel}>
         <h3 style={S.panelTitle}>إعدادات النظام</h3>
         {settings.length === 0 ? <p style={{ color: '#587A68', fontSize: 14 }}>لا توجد إعدادات متاحة</p>

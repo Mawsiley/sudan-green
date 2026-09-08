@@ -159,18 +159,19 @@ exports.handler = async (event) => {
   try {
     let result;
     switch (action) {
-      case 'register':              result = await doRegister(body);                 break;
-      case 'requestOTP':            result = await doRequestOTP(body);               break;
-      case 'verifyOTP':             result = await doVerifyOTP(body);                break;
-      case 'login':                 result = await doLogin(body);                    break;
-      case 'logout':                result = await doLogout(body, bearerToken);      break;
-      case 'refreshSession':        result = await doRefresh(bearerToken);           break;
-      case 'requestPasswordReset':  result = await doReqReset(body);                 break;
-      case 'verifyPasswordResetOTP':result = await doVerifyResetOTP(body);           break;
-      case 'resetPassword':         result = await doResetPassword(body);            break;
-      case 'changePassword':        result = await doChangePassword(body, bearerToken); break;
-      case 'getCurrentUser':        result = await doGetCurrentUser(bearerToken);    break;
-      case 'sendWATest':            result = await doWATest(body, bearerToken);      break;
+      case 'register':              result = await doRegister(body);                        break;
+      case 'requestOTP':            result = await doRequestOTP(body);                      break;
+      case 'verifyOTP':             result = await doVerifyOTP(body);                       break;
+      case 'login':                 result = await doLogin(body);                           break;
+      case 'logout':                result = await doLogout(body, bearerToken);             break;
+      case 'refreshSession':        result = await doRefresh(bearerToken);                  break;
+      case 'requestPasswordReset':  result = await doReqReset(body);                        break;
+      case 'verifyPasswordResetOTP':result = await doVerifyResetOTP(body);                  break;
+      case 'resetPassword':         result = await doResetPassword(body);                   break;
+      case 'changePassword':        result = await doChangePassword(body, bearerToken);     break;
+      case 'getCurrentUser':        result = await doGetCurrentUser(bearerToken);           break;
+      case 'sendWATest':            result = await doWATest(body, bearerToken);             break;
+      case 'syncApiSecret':         result = await doSyncApiSecret(body, bearerToken);      break;
       default:                      result = await doProxy(body, bearerToken);
     }
 
@@ -201,33 +202,27 @@ async function doRegister(b) {
 
   const nPhone = normalizePhone(phone, countryCode);
 
-  // التحقق من عدم تكرار الرقم
   const check = await gas('checkPhone', { phone: nPhone });
   if (!check.ok)    return fail('DB_ERROR',    'خطأ في الاتصال بقاعدة البيانات');
   if (check.exists) return fail('PHONE_EXISTS','رقم الهاتف مسجل مسبقاً');
 
-  // رفض التسجيل المباشر كـ admin/super_admin
   if (['admin','super_admin'].includes(roleId)) {
     return fail('ROLE_FORBIDDEN', 'لا يمكن التسجيل بهذا الدور');
   }
 
-  // التحقق من أن الدور يسمح بالتسجيل العام
   const roleCheck = await gas('getRoleById', { roleId });
   const role = roleCheck.role;
   if (role && !role.publicRegistration) {
     return fail('ROLE_NOT_PUBLIC', 'هذا الدور يتطلب إذناً من المدير');
   }
 
-  // تشفير كلمة المرور
   const salt = newSalt();
   const hash = hashPassword(password, salt);
 
-  // OTP
   const otp    = genOTP();
   const otpH   = hashOTP(otp, nPhone);
   const otpExp = new Date(Date.now() + 5 * 60000).toISOString();
 
-  // حفظ المستخدم المعلق
   const requiresApproval = role?.requiresApproval || false;
   const status = 'PENDING_VERIFICATION';
 
@@ -240,7 +235,6 @@ async function doRegister(b) {
 
   if (!save.ok) return fail('REGISTER_ERROR', save.error || 'خطأ في التسجيل');
 
-  // إرسال OTP عبر WhatsApp
   const msg = `مرحبًا ${fullName.trim()}،\n\nرمز التحقق الخاص بإنشاء حسابك هو:\n*${otp}*\n\nالرمز صالح لمدة 5 دقائق.\nلا تشارك هذا الرمز مع أي شخص.`;
   const wa = await sendWA(nPhone, msg);
 
@@ -301,17 +295,14 @@ async function doVerifyOTP(b) {
     return fail(r.error || 'OTP_ERROR', msgs[r.error] || 'خطأ في التحقق');
   }
 
-  // تفعيل المستخدم بعد التحقق
   if (purpose === 'REGISTER') {
     const act = await gas('activateUser', { phone: nPhone });
     if (act.ok) {
       const user = act.user || {};
-      // رسالة ترحيب
       const status = act.requiresApproval ? 'PENDING_APPROVAL' : 'ACTIVE';
       if (status === 'ACTIVE') {
         await sendWA(nPhone, `مرحبًا ${user.fullName || ''}،\nتم تأكيد رقم هاتفك وإنشاء حسابك بنجاح.\nيمكنك الآن تسجيل الدخول باستخدام رقم هاتفك وكلمة المرور التي اخترتها.`);
       } else {
-        // إشعار المدير
         if (WA_ADMIN) {
           await sendWA(WA_ADMIN, `🔔 طلب تسجيل جديد:\nالاسم: ${user.fullName}\nالهاتف: ${nPhone}\nالدور: ${user.roleId}\nيحتاج موافقة المدير.`);
         }
@@ -321,7 +312,6 @@ async function doVerifyOTP(b) {
     }
   }
 
-  // لاستعادة كلمة المرور: أنشئ reset token مؤقتاً
   if (purpose === 'PASSWORD_RESET') {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetHash  = crypto.createHmac('sha256', JWT_SECRET).update(nPhone + resetToken).digest('hex');
@@ -364,17 +354,14 @@ async function doLogin(b) {
     });
   }
 
-  // جلب بيانات المستخدم (مع hash — للخادم فقط)
   const r = await gas('getUserForAuth', { phone: nPhone });
   if (!r.ok || !r.user) {
-    // تأخير مصطنع لمنع timing attack
     hashPassword('dummy', newSalt());
     return fail('INVALID_CREDENTIALS', 'رقم الهاتف أو كلمة المرور غير صحيحة');
   }
 
   const u = r.user;
 
-  // فحص الحالة
   const statusErrors = {
     PENDING_VERIFICATION: ['PHONE_NOT_VERIFIED', 'يجب التحقق من رقم هاتفك أولاً'],
     PENDING_APPROVAL:     ['PENDING_APPROVAL',   'حسابك قيد مراجعة المدير'],
@@ -383,21 +370,17 @@ async function doLogin(b) {
   };
   if (statusErrors[u.status]) return fail(...statusErrors[u.status]);
 
-  // فحص القفل
   if (u.lockedUntil && new Date(u.lockedUntil) > new Date()) {
     const mins = Math.ceil((new Date(u.lockedUntil) - Date.now()) / 60000);
     return fail('ACCOUNT_LOCKED', `الحساب مقفل مؤقتاً، حاول بعد ${mins} دقيقة`);
   }
 
-  // التحقق من كلمة المرور
   let valid = verifyPassword(password, u.salt, u.passwordHash);
 
-  // هجرة من SHA-256 القديم
   if (!valid) {
     const oldHash = legacyHash(u.salt, password);
     if (oldHash === u.passwordHash) {
       valid = true;
-      // ترقية إلى PBKDF2
       const ns = newSalt();
       const nh = hashPassword(password, ns);
       await gas('updatePasswordHash', { phone: nPhone, passwordHash: nh, salt: ns });
@@ -409,10 +392,8 @@ async function doLogin(b) {
     return fail('INVALID_CREDENTIALS', 'رقم الهاتف أو كلمة المرور غير صحيحة');
   }
 
-  // تسجيل نجاح الدخول
   await gas('recordSuccessLogin', { phone: nPhone });
 
-  // إنشاء JWT
   const sessionHours = parseInt(r.sessionHours) || 12;
   const token = signJWT({
     userId:   u.userId,
@@ -422,7 +403,6 @@ async function doLogin(b) {
     roleName: u.roleName
   }, sessionHours);
 
-  // سجل التدقيق
   await gas('writeAuditLog', {
     userId: u.userId, action: 'LOGIN', targetType: 'USER',
     targetId: u.userId, details: 'تسجيل دخول ناجح'
@@ -469,7 +449,6 @@ async function doRefresh(token) {
 async function doReqReset(b) {
   const { phone, countryCode = '249' } = b;
   if (!phone) return fail('MISSING_PHONE', 'رقم الهاتف مطلوب');
-  // دائماً نُرجع نفس الرد (لا نكشف هل الرقم مسجل)
   await doRequestOTP({ phone, countryCode, purpose: 'PASSWORD_RESET' }).catch(() => {});
   return ok({}, 'إذا كان الرقم مسجلاً ستصلك رسالة WhatsApp');
 }
@@ -498,7 +477,6 @@ async function doResetPassword(b) {
   const upd = await gas('updatePasswordHash', { phone: nPhone, passwordHash: hash, salt, revokeAllSessions: true });
   if (!upd.ok) return fail('UPDATE_ERROR', 'خطأ في تحديث كلمة المرور');
 
-  // رسالة تأكيد
   const ur = await gas('getUser', { phone: nPhone });
   if (ur.ok && ur.user) {
     await sendWA(nPhone, `تم تغيير كلمة مرور حسابك في السودان الأخضر بنجاح.\nإذا لم تقم بهذا الإجراء، يرجى التواصل فورًا مع إدارة التطبيق.`);
@@ -558,6 +536,94 @@ async function doWATest(b, token) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  syncApiSecret — تزامن السر المشترك (settings_admin فقط)
+//  يُحدِّث API_SHARED_SECRET في جداول Apps Script وNetlify معاً
+// ═══════════════════════════════════════════════════════════════
+async function doSyncApiSecret(b, token) {
+  const p = verifyJWT(token);
+  if (!p || p.roleId !== 'settings_admin')
+    return fail('FORBIDDEN', 'هذا الإجراء متاح لمدير الإعدادات فقط');
+
+  const { newSecret, confirmSecret } = b;
+  if (!newSecret || newSecret.length < 16)
+    return fail('TOO_SHORT', 'السر يجب أن يكون 16 حرفاً على الأقل');
+  if (newSecret !== confirmSecret)
+    return fail('MISMATCH', 'السران غير متطابقان');
+  if (newSecret === 'CHANGE_ME_STRONG_SECRET')
+    return fail('DEFAULT_SECRET', 'لا تستخدم السر الافتراضي');
+
+  const NETLIFY_SITE_ID = process.env.NETLIFY_SITE_ID       || '';
+  const NETLIFY_TOKEN   = process.env.NETLIFY_ACCESS_TOKEN  || '';
+  const DEPLOY_HOOK     = process.env.NETLIFY_DEPLOY_HOOK   || '';
+
+  // 1. تحديث API_SHARED_SECRET في ورقة Settings عبر إجراء خاص
+  const gasRes = await gas('syncSecretGas', { newSecret });
+  if (!gasRes.ok && !gasRes.success)
+    return fail('GAS_ERROR', gasRes.message || 'فشل تحديث السر في جداول البيانات');
+
+  // 2. تحديث APPS_SCRIPT_SHARED_SECRET في Netlify عبر API
+  let netlifyUpdated = false;
+  if (NETLIFY_SITE_ID && NETLIFY_TOKEN) {
+    try {
+      const nr = await fetch(
+        `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/env`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${NETLIFY_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify([{
+            key: 'APPS_SCRIPT_SHARED_SECRET',
+            scopes: ['functions', 'builds', 'runtime'],
+            values: [{ value: newSecret, context: 'all' }]
+          }]),
+          signal: AbortSignal.timeout(15000)
+        }
+      );
+      netlifyUpdated = nr.ok;
+    } catch { /* Netlify API غير متاح */ }
+  }
+
+  // 3. إطلاق إعادة النشر عبر Deploy Hook أو Netlify Builds API
+  let redeploying = false;
+  if (DEPLOY_HOOK) {
+    try {
+      await fetch(DEPLOY_HOOK, { method: 'POST', signal: AbortSignal.timeout(10000) });
+      redeploying = true;
+    } catch {}
+  } else if (NETLIFY_SITE_ID && NETLIFY_TOKEN && netlifyUpdated) {
+    try {
+      await fetch(
+        `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/builds`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+          signal: AbortSignal.timeout(10000)
+        }
+      );
+      redeploying = true;
+    } catch {}
+  }
+
+  // إن لم تكن Netlify API مهيأة — أعِد السر للنسخ اليدوي
+  if (!netlifyUpdated && !DEPLOY_HOOK) {
+    return ok(
+      { netlifyUpdated: false, redeploying: false, newSecret },
+      'تم تحديث جداول البيانات — انسخ السر الجديد وحدِّثه يدوياً في Netlify'
+    );
+  }
+
+  return ok(
+    { netlifyUpdated, redeploying },
+    redeploying
+      ? 'تم تحديث السر — سيُعاد تشغيل الموقع خلال دقيقتين'
+      : 'تم تحديث السر في جداول البيانات وNetlify'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  proxy — العمليات الإدارية الأخرى (مع التحقق من JWT)
 // ═══════════════════════════════════════════════════════════════
 const ADMIN_ACTIONS = new Set([
@@ -566,7 +632,9 @@ const ADMIN_ACTIONS = new Set([
   'getSettings','updateSettings','getAuditLog','exportUsers','broadcast'
 ]);
 const AUTH_ACTIONS = new Set([
-  'getProfile','updateProfile','getCrops','getProjects','getRegions','getStats'
+  'getProfile','updateProfile','getCrops','getProjects','getRegions','getStats',
+  'getDashboard','updateCropPrice','updateUserStatus','getAuditLog','getRoles',
+  'updateSetting','getSettings','volunteerRegister'
 ]);
 
 async function doProxy(b, token) {
@@ -580,7 +648,6 @@ async function doProxy(b, token) {
     if (!p) return fail('UNAUTHORIZED', 'يجب تسجيل الدخول');
   }
 
-  // إضافة بيانات المستخدم الحالي للطلب
   const r = await gas(action, { ...rest, _userId: p?.userId, _roleId: p?.roleId, _phone: p?.phone });
 
   if (r.ok || r.success) return ok(r.data ?? r, r.message || 'تمت العملية');
