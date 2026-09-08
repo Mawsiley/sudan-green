@@ -1,7 +1,47 @@
 /* ── Google Fonts loaded in index.html ── */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif}
+body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+
+/* ── Theme tokens (light default) ── */
+:root{
+  --bg:#F8FAF9;
+  --surface:#fff;
+  --surface-2:#F1F8F3;
+  --surface-3:#E8F5E9;
+  --text:#0E1C12;
+  --text-2:#3A5C4A;
+  --text-muted:#587A68;
+  --accent:#1A9A48;
+  --accent-dark:#0B3D22;
+  --accent-bright:#2CC665;
+  --accent-glow:rgba(26,154,72,.2);
+  --border:rgba(26,154,72,.2);
+  --border-2:rgba(26,154,72,.08);
+  --input-bg:#fff;
+  --input-border:rgba(26,154,72,.2);
+  --shadow:0 8px 32px rgba(11,61,34,.1);
+  --shadow-lg:0 20px 60px rgba(11,61,34,.15);
+}
+:root[data-theme="dark"]{
+  --bg:#060E09;
+  --surface:#0D1A12;
+  --surface-2:rgba(255,255,255,.04);
+  --surface-3:rgba(255,255,255,.07);
+  --text:#E8F5EC;
+  --text-2:#A7C4AF;
+  --text-muted:#587A68;
+  --accent:#2CC665;
+  --accent-dark:#1A9A48;
+  --accent-bright:#2CC665;
+  --accent-glow:rgba(44,198,101,.2);
+  --border:rgba(44,198,101,.15);
+  --border-2:rgba(44,198,101,.07);
+  --input-bg:rgba(255,255,255,.05);
+  --input-border:rgba(44,198,101,.2);
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.5);
+}
 
 /* ── Shared Buttons ── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;

@@ -333,7 +333,9 @@ async function doLogin(b) {
 
   // ── مدير الإعدادات: يُتحقق منه هنا فقط، لا يصل لـ Sheets ────
   if (SETTINGS_ADMIN && nPhone === SETTINGS_ADMIN && SETTINGS_PIN) {
-    if (!crypto.timingSafeEqual(Buffer.from(password), Buffer.from(SETTINGS_PIN))) {
+    const pwBuf  = Buffer.from(password);
+    const pinBuf = Buffer.from(SETTINGS_PIN);
+    if (pwBuf.length !== pinBuf.length || !crypto.timingSafeEqual(pwBuf, pinBuf)) {
       return fail('INVALID_CREDENTIALS', 'رقم الهاتف أو كلمة المرور غير صحيحة');
     }
     const token = signJWT({

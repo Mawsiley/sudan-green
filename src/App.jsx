@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { LangProvider } from './context/LangContext';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
@@ -37,6 +39,8 @@ function GuestOnly({ children }) {
 
 export default function App() {
   return (
+    <ThemeProvider>
+    <LangProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -49,5 +53,7 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </LangProvider>
+    </ThemeProvider>
   );
 }
