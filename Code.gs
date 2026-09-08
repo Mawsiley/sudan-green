@@ -1,30 +1,16 @@
 // ═══════════════════════════════════════════════════════════════
-//  السودان الأخضر — Code.gs  v2.1
+//  السودان الأخضر — Code.gs  v2.2
 //  Google Apps Script API — ملف واحد كامل
 //  يستقبل طلبات من Netlify Function فقط (عبر API_SHARED_SECRET)
 // ═══════════════════════════════════════════════════════════════
 
-// ── § 1  تعريف التطبيق وإصدار المخطط ─────────────────────────
-const APP_NAME       = 'السودان الأخضر';
-const APP_VER        = '2.1.0';
-const APP_ID         = 'SUDAN_GREEN_V2';
-const SCHEMA_VERSION = 2;
+// ── § 1  تعريف التطبيق ───────────────────────────────────────
+const APP_NAME = 'السودان الأخضر';
+const APP_VER  = '2.2.0';
 
-// ── § 2  Script Properties ────────────────────────────────────
-function getProps_() {
-  const p = PropertiesService.getScriptProperties().getProperties();
-  return {
-    API_SHARED_SECRET: p.API_SHARED_SECRET || '',
-    PASSWORD_PEPPER:   p.PASSWORD_PEPPER   || '',
-    SPREADSHEET_ID:    p.SPREADSHEET_ID    || '',
-    APP_ID:            p.APP_ID            || APP_ID,
-    SCHEMA_VERSION:    parseInt(p.SCHEMA_VERSION || '1'),
-  };
-}
-
-// السر المشترك يُقرأ من Script Properties فقط — لا يُخزَّن في Sheets
+// ── § 2  السر المشترك — يُقرأ من ورقة Settings ───────────────
 function getApiSecret_() {
-  return getProps_().API_SHARED_SECRET;
+  return getSetting_('API_SHARED_SECRET');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -43,7 +29,7 @@ function doPost(e) {
 
     ensureSheets_();
 
-    // التحقق من السر (يُعفى منه: init, getStats, getCrops, getProjects, getRegions)
+    // التحقق من السر (يُعفى منه الإجراءات العامة)
     const publicActions = new Set(['getStats','getCrops','getProjects','getRegions','doGet']);
     if (!publicActions.has(action)) {
       const secret = getApiSecret_();
@@ -97,7 +83,7 @@ function doPost(e) {
       case 'writeAuditLog':       return jsonOut(writeAuditLog_(data));
       case 'getAuditLog':         return jsonOut(getAuditLog_(data));
 
-      // ── المحاصيل والبيانات الزراعية (موجودة سابقاً)
+      // ── المحاصيل والبيانات الزراعية
       case 'getCrops':            return jsonOut(getCrops_(data));
       case 'updateCrop':          return jsonOut(updateCrop_(data));
       case 'addCrop':             return jsonOut(addCrop_(data));
@@ -118,23 +104,12 @@ function doPost(e) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  § 3  setup — تُشغَّل يدوياً مرة واحدة لمنح الصلاحيات
+//  setup — شغّلها يدوياً مرة واحدة لإنشاء الأوراق
 // ═══════════════════════════════════════════════════════════════
 function setup() {
   ensureSheets_();
-  // تعيين القيم الافتراضية لـ Script Properties إن لم تكن موجودة
-  const sp = PropertiesService.getScriptProperties();
-  const existing = sp.getProperties();
-  const defaults = {
-    API_SHARED_SECRET: existing.API_SHARED_SECRET || 'CHANGE_ME',
-    PASSWORD_PEPPER:   existing.PASSWORD_PEPPER   || 'CHANGE_ME',
-    SCHEMA_VERSION:    String(SCHEMA_VERSION),
-    APP_ID:            APP_ID,
-    SPREADSHEET_ID:    SpreadsheetApp.getActiveSpreadsheet().getId(),
-  };
-  sp.setProperties(defaults, false); // false = لا تحذف الموجود
-  Logger.log('setup() complete — APP_ID: ' + APP_ID + ' — SCHEMA_VERSION: ' + SCHEMA_VERSION);
-  return jsonOut({ ok: true, app: APP_ID, schema: SCHEMA_VERSION });
+  Logger.log('setup() complete — ' + APP_NAME + ' v' + APP_VER);
+  return jsonOut({ ok: true, app: APP_NAME, version: APP_VER });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -171,7 +146,6 @@ function ensureSheets_() {
       'logId','userId','action','targetType','targetId',
       'details','createdAt'
     ],
-    // الأوراق الزراعية (كما هي)
     'Crops': [
       'CropID','NameAr','NameEn','Region','PriceToday','PriceYesterday',
       'Unit','Currency','Change','ChangePercent','UpdatedAt','UpdatedBy'
@@ -190,8 +164,7 @@ function ensureSheets_() {
     ],
     'Announcements': [
       'AnnID','Title','Message','TargetType','SentAt','SentBy','SentCount','Status'
-    ],
-    'Schema': ['key','value','updatedAt']
+    ]
   };
 
   for (const [name, headers] of Object.entries(defs)) {
@@ -217,6 +190,7 @@ function ensureSheets_() {
     'WHATSAPP_ENABLED':    'false',
     'DEFAULT_CURRENCY':    'SDG',
     'APP_NAME':            APP_NAME,
+    'API_SHARED_SECRET':   'CHANGE_ME_STRONG_SECRET',
     'API_URL':             '',
     'MAINTENANCE_MODE':    'false',
     'REGISTER_ENABLED':    'true',
@@ -287,7 +261,6 @@ function savePendingUser_(p) {
     const data = sh.getDataRange().getValues();
     const hdr = data[0]; const idx = c => hdr.indexOf(c);
 
-    // تكرار؟
     if (data.slice(1).some(r => r[idx('phone')] === p.phone)) {
       return { ok: false, error: 'PHONE_EXISTS' };
     }
@@ -296,12 +269,11 @@ function savePendingUser_(p) {
     sh.appendRow([
       uid, p.phone, p.passwordHash, p.salt,
       p.fullName, p.roleId, p.status || 'PENDING_VERIFICATION',
-      false, false, // phoneVerified, mustChangePassword
+      false, false,
       0, '', '', '', '',
       new Date().toISOString(), ''
     ]);
 
-    // حفظ OTP في ورقة OTP
     if (p.otpHash) {
       ss.getSheetByName('OTP').appendRow([
         Utilities.getUuid(), p.phone, 'REGISTER',
@@ -319,12 +291,11 @@ function savePendingUser_(p) {
 //  saveOTP_ — حفظ OTP جديد
 // ═══════════════════════════════════════════════════════════════
 function saveOTP_(p) {
-  const ss     = SpreadsheetApp.getActiveSpreadsheet();
-  const sh     = ss.getSheetByName('OTP');
-  const data   = sh.getDataRange().getValues();
-  const hdr    = data[0]; const idx = c => hdr.indexOf(c);
+  const ss   = SpreadsheetApp.getActiveSpreadsheet();
+  const sh   = ss.getSheetByName('OTP');
+  const data = sh.getDataRange().getValues();
+  const hdr  = data[0]; const idx = c => hdr.indexOf(c);
 
-  // إلغاء OTP السابق لنفس الرقم والغرض
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('phone')] === p.phone &&
         data[i][idx('purpose')] === p.purpose &&
@@ -333,7 +304,6 @@ function saveOTP_(p) {
     }
   }
 
-  // البحث عن بيانات المستخدم (للاسم)
   const usersData = ss.getSheetByName('Users').getDataRange().getValues();
   const uHdr = usersData[0]; const uIdx = c => uHdr.indexOf(c);
   const user = usersData.slice(1).find(r => r[uIdx('phone')] === p.phone);
@@ -362,22 +332,18 @@ function verifyAndConsumeOTP_(p) {
     if (r[idx('purpose')] !== p.purpose) continue;
     if (r[idx('used')]) continue;
 
-    // انتهت الصلاحية؟
     if (r[idx('expiresAt')] && new Date(r[idx('expiresAt')]) < new Date()) {
       return { ok: false, error: 'OTP_EXPIRED' };
     }
 
-    // تجاوز المحاولات؟
     const attempts = parseInt(r[idx('attempts')]) || 0;
     if (attempts >= maxAttempts) return { ok: false, error: 'OTP_MAX_ATTEMPTS' };
 
-    // التحقق من الرمز
     if (r[idx('otpHash')] !== p.otpHash) {
       sh.getRange(i + 1, idx('attempts') + 1).setValue(attempts + 1);
       return { ok: false, error: 'OTP_INVALID' };
     }
 
-    // استهلاك OTP
     sh.getRange(i + 1, idx('used') + 1).setValue(true);
     return { ok: true };
   }
@@ -397,7 +363,6 @@ function activateUser_(p) {
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('phone')] !== p.phone) continue;
 
-    // الدور يحتاج موافقة؟
     const roleId = data[i][idx('roleId')];
     const roleR  = getRoleById_({ roleId });
     const requiresApproval = roleR.role?.requiresApproval || false;
@@ -430,12 +395,11 @@ function activateUser_(p) {
 //  saveResetToken_ / verifyResetToken_
 // ═══════════════════════════════════════════════════════════════
 function saveResetToken_(p) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sh = ss.getSheetByName('ResetTokens');
+  const ss   = SpreadsheetApp.getActiveSpreadsheet();
+  const sh   = ss.getSheetByName('ResetTokens');
   const data = sh.getDataRange().getValues();
-  const hdr = data[0]; const idx = c => hdr.indexOf(c);
+  const hdr  = data[0]; const idx = c => hdr.indexOf(c);
 
-  // إلغاء القديمة
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('phone')] === p.phone && !data[i][idx('used')]) {
       sh.getRange(i + 1, idx('used') + 1).setValue(true);
@@ -475,8 +439,8 @@ function getUserForAuth_(p) {
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('phone')] !== p.phone) continue;
 
-    const roleId  = data[i][idx('roleId')];
-    const roleR   = getRoleById_({ roleId });
+    const roleId = data[i][idx('roleId')];
+    const roleR  = getRoleById_({ roleId });
 
     return {
       ok: true,
@@ -588,7 +552,6 @@ function updatePasswordHash_(p) {
     sh.getRange(i + 1, idx('mustChangePassword')+ 1).setValue(false);
 
     if (p.revokeAllSessions) {
-      // حذف جميع جلسات المستخدم
       const sessSh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sessions');
       const sessData = sessSh.getDataRange().getValues();
       const sHdr     = sessData[0]; const sIdx = c => sHdr.indexOf(c);
@@ -626,7 +589,6 @@ function getUsers_(p) {
     return obj;
   });
 
-  // فلترة
   let result = users;
   if (p.status) result = result.filter(u => u.status === p.status);
   if (p.roleId) result = result.filter(u => u.roleId === p.roleId);
@@ -642,7 +604,7 @@ function getUsers_(p) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  approveUser_ / rejectUser_
+//  approveUser_ / rejectUser_ / updateUserRole_ / suspend
 // ═══════════════════════════════════════════════════════════════
 function approveUser_(p) {
   if (!isAdmin_(p._roleId)) return { ok: false, error: 'FORBIDDEN' };
@@ -658,7 +620,7 @@ function approveUser_(p) {
     sh.getRange(i + 1, idx('approvedAt') + 1).setValue(new Date().toISOString());
     if (p.notes) sh.getRange(i + 1, idx('notes') + 1).setValue(p.notes);
 
-    writeAuditLog_({ userId: p._userId, action: 'APPROVE_USER', targetType: 'USER', targetId: p.targetUserId, details: `موافقة على الحساب` });
+    writeAuditLog_({ userId: p._userId, action: 'APPROVE_USER', targetType: 'USER', targetId: p.targetUserId, details: 'موافقة على الحساب' });
     return { ok: true, user: { userId: data[i][idx('userId')], phone: data[i][idx('phone')], fullName: data[i][idx('fullName')] } };
   }
 
@@ -691,7 +653,6 @@ function updateUserRole_(p) {
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('userId')] !== p.targetUserId) continue;
-    // لا تسمح بتغيير دور المدير الأساسي إلا بإذن خاص
     if (data[i][idx('roleId')] === 'super_admin' && p._roleId !== 'super_admin') {
       return { ok: false, error: 'CANNOT_CHANGE_SUPER_ADMIN' };
     }
@@ -832,12 +793,10 @@ function getSettings_(p) {
     .getSheetByName('Settings').getDataRange().getValues();
   const hdr = data[0]; const idx = c => hdr.indexOf(c);
 
-  // لا نُرجع أي مفاتيح محجوبة
-  const hidden = new Set([]);
   const settings = {};
   data.slice(1).forEach(r => {
     const k = r[idx('key')];
-    if (!hidden.has(k)) settings[k] = r[idx('value')];
+    if (k) settings[k] = r[idx('value')];
   });
 
   return { ok: true, settings };
@@ -848,11 +807,9 @@ function updateSettings_(p) {
   const sh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Settings');
   const data = sh.getDataRange().getValues();
   const hdr  = data[0]; const idx = c => hdr.indexOf(c);
-  const hidden = new Set([]); // الأسرار في Script Properties فقط
 
   const updates = p.settings || {};
   for (const [k, v] of Object.entries(updates)) {
-    if (hidden.has(k)) continue;
     let found = false;
     for (let i = 1; i < data.length; i++) {
       if (data[i][idx('key')] === k) {
@@ -907,7 +864,7 @@ function getAuditLog_(p) {
   if (!isAdmin_(p._roleId)) return { ok: false, error: 'FORBIDDEN' };
   const data = SpreadsheetApp.getActiveSpreadsheet()
     .getSheetByName('AuditLog').getDataRange().getValues();
-  const hdr = data[0]; const idx = c => hdr.indexOf(c);
+  const hdr = data[0];
   const logs = data.slice(1).reverse().slice(0, parseInt(p.limit) || 200).map(r =>
     Object.fromEntries(hdr.map((h, i) => [h, r[i]]))
   );
@@ -915,7 +872,7 @@ function getAuditLog_(p) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  البيانات الزراعية (موجودة سابقاً — محتفظ بها)
+//  البيانات الزراعية
 // ═══════════════════════════════════════════════════════════════
 function getCrops_(p) {
   const data = SpreadsheetApp.getActiveSpreadsheet()
@@ -926,10 +883,9 @@ function getCrops_(p) {
 
 function updateCrop_(p) {
   if (!isAdmin_(p._roleId)) return { ok: false, error: 'FORBIDDEN' };
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sh = ss.getSheetByName('Crops');
+  const sh   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Crops');
   const data = sh.getDataRange().getValues();
-  const hdr = data[0]; const idx = c => hdr.indexOf(c);
+  const hdr  = data[0]; const idx = c => hdr.indexOf(c);
   for (let i = 1; i < data.length; i++) {
     if (data[i][idx('CropID')] !== p.cropId) continue;
     const old = data[i][idx('PriceToday')];
@@ -1004,13 +960,11 @@ function getRegions_(p) {
 
 function getStats_(p) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const users    = ss.getSheetByName('Users');
-  const projects = ss.getSheetByName('Projects');
   return {
     ok: true,
     stats: {
-      totalUsers:    Math.max(0, users.getLastRow() - 1),
-      totalProjects: Math.max(0, projects.getLastRow() - 1),
+      totalUsers:    Math.max(0, ss.getSheetByName('Users').getLastRow() - 1),
+      totalProjects: Math.max(0, ss.getSheetByName('Projects').getLastRow() - 1),
       trees:         250000,
       farmers:       12000,
       hectares:      85000
@@ -1044,12 +998,6 @@ function getSetting_(key) {
     const row = data.slice(1).find(r => r[idx('key')] === key);
     return row ? String(row[idx('value')]) : '';
   } catch { return ''; }
-}
-
-function sha256_(str) {
-  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
-    str, Utilities.Charset.UTF_8)
-    .map(b => (b < 0 ? b + 256 : b).toString(16).padStart(2,'0')).join('');
 }
 
 function jsonOut(obj) {
