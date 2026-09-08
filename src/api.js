@@ -8,8 +8,8 @@ export async function apiCall(action, params = {}, token = null) {
     headers,
     body: JSON.stringify({ action, ...params }),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  return data;
 }
 
 export function fmtDate(d) {
