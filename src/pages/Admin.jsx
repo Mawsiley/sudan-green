@@ -262,6 +262,7 @@ function SettingsTab({ api, toast }) {
   // إعداد النظام — متغيرات Netlify
   const [sysVars, setSysVars] = useState({
     APPS_SCRIPT_URL: '',
+    NETLIFY_SITE_ID: '',
     NETLIFY_ACCESS_TOKEN: '',
     NETLIFY_DEPLOY_HOOK: '',
     WHATSAPP_PHONE_NUMBER_ID: '',
@@ -374,7 +375,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
-          💡 يتطلب متغيراً واحداً فقط: <code style={{ background: 'rgba(22,101,52,.1)', padding: '1px 5px', borderRadius: 4 }}>NETLIFY_ACCESS_TOKEN</code> — بدون NETLIFY_SITE_ID (يُحدَّد تلقائياً).
+          💡 أدخل <strong>Site ID</strong> و<strong>Access Token</strong> من Netlify مرة واحدة — بعدها تُحفظ تلقائياً لكل المرات القادمة.
         </div>
 
         <form onSubmit={saveSysVars}>
@@ -414,6 +415,7 @@ function SettingsTab({ api, toast }) {
             الحقول التالية اختيارية — اتركها فارغة إذا لم تحتجها الآن
           </div>
           {[
+            { key: 'NETLIFY_SITE_ID',          label: 'Netlify Site ID',           placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', type: 'text',     hint: 'من Netlify → Site settings → General → Site ID' },
             { key: 'NETLIFY_ACCESS_TOKEN',     label: 'Netlify Access Token',      placeholder: 'nfp_xxxxxxxxxxxx...', type: 'password', hint: 'من netlify.com/user/applications' },
             { key: 'NETLIFY_DEPLOY_HOOK',      label: 'Netlify Deploy Hook (اختياري)', placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
             { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
