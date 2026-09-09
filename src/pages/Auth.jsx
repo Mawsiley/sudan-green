@@ -90,11 +90,15 @@ export default function Auth() {
     if (pwStrength(password) < 2) return toast(t('err.pw_weak'));
     setLoading(true);
     try {
-      const r = await apiCall('register', { name: name.trim(), phone: phone.trim(), password, countryCode: country });
+      const r = await apiCall('register', {
+        fullName: name.trim(), phone: phone.trim(),
+        password, confirmPassword: password,
+        acceptTerms: true, countryCode: country
+      });
       if (r.success) {
         toast(isAr ? 'تم التسجيل! يمكنك الدخول بعد موافقة المشرف.' : 'Registered! You can sign in after admin approval.', 'success');
         setMode('login');
-      } else { toast(r.message || isAr ? 'فشل التسجيل' : 'Registration failed'); }
+      } else { toast(r.message || (isAr ? 'فشل التسجيل' : 'Registration failed')); }
     } catch { toast(t('err.connect')); }
     finally { setLoading(false); }
   }
@@ -108,7 +112,7 @@ export default function Auth() {
       if (r.success) {
         toast(isAr ? 'تم إرسال رمز OTP' : 'OTP sent', 'success');
         setMode('otp'); setTimer(120);
-      } else { toast(r.message || isAr ? 'فشل إرسال الرمز' : 'Failed to send code'); }
+      } else { toast(r.message || (isAr ? 'فشل إرسال الرمز' : 'Failed to send code')); }
     } catch { toast(t('err.connect')); }
     finally { setLoading(false); }
   }
@@ -124,7 +128,7 @@ export default function Auth() {
       if (r.success) {
         toast(isAr ? 'تم تغيير كلمة المرور بنجاح' : 'Password changed successfully', 'success');
         setMode('login'); setOtp(['', '', '', '', '', '']); setNewPw('');
-      } else { toast(r.message || isAr ? 'رمز OTP غير صحيح' : 'Invalid OTP'); }
+      } else { toast(r.message || (isAr ? 'رمز OTP غير صحيح' : 'Invalid OTP')); }
     } catch { toast(t('err.connect')); }
     finally { setLoading(false); }
   }
