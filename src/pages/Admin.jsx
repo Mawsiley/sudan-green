@@ -270,6 +270,8 @@ function SettingsTab({ api, toast }) {
   });
   const [sysLoading, setSysLoading] = useState(false);
   const [sysResult, setSysResult] = useState(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [testResult, setTestResult] = useState(null);
 
   useEffect(() => {
     api('getSettings').then(r => {
@@ -313,6 +315,19 @@ function SettingsTab({ api, toast }) {
       }
     } catch { toast('خطأ في الاتصال'); }
     finally { setSyncing(false); }
+  }
+
+  async function testConnection() {
+    const url = sysVars.APPS_SCRIPT_URL.trim();
+    setTestLoading(true);
+    setTestResult(null);
+    try {
+      const r = await api('testGasConnection', { url: url || undefined });
+      setTestResult({ ok: r.success, message: r.message, data: r.data });
+      if (r.success) toast(r.message, 'success');
+      else toast(r.message || 'فشل الاختبار');
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setTestLoading(false); }
   }
 
   async function saveSysVars(e) {
@@ -362,25 +377,59 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <form onSubmit={saveSysVars}>
+          {/* ── رابط Apps Script — مطلوب + زر اختبار ── */}
+          <div className="field" style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 12, color: '#0B3D22', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              رابط Apps Script (exec) <span style={{ color: '#DC2626' }}>*</span>
+              <code style={{ fontSize: 10, background: 'rgba(26,154,72,.1)', padding: '1px 6px', borderRadius: 4, color: '#1A9A48' }}>APPS_SCRIPT_URL</code>
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                type="url"
+                value={sysVars.APPS_SCRIPT_URL}
+                onChange={e => { setSysVars(v => ({ ...v, APPS_SCRIPT_URL: e.target.value })); setTestResult(null); }}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                style={{ flex: 1, background: '#fff', border: `1.5px solid ${testResult ? (testResult.ok ? '#16A34A' : '#DC2626') : 'rgba(26,154,72,.3)'}`, borderRadius: 8, padding: '9px 12px', fontSize: 13, fontFamily: 'monospace', direction: 'ltr' }}
+              />
+              <button type="button" onClick={testConnection} disabled={testLoading}
+                style={{ whiteSpace: 'nowrap', padding: '9px 16px', background: testResult?.ok ? '#DCFCE7' : '#F0FDF4', border: `1.5px solid ${testResult?.ok ? '#16A34A' : 'rgba(26,154,72,.4)'}`, borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: testResult?.ok ? '#166534' : '#0B3D22' }}>
+                {testLoading ? '⏳' : testResult?.ok ? '✅ متصل' : '🔗 اختبار'}
+              </button>
+            </div>
+            {testResult && (
+              <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, fontSize: 12, background: testResult.ok ? '#DCFCE7' : '#FEE2E2', color: testResult.ok ? '#166534' : '#991B1B', border: `1px solid ${testResult.ok ? '#86EFAC' : '#FECACA'}` }}>
+                {testResult.message}
+                {testResult.ok && testResult.data?.stats && (
+                  <span style={{ marginRight: 8, opacity: 0.8 }}>
+                    | مستخدمون: {testResult.data.stats.totalUsers ?? '?'} | مشاريع: {testResult.data.stats.totalProjects ?? '?'}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── باقي الحقول اختيارية ── */}
+          <div style={{ fontSize: 12, color: '#587A68', marginBottom: 10, fontWeight: 600 }}>
+            الحقول التالية اختيارية — اتركها فارغة إذا لم تحتجها الآن
+          </div>
           {[
-            { key: 'APPS_SCRIPT_URL',         label: 'رابط Apps Script (exec)', placeholder: 'https://script.google.com/macros/s/.../exec', type: 'url' },
             { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
-            { key: 'WHATSAPP_ACCESS_TOKEN',     label: 'واتساب — Access Token', placeholder: 'EAAxxxxx...', type: 'password' },
-            { key: 'WHATSAPP_ADMIN_PHONE',      label: 'واتساب — رقم المدير (للإشعارات)', placeholder: '+249912345678', type: 'text' },
-            { key: 'ALLOWED_ORIGIN',            label: 'النطاق المسموح (CORS)', placeholder: 'https://your-site.netlify.app', type: 'url' },
-            { key: 'NETLIFY_DEPLOY_HOOK',       label: 'Netlify Deploy Hook URL (اختياري)', placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
+            { key: 'WHATSAPP_ACCESS_TOKEN',    label: 'واتساب — Access Token',    placeholder: 'EAAxxxxx...',      type: 'password' },
+            { key: 'WHATSAPP_ADMIN_PHONE',     label: 'واتساب — رقم المدير',      placeholder: '+249912345678',    type: 'text' },
+            { key: 'ALLOWED_ORIGIN',           label: 'النطاق المسموح (CORS)',    placeholder: 'https://your-site.netlify.app', type: 'url' },
+            { key: 'NETLIFY_DEPLOY_HOOK',      label: 'Netlify Deploy Hook',       placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
           ].map(({ key, label, placeholder, type }) => (
-            <div key={key} className="field" style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, color: '#0B3D22' }}>
+            <div key={key} className="field" style={{ marginBottom: 10 }}>
+              <label style={{ fontSize: 12, color: '#3A5C4A', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {label}
-                <code style={{ marginRight: 6, fontSize: 10, background: 'rgba(26,154,72,.1)', padding: '1px 6px', borderRadius: 4, color: '#1A9A48' }}>{key}</code>
+                <code style={{ fontSize: 10, background: 'rgba(26,154,72,.08)', padding: '1px 5px', borderRadius: 4, color: '#587A68' }}>{key}</code>
               </label>
               <input
                 type={type}
                 value={sysVars[key]}
                 onChange={e => setSysVars(v => ({ ...v, [key]: e.target.value }))}
                 placeholder={placeholder}
-                style={{ background: '#fff', border: '1.5px solid rgba(26,154,72,.3)', borderRadius: 8, padding: '9px 12px', fontSize: 13, width: '100%', fontFamily: 'monospace', direction: 'ltr' }}
+                style={{ background: '#fff', border: '1.5px solid rgba(26,154,72,.2)', borderRadius: 8, padding: '8px 12px', fontSize: 13, width: '100%', fontFamily: 'monospace', direction: 'ltr', marginTop: 4 }}
               />
             </div>
           ))}

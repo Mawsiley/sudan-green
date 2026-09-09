@@ -174,6 +174,7 @@ exports.handler = async (event) => {
       case 'sendWATest':            result = await doWATest(body, bearerToken);             break;
       case 'syncApiSecret':         result = await doSyncApiSecret(body, bearerToken);      break;
       case 'updateNetlifyEnv':      result = await doUpdateNetlifyEnv(body, bearerToken);   break;
+      case 'testGasConnection':     result = await doTestGasConnection(body, bearerToken);  break;
       default:                      result = await doProxy(body, bearerToken);
     }
 
@@ -630,6 +631,39 @@ async function doSyncApiSecret(b, token) {
 // ═══════════════════════════════════════════════════════════════
 //  updateNetlifyEnv — تحديث متغيرات Netlify من لوحة المدير
 // ═══════════════════════════════════════════════════════════════
+async function doTestGasConnection(b, token) {
+  const p = verifyJWT(token);
+  if (!p || !['settings_admin','admin','super_admin'].includes(p.roleId))
+    return fail('FORBIDDEN', 'غير مصرح');
+
+  const testUrl = (b.url || '').trim() || GAS_URL;
+  if (!testUrl) return fail('MISSING_URL', 'أدخل رابط Apps Script أولاً');
+  if (!testUrl.includes('script.google.com'))
+    return fail('INVALID_URL', 'الرابط يجب أن يكون من script.google.com');
+
+  try {
+    const res = await fetch(testUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body:    JSON.stringify({ action: 'getStats' }),
+      signal:  AbortSignal.timeout(20000)
+    });
+    if (!res.ok) return fail('HTTP_ERROR', `Apps Script أعاد: HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.ok) {
+      return ok({
+        connected: true,
+        stats: data.stats || {},
+        url: testUrl
+      }, `✅ الاتصال ناجح — ${data.stats?.totalUsers ?? '?'} مستخدم، ${data.stats?.totalProjects ?? '?'} مشروع`);
+    }
+    return fail('GAS_ERROR', data.message || 'Apps Script أعاد استجابة غير متوقعة');
+  } catch (e) {
+    if (e.name === 'TimeoutError') return fail('TIMEOUT', 'انتهت مهلة الاتصال (20 ثانية) — تحقق من النشر كـ Anyone');
+    return fail('CONNECTION_FAILED', `تعذر الاتصال: ${e.message}`);
+  }
+}
+
 async function doUpdateNetlifyEnv(b, token) {
   const p = verifyJWT(token);
   if (!p || p.roleId !== 'settings_admin')
