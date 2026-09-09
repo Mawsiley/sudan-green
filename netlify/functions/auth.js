@@ -5,18 +5,30 @@
 // ═══════════════════════════════════════════════════════════════
 'use strict';
 const crypto = require('crypto');
-// @netlify/blobs removed — using Netlify API with auto-injected SITE_ID instead
 
-// ── متغيرات البيئة (أسماء موحدة مع القالب الأساسي) ──────────
+// ── متغيرات البيئة الأساسية ───────────────────────────────────
 const GAS_URL        = process.env.APPS_SCRIPT_URL            || '';
 const GAS_SECRET     = process.env.APPS_SCRIPT_SHARED_SECRET  || '';
 const PEPPER         = process.env.AUTH_PASSWORD_PEPPER        || '';
 const JWT_SECRET     = process.env.SETTINGS_SESSION_SECRET     || '';
 const OTP_SECRET     = process.env.AUTH_OTP_SECRET             || '';
-const WA_PHONE_ID    = process.env.WHATSAPP_PHONE_NUMBER_ID    || '';
-const WA_TOKEN       = process.env.WHATSAPP_ACCESS_TOKEN       || '';
-const WA_ADMIN       = process.env.WHATSAPP_ADMIN_PHONE        || '';
 const ALLOWED        = process.env.ALLOWED_ORIGIN              || '*';
+
+// ── Remote config cache (يُقرأ من Apps Script ويُخزَّن 5 دقائق) ─
+let _rcache = null; let _rcacheAt = 0;
+async function remoteVar(key) {
+  const now = Date.now();
+  if (!_rcache || now - _rcacheAt > 300000) {
+    try {
+      const r = await gas('getConfig', {});
+      if (r?.ok && r.config) { _rcache = r.config; _rcacheAt = now; }
+    } catch { _rcache = _rcache || {}; }
+  }
+  return (_rcache && _rcache[key]) || '';
+}
+async function getWaPhoneId() { return process.env.WHATSAPP_PHONE_NUMBER_ID || await remoteVar('WHATSAPP_PHONE_NUMBER_ID'); }
+async function getWaToken()   { return process.env.WHATSAPP_ACCESS_TOKEN    || await remoteVar('WHATSAPP_ACCESS_TOKEN'); }
+async function getWaAdmin()   { return process.env.WHATSAPP_ADMIN_PHONE     || await remoteVar('WHATSAPP_ADMIN_PHONE'); }
 // مدير الإعدادات — يُتحقق منه هنا فقط، لا يُحفظ في Sheets أبداً
 const SETTINGS_ADMIN = process.env.SETTINGS_ADMIN_ACCOUNT      || '';
 const SETTINGS_PIN   = process.env.SETTINGS_ADMIN_PIN          || '';
@@ -677,7 +689,7 @@ async function doUpdateNetlifyEnv(b, token) {
 
   const BLOCKED = new Set([
     'SETTINGS_SESSION_SECRET','AUTH_PASSWORD_PEPPER','AUTH_OTP_SECRET',
-    'SETTINGS_ADMIN_ACCOUNT','SETTINGS_ADMIN_PIN'
+    'SETTINGS_ADMIN_ACCOUNT','SETTINGS_ADMIN_PIN','API_SHARED_SECRET'
   ]);
 
   const { vars } = b;
@@ -689,85 +701,30 @@ async function doUpdateNetlifyEnv(b, token) {
       return fail('FORBIDDEN', `لا يمكن تغيير ${key} من هنا لأسباب أمنية`);
   }
 
-  // Bootstrap: يمكن إرسال القيم في الطلب مباشرة عند الإعداد الأول
-  const SITE_ID  = process.env.NETLIFY_SITE_ID || process.env.SITE_ID || vars.NETLIFY_SITE_ID || '';
-  const NF_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || vars.NETLIFY_ACCESS_TOKEN || '';
+  // تحقق من وجود رابط Apps Script
+  const url = await getGasUrl();
+  if (!url)
+    return fail('NOT_CONFIGURED', 'أدخل رابط Apps Script أولاً في حقل APPS_SCRIPT_URL');
 
-  if (!SITE_ID)
-    return fail('NOT_CONFIGURED', 'أدخل NETLIFY_SITE_ID في الحقل أعلاه — من Netlify → Site settings → General → Site ID');
-  if (!NF_TOKEN)
-    return fail('NOT_CONFIGURED', 'أدخل NETLIFY_ACCESS_TOKEN في الحقل أعلاه — من netlify.com/user/applications');
-
-  const nfHeaders = { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' };
-
-  // جلب بيانات الموقع للحصول على account_slug
-  let accountSlug = '';
+  // حفظ في Apps Script Script Properties — لا يحتاج Netlify API
   try {
-    const siteRes = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}`, {
-      headers: nfHeaders, signal: AbortSignal.timeout(10000)
-    });
-    if (!siteRes.ok) {
-      if (siteRes.status === 404) return fail('NETLIFY_ERROR', 'Site ID غير صحيح — تحقق من Netlify → Site settings → General → Site ID');
-      if (siteRes.status === 401) return fail('NETLIFY_ERROR', 'Access Token غير صحيح أو منتهي الصلاحية');
-      return fail('NETLIFY_ERROR', `خطأ في التحقق: ${siteRes.status}`);
+    const configs = {};
+    for (const [k, v] of Object.entries(vars)) {
+      if (String(v).trim()) configs[k] = String(v);
     }
-    const siteData = await siteRes.json();
-    accountSlug = siteData.account_slug || siteData.account_id || '';
+    const r = await gas('saveConfig', { configs });
+    if (!r?.ok) return fail('GAS_ERROR', 'فشل الحفظ في Apps Script');
+
+    // مسح الكاش لإجبار القراءة من جديد
+    _rcache = null; _rcacheAt = 0;
+
+    return ok(
+      { updatedKeys: r.saved || Object.keys(configs), redeploying: false },
+      `✅ تم حفظ ${(r.saved || Object.keys(configs)).length} إعداد في Apps Script — يعمل فوراً`
+    );
   } catch (e) {
-    return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify: ${e.message}`);
+    return fail('GAS_ERROR', `فشل الحفظ: ${e.message}`);
   }
-
-  if (!accountSlug)
-    return fail('NETLIFY_ERROR', 'تعذر تحديد حساب Netlify — جرّب مرة أخرى');
-
-  // حفظ كل متغير على مستوى الحساب (account-level env vars)
-  const toSave = Object.entries(vars).filter(([, v]) => v !== '');
-  const failed = [];
-  for (const [key, value] of toSave) {
-    try {
-      const r = await fetch(`https://api.netlify.com/api/v1/accounts/${accountSlug}/env/${key}`, {
-        method: 'PUT',
-        headers: nfHeaders,
-        body: JSON.stringify({
-          key,
-          scopes: ['functions','builds','runtime'],
-          values: [{ value: String(value), context: 'all' }]
-        }),
-        signal: AbortSignal.timeout(10000)
-      });
-      if (!r.ok) {
-        // إن لم يكن موجوداً ابعث POST لإنشائه
-        const c = await fetch(`https://api.netlify.com/api/v1/accounts/${accountSlug}/env`, {
-          method: 'POST',
-          headers: nfHeaders,
-          body: JSON.stringify([{
-            key,
-            scopes: ['functions','builds','runtime'],
-            values: [{ value: String(value), context: 'all' }]
-          }]),
-          signal: AbortSignal.timeout(10000)
-        });
-        if (!c.ok) failed.push(key);
-      }
-    } catch { failed.push(key); }
-  }
-  if (failed.length) return fail('NETLIFY_ERROR', `فشل حفظ: ${failed.join(', ')}`);
-
-  const DEPLOY_HOOK = process.env.NETLIFY_DEPLOY_HOOK || '';
-  let redeploying = false;
-  if (DEPLOY_HOOK) {
-    try {
-      const hr = await fetch(DEPLOY_HOOK, { method: 'POST', signal: AbortSignal.timeout(10000) });
-      redeploying = hr.ok;
-    } catch {}
-  }
-
-  return ok(
-    { updatedKeys: Object.keys(vars), redeploying },
-    redeploying
-      ? `✅ تم حفظ ${Object.keys(vars).length} متغير — جارٍ إعادة النشر (~دقيقتان)`
-      : `✅ تم حفظ ${Object.keys(vars).length} متغير في Netlify — أعد نشر الموقع لتفعيلها`
-  );
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -262,9 +262,6 @@ function SettingsTab({ api, toast }) {
   // إعداد النظام — متغيرات Netlify
   const [sysVars, setSysVars] = useState({
     APPS_SCRIPT_URL: '',
-    NETLIFY_SITE_ID: '',
-    NETLIFY_ACCESS_TOKEN: '',
-    NETLIFY_DEPLOY_HOOK: '',
     WHATSAPP_PHONE_NUMBER_ID: '',
     WHATSAPP_ACCESS_TOKEN: '',
     WHATSAPP_ADMIN_PHONE: '',
@@ -375,7 +372,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
-          💡 أدخل <strong>Site ID</strong> و<strong>Access Token</strong> من Netlify مرة واحدة — بعدها تُحفظ تلقائياً لكل المرات القادمة.
+          ✅ المتغيرات تُحفظ مباشرة في Apps Script — تعمل فوراً بدون إعادة نشر ولا Netlify API.
         </div>
 
         <form onSubmit={saveSysVars}>
@@ -415,12 +412,9 @@ function SettingsTab({ api, toast }) {
             الحقول التالية اختيارية — اتركها فارغة إذا لم تحتجها الآن
           </div>
           {[
-            { key: 'NETLIFY_SITE_ID',          label: 'Netlify Site ID',           placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', type: 'text',     hint: 'من Netlify → Site settings → General → Site ID' },
-            { key: 'NETLIFY_ACCESS_TOKEN',     label: 'Netlify Access Token',      placeholder: 'nfp_xxxxxxxxxxxx...', type: 'password', hint: 'من netlify.com/user/applications' },
-            { key: 'NETLIFY_DEPLOY_HOOK',      label: 'Netlify Deploy Hook (اختياري)', placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
-            { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
-            { key: 'WHATSAPP_ACCESS_TOKEN',    label: 'واتساب — Access Token',    placeholder: 'EAAxxxxx...',      type: 'password' },
-            { key: 'WHATSAPP_ADMIN_PHONE',     label: 'واتساب — رقم المدير',      placeholder: '+249912345678',    type: 'text' },
+            { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345',               type: 'text' },
+            { key: 'WHATSAPP_ACCESS_TOKEN',    label: 'واتساب — Access Token',    placeholder: 'EAAxxxxx...',                   type: 'password' },
+            { key: 'WHATSAPP_ADMIN_PHONE',     label: 'واتساب — رقم المدير',      placeholder: '+249912345678',                 type: 'text' },
             { key: 'ALLOWED_ORIGIN',           label: 'النطاق المسموح (CORS)',    placeholder: 'https://your-site.netlify.app', type: 'url' },
           ].map(({ key, label, placeholder, type, hint }) => (
             <div key={key} className="field" style={{ marginBottom: 10 }}>

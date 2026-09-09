@@ -98,6 +98,10 @@ function doPost(e) {
       // ── تزامن السر المشترك (من Netlify Function — settings_admin)
       case 'syncSecretGas':       return jsonOut(syncSecretGas_(data));
 
+      // ── إعدادات النظام (settings_admin فقط — محمية بالسر)
+      case 'saveConfig':          return jsonOut(saveConfig_(data));
+      case 'getConfig':           return jsonOut(getConfig_(data));
+
       // ── إجراءات Dashboard الجديدة
       case 'getDashboard':        return jsonOut(getDashboard_(data));
       case 'updateCropPrice':     return jsonOut(updateCropPrice_(data));
@@ -1046,6 +1050,29 @@ function syncSecretGas_(p) {
     Logger.log('syncSecretGas_ error: ' + err);
     return { ok: false, error: 'INTERNAL_ERROR', message: err.toString() };
   }
+}
+
+// ── saveConfig_ — يحفظ إعدادات النظام في Script Properties ───
+function saveConfig_(p) {
+  const configs = p.configs || {};
+  const BLOCKED = new Set(['API_SHARED_SECRET']);
+  const props = PropertiesService.getScriptProperties();
+  const saved = [];
+  for (const k in configs) {
+    if (!BLOCKED.has(k) && String(configs[k]).trim()) {
+      props.setProperty(k, String(configs[k]));
+      saved.push(k);
+    }
+  }
+  return { ok: true, saved };
+}
+
+// ── getConfig_ — يقرأ إعدادات النظام من Script Properties ────
+function getConfig_(p) {
+  const SENSITIVE = new Set(['API_SHARED_SECRET']);
+  const all = PropertiesService.getScriptProperties().getProperties();
+  for (const k of SENSITIVE) delete all[k];
+  return { ok: true, config: all };
 }
 
 // ── getDashboard_ ─────────────────────────────────────────────
