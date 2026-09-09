@@ -698,29 +698,42 @@ async function doUpdateNetlifyEnv(b, token) {
   if (!NF_TOKEN)
     return fail('NOT_CONFIGURED', 'أدخل NETLIFY_ACCESS_TOKEN في الحقل أعلاه — من netlify.com/user/applications');
 
-  const entries = Object.entries(vars).map(([key, value]) => ({
-    key,
-    scopes: ['functions','builds','runtime'],
-    values: [{ value: String(value), context: 'all' }]
-  }));
-
+  // تحقق من Site ID أولاً
   try {
-    const nr = await fetch(
-      `https://api.netlify.com/api/v1/sites/${SITE_ID}/env`,
-      {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(entries),
-        signal: AbortSignal.timeout(15000)
-      }
-    );
-    if (!nr.ok) {
-      const txt = await nr.text().catch(() => '');
-      return fail('NETLIFY_ERROR', `Netlify API أعاد ${nr.status}: ${txt.slice(0,200)}`);
+    const check = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}`, {
+      headers: { 'Authorization': `Bearer ${NF_TOKEN}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!check.ok) {
+      const txt = await check.text().catch(() => '');
+      if (check.status === 404) return fail('NETLIFY_ERROR', 'Site ID غير صحيح — تحقق من Netlify → Site settings → General → Site ID');
+      if (check.status === 401) return fail('NETLIFY_ERROR', 'Access Token غير صحيح أو منتهي الصلاحية');
+      return fail('NETLIFY_ERROR', `خطأ في التحقق ${check.status}: ${txt.slice(0,100)}`);
     }
   } catch (e) {
-    return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify API: ${e.message}`);
+    return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify: ${e.message}`);
   }
+
+  // حفظ كل متغير بـ PUT (يُنشئ أو يُحدِّث)
+  const headers = { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' };
+  const failed = [];
+  for (const [key, value] of Object.entries(vars)) {
+    if (!value) continue; // تجاهل الحقول الفارغة
+    try {
+      const r = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/env/${key}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          key,
+          scopes: ['functions','builds','runtime'],
+          values: [{ value: String(value), context: 'all' }]
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!r.ok) failed.push(key);
+    } catch { failed.push(key); }
+  }
+  if (failed.length) return fail('NETLIFY_ERROR', `فشل حفظ: ${failed.join(', ')}`);
 
   const DEPLOY_HOOK = process.env.NETLIFY_DEPLOY_HOOK || '';
   let redeploying = false;
