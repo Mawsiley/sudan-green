@@ -698,31 +698,36 @@ async function doUpdateNetlifyEnv(b, token) {
   if (!NF_TOKEN)
     return fail('NOT_CONFIGURED', 'أدخل NETLIFY_ACCESS_TOKEN في الحقل أعلاه — من netlify.com/user/applications');
 
-  // تحقق من Site ID أولاً
+  const nfHeaders = { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' };
+
+  // جلب بيانات الموقع للحصول على account_slug
+  let accountSlug = '';
   try {
-    const check = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}`, {
-      headers: { 'Authorization': `Bearer ${NF_TOKEN}` },
-      signal: AbortSignal.timeout(10000)
+    const siteRes = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}`, {
+      headers: nfHeaders, signal: AbortSignal.timeout(10000)
     });
-    if (!check.ok) {
-      const txt = await check.text().catch(() => '');
-      if (check.status === 404) return fail('NETLIFY_ERROR', 'Site ID غير صحيح — تحقق من Netlify → Site settings → General → Site ID');
-      if (check.status === 401) return fail('NETLIFY_ERROR', 'Access Token غير صحيح أو منتهي الصلاحية');
-      return fail('NETLIFY_ERROR', `خطأ في التحقق ${check.status}: ${txt.slice(0,100)}`);
+    if (!siteRes.ok) {
+      if (siteRes.status === 404) return fail('NETLIFY_ERROR', 'Site ID غير صحيح — تحقق من Netlify → Site settings → General → Site ID');
+      if (siteRes.status === 401) return fail('NETLIFY_ERROR', 'Access Token غير صحيح أو منتهي الصلاحية');
+      return fail('NETLIFY_ERROR', `خطأ في التحقق: ${siteRes.status}`);
     }
+    const siteData = await siteRes.json();
+    accountSlug = siteData.account_slug || siteData.account_id || '';
   } catch (e) {
     return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify: ${e.message}`);
   }
 
-  // حفظ كل متغير بـ PUT (يُنشئ أو يُحدِّث)
-  const headers = { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' };
+  if (!accountSlug)
+    return fail('NETLIFY_ERROR', 'تعذر تحديد حساب Netlify — جرّب مرة أخرى');
+
+  // حفظ كل متغير على مستوى الحساب (account-level env vars)
+  const toSave = Object.entries(vars).filter(([, v]) => v !== '');
   const failed = [];
-  for (const [key, value] of Object.entries(vars)) {
-    if (!value) continue; // تجاهل الحقول الفارغة
+  for (const [key, value] of toSave) {
     try {
-      const r = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/env/${key}`, {
+      const r = await fetch(`https://api.netlify.com/api/v1/accounts/${accountSlug}/env/${key}`, {
         method: 'PUT',
-        headers,
+        headers: nfHeaders,
         body: JSON.stringify({
           key,
           scopes: ['functions','builds','runtime'],
@@ -730,7 +735,20 @@ async function doUpdateNetlifyEnv(b, token) {
         }),
         signal: AbortSignal.timeout(10000)
       });
-      if (!r.ok) failed.push(key);
+      if (!r.ok) {
+        // إن لم يكن موجوداً ابعث POST لإنشائه
+        const c = await fetch(`https://api.netlify.com/api/v1/accounts/${accountSlug}/env`, {
+          method: 'POST',
+          headers: nfHeaders,
+          body: JSON.stringify([{
+            key,
+            scopes: ['functions','builds','runtime'],
+            values: [{ value: String(value), context: 'all' }]
+          }]),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!c.ok) failed.push(key);
+      }
     } catch { failed.push(key); }
   }
   if (failed.length) return fail('NETLIFY_ERROR', `فشل حفظ: ${failed.join(', ')}`);
