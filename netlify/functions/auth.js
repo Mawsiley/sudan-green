@@ -92,8 +92,17 @@ function normalizePhone(phone, cc = '249') {
 }
 
 // ── Netlify Blobs store (لتخزين APPS_SCRIPT_URL بين البارد والساخن) ─
+// SITE_ID يُحقن تلقائياً من Netlify runtime — لا حاجة لإضافته يدوياً
+// NETLIFY_ACCESS_TOKEN مطلوب مرة واحدة فقط في Netlify → Environment Variables
 function cfgStore() {
-  return getStore({ name: 'app-config' });
+  // إذا كان NETLIFY_BLOBS_CONTEXT متاحاً (runtime جديد) يعمل تلقائياً
+  if (process.env.NETLIFY_BLOBS_CONTEXT) {
+    return getStore({ name: 'app-config' });
+  }
+  const siteID = process.env.SITE_ID || process.env.NETLIFY_SITE_ID || '';
+  const token  = process.env.NETLIFY_ACCESS_TOKEN || '';
+  if (!siteID || !token) throw new Error('BLOBS_NOT_CONFIGURED');
+  return getStore({ name: 'app-config', siteID, token });
 }
 
 // ── Google Apps Script ───────────────────────────────────────
@@ -728,7 +737,11 @@ async function doUpdateNetlifyEnv(b, token) {
       GAS_URL_BLOB = newGasUrl;   // تحديث الكاش الداخلي فوراً
       savedKeys.push('APPS_SCRIPT_URL');
     } catch (e) {
-      return fail('STORE_ERROR', `فشل حفظ الرابط في Netlify Blobs: ${e.message}`);
+      if (e.message === 'BLOBS_NOT_CONFIGURED') {
+        return fail('BLOBS_NOT_CONFIGURED',
+          'أضف NETLIFY_ACCESS_TOKEN في Netlify → Environment Variables مرة واحدة فقط (من User Settings → Personal access tokens)');
+      }
+      return fail('STORE_ERROR', `فشل حفظ الرابط: ${e.message}`);
     }
   }
 
