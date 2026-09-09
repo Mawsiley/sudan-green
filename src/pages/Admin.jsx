@@ -259,6 +259,19 @@ function SettingsTab({ api, toast }) {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
 
+  // إعداد النظام — متغيرات Netlify
+  const [sysVars, setSysVars] = useState({
+    APPS_SCRIPT_URL: '',
+    APPS_SCRIPT_SHARED_SECRET: '',
+    WHATSAPP_PHONE_NUMBER_ID: '',
+    WHATSAPP_ACCESS_TOKEN: '',
+    WHATSAPP_ADMIN_PHONE: '',
+    ALLOWED_ORIGIN: '',
+    NETLIFY_DEPLOY_HOOK: '',
+  });
+  const [sysLoading, setSysLoading] = useState(false);
+  const [sysResult, setSysResult] = useState(null);
+
   useEffect(() => {
     api('getSettings').then(r => {
       if (r.success) {
@@ -303,11 +316,102 @@ function SettingsTab({ api, toast }) {
     finally { setSyncing(false); }
   }
 
+  async function saveSysVars(e) {
+    e.preventDefault();
+    const toSend = Object.fromEntries(
+      Object.entries(sysVars).filter(([, v]) => v.trim() !== '')
+    );
+    if (Object.keys(toSend).length === 0)
+      return toast('أدخل متغيراً واحداً على الأقل');
+    if (toSend.APPS_SCRIPT_URL && !toSend.APPS_SCRIPT_URL.includes('script.google.com'))
+      return toast('رابط Apps Script يجب أن يحتوي على script.google.com');
+    setSysLoading(true);
+    setSysResult(null);
+    try {
+      const r = await api('updateNetlifyEnv', { vars: toSend });
+      if (r.success) {
+        setSysResult({ ok: true, data: r.data, message: r.message });
+        toast(r.message, 'success');
+        setSysVars(v => Object.fromEntries(Object.keys(v).map(k => [k, ''])));
+      } else {
+        setSysResult({ ok: false, message: r.message });
+        toast(r.message || 'فشل التحديث');
+      }
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setSysLoading(false); }
+  }
+
   const secretStrength = secret.newSecret.length >= 32 ? 'قوي جداً' : secret.newSecret.length >= 24 ? 'جيد' : secret.newSecret.length >= 16 ? 'مقبول' : '';
   const secretColor    = secret.newSecret.length >= 32 ? '#16A34A' : secret.newSecret.length >= 24 ? '#D97706' : '#DC2626';
 
   return (
     <div style={{ maxWidth: 600 }}>
+      {/* ══ إعداد النظام — متغيرات Netlify ══ */}
+      <div style={{ ...S.panel, border: '2px solid rgba(26,154,72,.3)', background: '#F0FDF4', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: 24 }}>⚙️</span>
+          <div>
+            <h3 style={{ ...S.panelTitle, color: '#0B3D22', marginBottom: 2 }}>إعداد النظام</h3>
+            <p style={{ fontSize: 12, color: '#587A68' }}>
+              أدخل المتغيرات التي تريد تحديثها — الحقول الفارغة تُتجاهَل
+            </p>
+          </div>
+        </div>
+
+        <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
+          💡 يتطلب: <strong>NETLIFY_SITE_ID</strong> و <strong>NETLIFY_ACCESS_TOKEN</strong> في Netlify. بعد الحفظ يُعاد النشر تلقائياً (~دقيقتان).
+        </div>
+
+        <form onSubmit={saveSysVars}>
+          {[
+            { key: 'APPS_SCRIPT_URL',          label: 'رابط Apps Script (exec)', placeholder: 'https://script.google.com/macros/s/.../exec', type: 'url' },
+            { key: 'APPS_SCRIPT_SHARED_SECRET', label: 'السر المشترك مع Apps Script', placeholder: 'كلمة سر قوية 32+ حرف', type: 'text' },
+            { key: 'WHATSAPP_PHONE_NUMBER_ID',  label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
+            { key: 'WHATSAPP_ACCESS_TOKEN',     label: 'واتساب — Access Token', placeholder: 'EAAxxxxx...', type: 'password' },
+            { key: 'WHATSAPP_ADMIN_PHONE',      label: 'واتساب — رقم المدير (للإشعارات)', placeholder: '+249912345678', type: 'text' },
+            { key: 'ALLOWED_ORIGIN',            label: 'النطاق المسموح (CORS)', placeholder: 'https://your-site.netlify.app', type: 'url' },
+            { key: 'NETLIFY_DEPLOY_HOOK',       label: 'Netlify Deploy Hook URL (اختياري)', placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
+          ].map(({ key, label, placeholder, type }) => (
+            <div key={key} className="field" style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: '#0B3D22' }}>
+                {label}
+                <code style={{ marginRight: 6, fontSize: 10, background: 'rgba(26,154,72,.1)', padding: '1px 6px', borderRadius: 4, color: '#1A9A48' }}>{key}</code>
+              </label>
+              <input
+                type={type}
+                value={sysVars[key]}
+                onChange={e => setSysVars(v => ({ ...v, [key]: e.target.value }))}
+                placeholder={placeholder}
+                style={{ background: '#fff', border: '1.5px solid rgba(26,154,72,.3)', borderRadius: 8, padding: '9px 12px', fontSize: 13, width: '100%', fontFamily: 'monospace', direction: 'ltr' }}
+              />
+            </div>
+          ))}
+
+          <button type="submit" className="btn btn-primary" disabled={sysLoading}
+            style={{ width: '100%', marginTop: 8 }}>
+            {sysLoading ? '⏳ جاري الحفظ في Netlify...' : '💾 حفظ وإعادة النشر'}
+          </button>
+        </form>
+
+        {sysResult && (
+          <div style={{ marginTop: 14, background: sysResult.ok ? '#DCFCE7' : '#FEE2E2', border: `1px solid ${sysResult.ok ? '#86EFAC' : '#FECACA'}`, borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+            {sysResult.ok ? (
+              <>
+                <div style={{ color: '#166534', fontWeight: 700, marginBottom: 4 }}>✅ {sysResult.message}</div>
+                <div style={{ color: '#166534' }}>
+                  المتغيرات المحدَّثة: {sysResult.data?.updatedKeys?.join(' • ') || '—'}
+                </div>
+                {sysResult.data?.redeploying && (
+                  <div style={{ color: '#15803D', marginTop: 4 }}>🔄 الموقع يُعاد بناؤه — انتظر دقيقتين ثم أعد تسجيل الدخول</div>
+                )}
+              </>
+            ) : (
+              <div style={{ color: '#991B1B', fontWeight: 600 }}>❌ {sysResult.message}</div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* ── قسم تزامن السر المشترك ── */}
       <div style={{ ...S.panel, border: '2px solid rgba(220,38,38,.2)', background: '#FFF8F8' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>

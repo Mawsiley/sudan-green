@@ -172,6 +172,7 @@ exports.handler = async (event) => {
       case 'getCurrentUser':        result = await doGetCurrentUser(bearerToken);           break;
       case 'sendWATest':            result = await doWATest(body, bearerToken);             break;
       case 'syncApiSecret':         result = await doSyncApiSecret(body, bearerToken);      break;
+      case 'updateNetlifyEnv':      result = await doUpdateNetlifyEnv(body, bearerToken);   break;
       default:                      result = await doProxy(body, bearerToken);
     }
 
@@ -622,6 +623,83 @@ async function doSyncApiSecret(b, token) {
     redeploying
       ? 'تم تحديث السر — سيُعاد تشغيل الموقع خلال دقيقتين'
       : 'تم تحديث السر في جداول البيانات وNetlify'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  updateNetlifyEnv — تحديث متغيرات Netlify من لوحة المدير
+// ═══════════════════════════════════════════════════════════════
+async function doUpdateNetlifyEnv(b, token) {
+  const p = verifyJWT(token);
+  if (!p || p.roleId !== 'settings_admin')
+    return fail('FORBIDDEN', 'هذا الإجراء متاح لمدير الإعدادات فقط');
+
+  const BLOCKED = new Set([
+    'SETTINGS_SESSION_SECRET','AUTH_PASSWORD_PEPPER','AUTH_OTP_SECRET',
+    'SETTINGS_ADMIN_ACCOUNT','SETTINGS_ADMIN_PIN',
+    'NETLIFY_ACCESS_TOKEN','NETLIFY_SITE_ID'
+  ]);
+
+  const { vars } = b;
+  if (!vars || typeof vars !== 'object' || Object.keys(vars).length === 0)
+    return fail('MISSING_FIELDS', 'لا توجد متغيرات للتحديث');
+
+  for (const key of Object.keys(vars)) {
+    if (BLOCKED.has(key))
+      return fail('FORBIDDEN', `لا يمكن تغيير ${key} من هنا لأسباب أمنية`);
+  }
+
+  const NETLIFY_SITE_ID = process.env.NETLIFY_SITE_ID       || '';
+  const NETLIFY_TOKEN   = process.env.NETLIFY_ACCESS_TOKEN  || '';
+  const DEPLOY_HOOK     = process.env.NETLIFY_DEPLOY_HOOK   || '';
+
+  if (!NETLIFY_SITE_ID || !NETLIFY_TOKEN)
+    return fail('NOT_CONFIGURED',
+      'يجب إضافة NETLIFY_SITE_ID و NETLIFY_ACCESS_TOKEN في Netlify أولاً');
+
+  const entries = Object.entries(vars).map(([key, value]) => ({
+    key,
+    scopes: ['functions', 'builds', 'runtime'],
+    values: [{ value: String(value), context: 'all' }]
+  }));
+
+  try {
+    const nr = await fetch(
+      `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/env`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(entries),
+        signal: AbortSignal.timeout(15000)
+      }
+    );
+    if (!nr.ok) {
+      const txt = await nr.text().catch(() => '');
+      return fail('NETLIFY_ERROR', `Netlify API أعاد ${nr.status}: ${txt.slice(0, 200)}`);
+    }
+  } catch (e) {
+    return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify API: ${e.message}`);
+  }
+
+  let redeploying = false;
+  try {
+    const hookUrl = DEPLOY_HOOK ||
+      `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/builds`;
+    const hookOpts = DEPLOY_HOOK
+      ? { method: 'POST', signal: AbortSignal.timeout(10000) }
+      : { method: 'POST',
+          headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+          signal: AbortSignal.timeout(10000) };
+    const hr = await fetch(hookUrl, hookOpts);
+    redeploying = hr.ok;
+  } catch {}
+
+  return ok(
+    { updatedKeys: Object.keys(vars), redeploying },
+    redeploying
+      ? `تم تحديث ${Object.keys(vars).length} متغير — الموقع يُعاد نشره (~دقيقتان)`
+      : `تم تحديث ${Object.keys(vars).length} متغير في Netlify`
   );
 }
 
