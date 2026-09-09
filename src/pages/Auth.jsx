@@ -96,7 +96,7 @@ export default function Auth() {
         acceptTerms: true, countryCode: country
       });
       if (r.success) {
-        toast(isAr ? 'تم التسجيل! يمكنك الدخول بعد موافقة المشرف.' : 'Registered! You can sign in after admin approval.', 'success');
+        toast(r.message || (isAr ? 'تم التسجيل بنجاح' : 'Registered successfully'), 'success');
         setMode('login');
       } else { toast(r.message || (isAr ? 'فشل التسجيل' : 'Registration failed')); }
     } catch { toast(t('err.connect')); }

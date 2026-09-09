@@ -282,11 +282,22 @@ async function doRegister(b) {
   const msg = `مرحبًا ${fullName.trim()}،\n\nرمز التحقق الخاص بإنشاء حسابك هو:\n*${otp}*\n\nالرمز صالح لمدة 5 دقائق.\nلا تشارك هذا الرمز مع أي شخص.`;
   const wa = await sendWA(nPhone, msg);
 
+  // إذا لم يُرسَل OTP عبر WhatsApp → فعِّل الحساب تلقائياً
+  let autoActivated = false;
+  if (!wa.sent) {
+    try {
+      const act = await gas('activateUser', { phone: nPhone });
+      autoActivated = act.ok;
+    } catch { /* تجاهل */ }
+  }
+
   return ok(
-    { phone: nPhone, whatsappSent: wa.sent },
+    { phone: nPhone, whatsappSent: wa.sent, autoActivated },
     wa.sent
       ? 'تم إرسال رمز التحقق عبر WhatsApp'
-      : 'تم التسجيل — تواصل مع المدير لتفعيل الحساب'
+      : (autoActivated
+          ? 'تم التسجيل والتفعيل — يمكنك تسجيل الدخول الآن'
+          : 'تم التسجيل — تواصل مع المدير لتفعيل الحساب')
   );
 }
 
