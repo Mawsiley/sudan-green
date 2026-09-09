@@ -691,12 +691,13 @@ async function doUpdateNetlifyEnv(b, token) {
 
   // SITE_ID يُضخّ تلقائياً بواسطة Netlify — لا يحتاج إعداد مستخدم
   const SITE_ID = process.env.SITE_ID || process.env.NETLIFY_SITE_ID || '';
-  const NF_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || '';
+  // Bootstrap: إذا كان الـ token في vars (إعداد أول مرة) نستخدمه مباشرة
+  const NF_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || vars.NETLIFY_ACCESS_TOKEN || '';
 
   if (!SITE_ID)
     return fail('NOT_CONFIGURED', 'SITE_ID غير متاح — تأكد أن الدالة تعمل على Netlify');
   if (!NF_TOKEN)
-    return fail('NOT_CONFIGURED', 'يجب إضافة NETLIFY_ACCESS_TOKEN في متغيرات Netlify');
+    return fail('NOT_CONFIGURED', 'أدخل NETLIFY_ACCESS_TOKEN في الحقل أعلاه ثم احفظ');
 
   const entries = Object.entries(vars).map(([key, value]) => ({
     key,
