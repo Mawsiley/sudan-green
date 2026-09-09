@@ -373,7 +373,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
-          ✅ الإعدادات تُحفظ فوراً بدون إعادة نشر — فقط أدخل رابط Apps Script وابدأ.
+          💡 يتطلب متغيراً واحداً فقط: <code style={{ background: 'rgba(22,101,52,.1)', padding: '1px 5px', borderRadius: 4 }}>NETLIFY_ACCESS_TOKEN</code> — بدون NETLIFY_SITE_ID (يُحدَّد تلقائياً).
         </div>
 
         <form onSubmit={saveSysVars}>

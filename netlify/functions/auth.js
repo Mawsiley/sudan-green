@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 'use strict';
 const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
+// @netlify/blobs removed — using Netlify API with auto-injected SITE_ID instead
 
 // ── متغيرات البيئة (أسماء موحدة مع القالب الأساسي) ──────────
 const GAS_URL        = process.env.APPS_SCRIPT_URL            || '';
@@ -79,13 +79,7 @@ function normalizePhone(phone, cc = '249') {
 
 // ── Google Apps Script ───────────────────────────────────────
 async function getGasUrl() {
-  if (GAS_URL) return GAS_URL;
-  try {
-    const store = getStore('app-config');
-    const saved = await store.get('APPS_SCRIPT_URL');
-    if (saved) return saved;
-  } catch {}
-  return '';
+  return GAS_URL;
 }
 
 async function gas(action, data = {}) {
@@ -695,20 +689,53 @@ async function doUpdateNetlifyEnv(b, token) {
       return fail('FORBIDDEN', `لا يمكن تغيير ${key} من هنا لأسباب أمنية`);
   }
 
-  // حفظ في Netlify Blobs — لا يحتاج NETLIFY_SITE_ID أو NETLIFY_ACCESS_TOKEN
+  // SITE_ID يُضخّ تلقائياً بواسطة Netlify — لا يحتاج إعداد مستخدم
+  const SITE_ID = process.env.SITE_ID || process.env.NETLIFY_SITE_ID || '';
+  const NF_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || '';
+
+  if (!SITE_ID)
+    return fail('NOT_CONFIGURED', 'SITE_ID غير متاح — تأكد أن الدالة تعمل على Netlify');
+  if (!NF_TOKEN)
+    return fail('NOT_CONFIGURED', 'يجب إضافة NETLIFY_ACCESS_TOKEN في متغيرات Netlify');
+
+  const entries = Object.entries(vars).map(([key, value]) => ({
+    key,
+    scopes: ['functions','builds','runtime'],
+    values: [{ value: String(value), context: 'all' }]
+  }));
+
   try {
-    const store = getStore('app-config');
-    const saves = Object.entries(vars).map(([key, value]) =>
-      store.set(key, String(value))
+    const nr = await fetch(
+      `https://api.netlify.com/api/v1/sites/${SITE_ID}/env`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${NF_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(entries),
+        signal: AbortSignal.timeout(15000)
+      }
     );
-    await Promise.all(saves);
+    if (!nr.ok) {
+      const txt = await nr.text().catch(() => '');
+      return fail('NETLIFY_ERROR', `Netlify API أعاد ${nr.status}: ${txt.slice(0,200)}`);
+    }
   } catch (e) {
-    return fail('STORE_ERROR', `فشل الحفظ: ${e.message}`);
+    return fail('NETLIFY_ERROR', `تعذر الاتصال بـ Netlify API: ${e.message}`);
+  }
+
+  const DEPLOY_HOOK = process.env.NETLIFY_DEPLOY_HOOK || '';
+  let redeploying = false;
+  if (DEPLOY_HOOK) {
+    try {
+      const hr = await fetch(DEPLOY_HOOK, { method: 'POST', signal: AbortSignal.timeout(10000) });
+      redeploying = hr.ok;
+    } catch {}
   }
 
   return ok(
-    { updatedKeys: Object.keys(vars), redeploying: false },
-    `✅ تم حفظ ${Object.keys(vars).length} إعداد — يعمل فوراً بدون إعادة نشر`
+    { updatedKeys: Object.keys(vars), redeploying },
+    redeploying
+      ? `✅ تم حفظ ${Object.keys(vars).length} متغير — جارٍ إعادة النشر (~دقيقتان)`
+      : `✅ تم حفظ ${Object.keys(vars).length} متغير في Netlify — أعد نشر الموقع لتفعيلها`
   );
 }
 
