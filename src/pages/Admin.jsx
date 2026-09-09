@@ -373,7 +373,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
-          💡 يتطلب: <strong>NETLIFY_SITE_ID</strong> و <strong>NETLIFY_ACCESS_TOKEN</strong> في Netlify. بعد الحفظ يُعاد النشر تلقائياً (~دقيقتان).
+          ✅ الإعدادات تُحفظ فوراً بدون إعادة نشر — فقط أدخل رابط Apps Script وابدأ.
         </div>
 
         <form onSubmit={saveSysVars}>
@@ -436,7 +436,7 @@ function SettingsTab({ api, toast }) {
 
           <button type="submit" className="btn btn-primary" disabled={sysLoading}
             style={{ width: '100%', marginTop: 8 }}>
-            {sysLoading ? '⏳ جاري الحفظ في Netlify...' : '💾 حفظ وإعادة النشر'}
+            {sysLoading ? '⏳ جاري الحفظ...' : '💾 حفظ الإعدادات'}
           </button>
         </form>
 
@@ -470,7 +470,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
-          ⚠️ بعد التزامن سيُعاد تشغيل الموقع خلال ~دقيقتين. تأكد من أن <strong>NETLIFY_SITE_ID</strong> و<strong>NETLIFY_ACCESS_TOKEN</strong> محددان في متغيرات البيئة.
+          ⚠️ بعد تغيير السر يجب تحديث قيمة <strong>APPS_SCRIPT_SHARED_SECRET</strong> يدوياً في متغيرات Netlify.
         </div>
 
         <form onSubmit={syncSecret}>
