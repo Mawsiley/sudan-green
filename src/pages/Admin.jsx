@@ -262,11 +262,12 @@ function SettingsTab({ api, toast }) {
   // إعداد النظام — متغيرات Netlify
   const [sysVars, setSysVars] = useState({
     APPS_SCRIPT_URL: '',
+    NETLIFY_ACCESS_TOKEN: '',
+    NETLIFY_DEPLOY_HOOK: '',
     WHATSAPP_PHONE_NUMBER_ID: '',
     WHATSAPP_ACCESS_TOKEN: '',
     WHATSAPP_ADMIN_PHONE: '',
     ALLOWED_ORIGIN: '',
-    NETLIFY_DEPLOY_HOOK: '',
   });
   const [sysLoading, setSysLoading] = useState(false);
   const [sysResult, setSysResult] = useState(null);
@@ -413,12 +414,13 @@ function SettingsTab({ api, toast }) {
             الحقول التالية اختيارية — اتركها فارغة إذا لم تحتجها الآن
           </div>
           {[
+            { key: 'NETLIFY_ACCESS_TOKEN',     label: 'Netlify Access Token',      placeholder: 'nfp_xxxxxxxxxxxx...', type: 'password', hint: 'من netlify.com/user/applications' },
+            { key: 'NETLIFY_DEPLOY_HOOK',      label: 'Netlify Deploy Hook (اختياري)', placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
             { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
             { key: 'WHATSAPP_ACCESS_TOKEN',    label: 'واتساب — Access Token',    placeholder: 'EAAxxxxx...',      type: 'password' },
             { key: 'WHATSAPP_ADMIN_PHONE',     label: 'واتساب — رقم المدير',      placeholder: '+249912345678',    type: 'text' },
             { key: 'ALLOWED_ORIGIN',           label: 'النطاق المسموح (CORS)',    placeholder: 'https://your-site.netlify.app', type: 'url' },
-            { key: 'NETLIFY_DEPLOY_HOOK',      label: 'Netlify Deploy Hook',       placeholder: 'https://api.netlify.com/build_hooks/...', type: 'url' },
-          ].map(({ key, label, placeholder, type }) => (
+          ].map(({ key, label, placeholder, type, hint }) => (
             <div key={key} className="field" style={{ marginBottom: 10 }}>
               <label style={{ fontSize: 12, color: '#3A5C4A', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {label}
@@ -431,6 +433,7 @@ function SettingsTab({ api, toast }) {
                 placeholder={placeholder}
                 style={{ background: '#fff', border: '1.5px solid rgba(26,154,72,.2)', borderRadius: 8, padding: '8px 12px', fontSize: 13, width: '100%', fontFamily: 'monospace', direction: 'ltr', marginTop: 4 }}
               />
+              {hint && <div style={{ fontSize: 11, color: '#587A68', marginTop: 3 }}>💡 {hint}</div>}
             </div>
           ))}
 
