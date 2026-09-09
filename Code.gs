@@ -29,11 +29,12 @@ function doPost(e) {
 
     ensureSheets_();
 
-    // التحقق من السر (يُعفى منه الإجراءات العامة)
+    // التحقق من السر — اختياري: إذا لم يُضبط يسمح بكل الطلبات
     const publicActions = new Set(['getStats','getCrops','getProjects','getRegions','doGet']);
     if (!publicActions.has(action)) {
       const secret = getApiSecret_();
-      if (secret && data._secret !== secret) {
+      const DEFAULT = 'CHANGE_ME_STRONG_SECRET';
+      if (secret && secret !== DEFAULT && data._secret !== secret) {
         return jsonOut({ ok: false, error: 'FORBIDDEN', message: 'Unauthorized' });
       }
     }

@@ -79,7 +79,8 @@ function normalizePhone(phone, cc = '249') {
 // ── Google Apps Script ───────────────────────────────────────
 async function gas(action, data = {}) {
   if (!GAS_URL) throw new Error('APPS_SCRIPT_API_URL غير محدد');
-  const body = JSON.stringify({ action, _secret: GAS_SECRET, ...data });
+  const payload = GAS_SECRET ? { action, _secret: GAS_SECRET, ...data } : { action, ...data };
+  const body = JSON.stringify(payload);
   const res  = await fetch(GAS_URL, {
     method:  'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },

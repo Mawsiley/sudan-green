@@ -262,7 +262,6 @@ function SettingsTab({ api, toast }) {
   // إعداد النظام — متغيرات Netlify
   const [sysVars, setSysVars] = useState({
     APPS_SCRIPT_URL: '',
-    APPS_SCRIPT_SHARED_SECRET: '',
     WHATSAPP_PHONE_NUMBER_ID: '',
     WHATSAPP_ACCESS_TOKEN: '',
     WHATSAPP_ADMIN_PHONE: '',
@@ -364,9 +363,8 @@ function SettingsTab({ api, toast }) {
 
         <form onSubmit={saveSysVars}>
           {[
-            { key: 'APPS_SCRIPT_URL',          label: 'رابط Apps Script (exec)', placeholder: 'https://script.google.com/macros/s/.../exec', type: 'url' },
-            { key: 'APPS_SCRIPT_SHARED_SECRET', label: 'السر المشترك مع Apps Script', placeholder: 'كلمة سر قوية 32+ حرف', type: 'text' },
-            { key: 'WHATSAPP_PHONE_NUMBER_ID',  label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
+            { key: 'APPS_SCRIPT_URL',         label: 'رابط Apps Script (exec)', placeholder: 'https://script.google.com/macros/s/.../exec', type: 'url' },
+            { key: 'WHATSAPP_PHONE_NUMBER_ID', label: 'واتساب — Phone Number ID', placeholder: '123456789012345', type: 'text' },
             { key: 'WHATSAPP_ACCESS_TOKEN',     label: 'واتساب — Access Token', placeholder: 'EAAxxxxx...', type: 'password' },
             { key: 'WHATSAPP_ADMIN_PHONE',      label: 'واتساب — رقم المدير (للإشعارات)', placeholder: '+249912345678', type: 'text' },
             { key: 'ALLOWED_ORIGIN',            label: 'النطاق المسموح (CORS)', placeholder: 'https://your-site.netlify.app', type: 'url' },
