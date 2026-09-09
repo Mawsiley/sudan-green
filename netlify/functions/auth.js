@@ -4,10 +4,12 @@
 //  لا تُرسَل أسرار WhatsApp من المتصفح — كل شيء هنا
 // ═══════════════════════════════════════════════════════════════
 'use strict';
-const crypto = require('crypto');
+const crypto   = require('crypto');
+const { getStore } = require('@netlify/blobs');
 
 // ── متغيرات البيئة الأساسية ───────────────────────────────────
 const GAS_URL        = process.env.APPS_SCRIPT_URL            || '';
+let   GAS_URL_BLOB   = '';   // مخزَّن عند أول قراءة من Netlify Blobs
 const GAS_SECRET     = process.env.APPS_SCRIPT_SHARED_SECRET  || '';
 const PEPPER         = process.env.AUTH_PASSWORD_PEPPER        || '';
 const JWT_SECRET     = process.env.SETTINGS_SESSION_SECRET     || '';
@@ -89,9 +91,20 @@ function normalizePhone(phone, cc = '249') {
   return '+' + code + digits;
 }
 
+// ── Netlify Blobs store (لتخزين APPS_SCRIPT_URL بين البارد والساخن) ─
+function cfgStore() {
+  return getStore({ name: 'app-config' });
+}
+
 // ── Google Apps Script ───────────────────────────────────────
 async function getGasUrl() {
-  return GAS_URL;
+  if (GAS_URL)       return GAS_URL;        // env var له الأولوية
+  if (GAS_URL_BLOB)  return GAS_URL_BLOB;   // مخزن في الذاكرة لهذا المثيل
+  try {
+    const url = await cfgStore().get('APPS_SCRIPT_URL');
+    if (url) { GAS_URL_BLOB = url; return url; }
+  } catch {}
+  return '';
 }
 
 async function gas(action, data = {}) {
@@ -111,6 +124,7 @@ async function gas(action, data = {}) {
 
 // ── WhatsApp Cloud API ───────────────────────────────────────
 async function sendWA(to, text) {
+  const [WA_PHONE_ID, WA_TOKEN] = await Promise.all([getWaPhoneId(), getWaToken()]);
   if (!WA_PHONE_ID || !WA_TOKEN) {
     console.log('[WA-SKIP] not configured — OTP for', to, ':', text.slice(-10));
     return { sent: false };
@@ -324,6 +338,7 @@ async function doVerifyOTP(b) {
       if (status === 'ACTIVE') {
         await sendWA(nPhone, `مرحبًا ${user.fullName || ''}،\nتم تأكيد رقم هاتفك وإنشاء حسابك بنجاح.\nيمكنك الآن تسجيل الدخول باستخدام رقم هاتفك وكلمة المرور التي اخترتها.`);
       } else {
+        const WA_ADMIN = await getWaAdmin();
         if (WA_ADMIN) {
           await sendWA(WA_ADMIN, `🔔 طلب تسجيل جديد:\nالاسم: ${user.fullName}\nالهاتف: ${nPhone}\nالدور: ${user.roleId}\nيحتاج موافقة المدير.`);
         }
@@ -701,30 +716,50 @@ async function doUpdateNetlifyEnv(b, token) {
       return fail('FORBIDDEN', `لا يمكن تغيير ${key} من هنا لأسباب أمنية`);
   }
 
-  // تحقق من وجود رابط Apps Script
+  const savedKeys = [];
+
+  // ── 1. إذا أُرسِل APPS_SCRIPT_URL → حفظه في Netlify Blobs أولاً ──
+  const newGasUrl = String(vars.APPS_SCRIPT_URL || '').trim();
+  if (newGasUrl) {
+    if (!newGasUrl.includes('script.google.com'))
+      return fail('INVALID_URL', 'رابط Apps Script يجب أن يكون من script.google.com');
+    try {
+      await cfgStore().set('APPS_SCRIPT_URL', newGasUrl);
+      GAS_URL_BLOB = newGasUrl;   // تحديث الكاش الداخلي فوراً
+      savedKeys.push('APPS_SCRIPT_URL');
+    } catch (e) {
+      return fail('STORE_ERROR', `فشل حفظ الرابط في Netlify Blobs: ${e.message}`);
+    }
+  }
+
+  // ── 2. تحقق من وجود رابط للاتصال بـ Apps Script ──────────────
   const url = await getGasUrl();
   if (!url)
     return fail('NOT_CONFIGURED', 'أدخل رابط Apps Script أولاً في حقل APPS_SCRIPT_URL');
 
-  // حفظ في Apps Script Script Properties — لا يحتاج Netlify API
-  try {
-    const configs = {};
-    for (const [k, v] of Object.entries(vars)) {
-      if (String(v).trim()) configs[k] = String(v);
+  // ── 3. حفظ بقية المتغيرات في Apps Script Script Properties ───
+  const otherVars = Object.entries(vars).filter(([k]) => k !== 'APPS_SCRIPT_URL');
+  if (otherVars.length > 0) {
+    try {
+      const configs = {};
+      for (const [k, v] of otherVars) {
+        if (String(v).trim()) configs[k] = String(v);
+      }
+      if (Object.keys(configs).length > 0) {
+        const r = await gas('saveConfig', { configs });
+        if (!r?.ok) return fail('GAS_ERROR', 'فشل الحفظ في Apps Script');
+        savedKeys.push(...(r.saved || Object.keys(configs)));
+        _rcache = null; _rcacheAt = 0;
+      }
+    } catch (e) {
+      return fail('GAS_ERROR', `فشل الحفظ: ${e.message}`);
     }
-    const r = await gas('saveConfig', { configs });
-    if (!r?.ok) return fail('GAS_ERROR', 'فشل الحفظ في Apps Script');
-
-    // مسح الكاش لإجبار القراءة من جديد
-    _rcache = null; _rcacheAt = 0;
-
-    return ok(
-      { updatedKeys: r.saved || Object.keys(configs), redeploying: false },
-      `✅ تم حفظ ${(r.saved || Object.keys(configs)).length} إعداد في Apps Script — يعمل فوراً`
-    );
-  } catch (e) {
-    return fail('GAS_ERROR', `فشل الحفظ: ${e.message}`);
   }
+
+  return ok(
+    { updatedKeys: savedKeys, redeploying: false },
+    `✅ تم حفظ ${savedKeys.length} إعداد — يعمل فوراً لجميع المتصفحات`
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
