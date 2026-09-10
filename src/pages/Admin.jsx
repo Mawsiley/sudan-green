@@ -777,6 +777,79 @@ function DevToolsTab({ api, toast }) {
   const [regLoading, setRL]       = useState(false);
   const [logs, setLogs]           = useState([]);
   const [logsLoading, setLL]      = useState(false);
+  const [copied, setCopied]       = useState(false);
+
+  function buildReport() {
+    const lines = [];
+    lines.push('══════════════════════════════════════');
+    lines.push('   تقرير أخطاء — السودان الأخضر 🌿');
+    lines.push('══════════════════════════════════════');
+    lines.push(`التاريخ: ${new Date().toLocaleString('ar-SA')}`);
+    lines.push('');
+
+    lines.push('🔍 حالة النظام:');
+    if (status) {
+      lines.push(`  Apps Script: ${status.gasStatus?.ok ? '✅ متصل' : `❌ ${status.gasStatus?.error || 'غير متصل'}`}`);
+      if (status.gasStatus?.stats) {
+        lines.push(`  الإحصاء: ${status.gasStatus.stats.totalUsers} مستخدم • ${status.gasStatus.stats.totalProjects} مشروع`);
+      }
+      lines.push('  متغيرات البيئة:');
+      const VAR_SHORT = {
+        APPS_SCRIPT_URL: 'APPS_SCRIPT_URL', APPS_SCRIPT_URL_BLOB: 'APPS_SCRIPT_URL_BLOB',
+        APPS_SCRIPT_SHARED_SECRET: 'APPS_SCRIPT_SHARED_SECRET', AUTH_PASSWORD_PEPPER: 'AUTH_PASSWORD_PEPPER',
+        SETTINGS_SESSION_SECRET: 'SETTINGS_SESSION_SECRET', AUTH_OTP_SECRET: 'AUTH_OTP_SECRET',
+        SETTINGS_ADMIN_ACCOUNT: 'SETTINGS_ADMIN_ACCOUNT', SETTINGS_ADMIN_PIN: 'SETTINGS_ADMIN_PIN',
+        NETLIFY_BLOBS_CONTEXT: 'NETLIFY_BLOBS_CONTEXT', NETLIFY_ACCESS_TOKEN: 'NETLIFY_ACCESS_TOKEN',
+        ALLOWED_ORIGIN: 'ALLOWED_ORIGIN',
+      };
+      Object.entries(status.vars || {}).forEach(([k, v]) => {
+        const icon = v === true ? '✅' : v === false ? '❌' : '📋';
+        const val  = typeof v === 'string' ? ` = ${v}` : '';
+        lines.push(`    ${icon} ${VAR_SHORT[k] || k}${val}`);
+      });
+    } else {
+      lines.push('  (لم يتم تحميل حالة النظام بعد)');
+    }
+    lines.push('');
+
+    lines.push('🧪 اختبار تدفق التسجيل:');
+    if (regTest) {
+      lines.push(`  النتيجة: ${regTest.allOk ? '✅ كل الخطوات تعمل' : '❌ هناك مشكلة'}`);
+      (regTest.steps || []).forEach(s => {
+        const icon = s.ok ? '✅' : '❌';
+        const err  = s.response?.error ? ` — ${s.response.error}` : '';
+        const msg  = s.error ? ` — ${s.error}` : '';
+        lines.push(`  ${icon} ${s.step}${err}${msg}`);
+      });
+    } else {
+      lines.push('  (لم يتم تشغيل الاختبار بعد)');
+    }
+    lines.push('');
+
+    lines.push(`📋 سجل الأخطاء (${logs.length} خطأ):`);
+    if (logs.length === 0) {
+      lines.push('  ✅ لا توجد أخطاء');
+    } else {
+      logs.forEach((log, i) => {
+        lines.push(`  [${i + 1}] ${log.source} | ${log.code} | ${new Date(log.ts).toLocaleString('ar-SA')}`);
+        lines.push(`      الرسالة: ${log.message}`);
+        if (log.detail) lines.push(`      التفصيل: ${log.detail}`);
+      });
+    }
+    lines.push('');
+    lines.push('══════════════════════════════════════');
+    return lines.join('\n');
+  }
+
+  async function copyReport() {
+    try {
+      await navigator.clipboard.writeText(buildReport());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast('تعذّر النسخ — جرّب تحديد النص يدوياً');
+    }
+  }
 
   const loadStatus = useCallback(async () => {
     setSL(true);
@@ -941,6 +1014,36 @@ function DevToolsTab({ api, toast }) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* ══ صندوق نسخ التقرير ══ */}
+      <div style={{ ...S.panel, marginTop: 20, border: '2px solid rgba(99,102,241,.3)', background: '#F5F3FF' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <span style={{ fontSize: 22 }}>📤</span>
+          <h3 style={{ ...S.panelTitle, color: '#4338CA', marginBottom: 0, flex: 1 }}>نسخ تقرير الأخطاء</h3>
+          <button
+            className="btn btn-sm"
+            style={{ background: copied ? '#16A34A' : '#4F46E5', color: '#fff', border: 'none', minWidth: 90 }}
+            onClick={copyReport}
+          >
+            {copied ? '✅ تم النسخ' : '📋 نسخ الكل'}
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: '#6366F1', marginBottom: 10 }}>
+          انسخ هذا النص وألصقه في المحادثة للحصول على مساعدة — يشمل حالة النظام + الاختبار + سجل الأخطاء.
+        </div>
+        <textarea
+          readOnly
+          value={buildReport()}
+          style={{
+            width: '100%', minHeight: 200, fontFamily: 'monospace', fontSize: 11,
+            border: '1px solid rgba(99,102,241,.3)', borderRadius: 8,
+            padding: '10px 12px', background: '#fff', color: '#1e1b4b',
+            resize: 'vertical', lineHeight: 1.6, direction: 'ltr', textAlign: 'left',
+            outline: 'none',
+          }}
+          onClick={e => e.target.select()}
+        />
       </div>
     </div>
   );
