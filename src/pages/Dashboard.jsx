@@ -43,10 +43,11 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <aside className={`app-sidebar${sideOpen ? ' open' : ''}`} style={S.side}>
-        <div style={S.sideHead}>
+        <a href="/" style={{ ...S.sideHead, textDecoration: 'none', cursor: 'pointer' }}
+          title="الصفحة الرئيسية">
           <span style={{ fontSize: 28 }}>🌿</span>
           <span style={S.sideName}>السودان الأخضر</span>
-        </div>
+        </a>
         <div style={S.userCard}>
           <div style={S.avatar}>{avatarLetter}</div>
           <div>
@@ -72,6 +73,11 @@ export default function Dashboard() {
               لوحة الإدارة
             </a>
           )}
+          <a href="/"
+            style={{ ...S.navBtn, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,.45)', marginTop: 4 }}>
+            <span style={{ fontSize: 16, minWidth: 20 }}>🏠</span>
+            الصفحة الرئيسية
+          </a>
         </nav>
         <button className="btn btn-ghost btn-sm"
           style={{ margin: '0 16px 16px', width: 'calc(100% - 32px)', color: 'rgba(255,255,255,.7)', borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.06)' }}

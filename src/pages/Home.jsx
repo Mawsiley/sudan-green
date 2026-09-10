@@ -14,14 +14,14 @@ const CROPS = [
 ];
 
 const PROJECTS_AR = [
-  { title: 'مشروع تشجير النيل الأزرق', desc: 'زراعة 50,000 شجرة على ضفاف النيل الأزرق لمكافحة التصحر', icon: '🌳', progress: 68 },
-  { title: 'مزارع الطاقة الشمسية الزراعية', desc: 'توليد الطاقة النظيفة لري المزارع في المناطق الجافة', icon: '☀️', progress: 45 },
-  { title: 'بنوك البذور الوطنية', desc: 'حفظ وتوزيع البذور المحلية للحفاظ على التنوع البيولوجي', icon: '🌿', progress: 82 },
+  { title: 'مشروع تشجير النيل الأزرق', desc: 'زراعة 50,000 شجرة على ضفاف النيل الأزرق لمكافحة التصحر', icon: '🌳', progress: 68, img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&auto=format&fit=crop&q=75' },
+  { title: 'مزارع الطاقة الشمسية الزراعية', desc: 'توليد الطاقة النظيفة لري المزارع في المناطق الجافة', icon: '☀️', progress: 45, img: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=75' },
+  { title: 'بنوك البذور الوطنية', desc: 'حفظ وتوزيع البذور المحلية للحفاظ على التنوع البيولوجي', icon: '🌿', progress: 82, img: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=75' },
 ];
 const PROJECTS_EN = [
-  { title: 'Blue Nile Afforestation', desc: 'Planting 50,000 trees along the Blue Nile banks to combat desertification', icon: '🌳', progress: 68 },
-  { title: 'Solar-Powered Farms', desc: 'Generating clean energy to irrigate farms in arid regions', icon: '☀️', progress: 45 },
-  { title: 'National Seed Banks', desc: 'Preserving and distributing local seeds to maintain biodiversity', icon: '🌿', progress: 82 },
+  { title: 'Blue Nile Afforestation', desc: 'Planting 50,000 trees along the Blue Nile banks to combat desertification', icon: '🌳', progress: 68, img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&auto=format&fit=crop&q=75' },
+  { title: 'Solar-Powered Farms', desc: 'Generating clean energy to irrigate farms in arid regions', icon: '☀️', progress: 45, img: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=75' },
+  { title: 'National Seed Banks', desc: 'Preserving and distributing local seeds to maintain biodiversity', icon: '🌿', progress: 82, img: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=75' },
 ];
 
 const STATS_AR = [['2,300+','شجرة مزروعة'],['450+','مزارع مسجل'],['15','ولاية'],['8','مشروع نشط']];
@@ -80,6 +80,13 @@ export default function Home() {
         background: 'linear-gradient(180deg,#060E09 0%,#0B3D22 100%)',
         color: '#E8F5EC',
       }}>
+        <img
+          src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&auto=format&fit=crop&q=60"
+          alt=""
+          aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, pointerEvents: 'none' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(6,14,9,.7) 0%,rgba(11,61,34,.85) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle,rgba(44,198,101,.2) 0%,transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', animation: 'glow 4s ease-in-out infinite', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
@@ -180,10 +187,20 @@ export default function Home() {
                 <div style={{
                   background: isDark ? 'rgba(44,198,101,.04)' : '#fff',
                   border: `1px solid ${isDark ? 'rgba(44,198,101,.1)' : 'rgba(26,154,72,.12)'}`,
-                  borderRadius: 16, padding: 24,
+                  borderRadius: 16, overflow: 'hidden',
                   boxShadow: isDark ? 'none' : '0 2px 12px rgba(11,61,34,.06)',
                 }}>
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>{p.icon}</div>
+                  <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}>
+                    <img
+                      src={p.img}
+                      alt={p.title}
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, rgba(6,14,9,.6) 100%)' }} />
+                    <div style={{ position: 'absolute', bottom: 10, insetInlineStart: 12, fontSize: 28 }}>{p.icon}</div>
+                  </div>
+                  <div style={{ padding: 20 }}>
                   <h3 style={{ fontFamily: "'Amiri',serif", fontSize: 20, marginBottom: 10, color: isDark ? '#E8F5E9' : '#0B3D22' }}>{p.title}</h3>
                   <p style={{ fontSize: 13, color: '#587A68', lineHeight: 1.7, marginBottom: 16 }}>{p.desc}</p>
                   <div>
@@ -194,6 +211,7 @@ export default function Home() {
                     <div style={{ height: 6, background: isDark ? 'rgba(44,198,101,.15)' : 'rgba(26,154,72,.12)', borderRadius: 3 }}>
                       <div style={{ width: `${p.progress}%`, height: '100%', background: 'linear-gradient(90deg,#1A9A48,#2CC665)', borderRadius: 3 }} />
                     </div>
+                  </div>
                   </div>
                 </div>
               </FadeIn>

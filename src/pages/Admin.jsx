@@ -46,10 +46,11 @@ export default function Admin() {
       {msg && <div className={`alert-toast alert-${msg.type === 'success' ? 'success' : 'error'}`}>{msg.text}</div>}
 
       <aside className={`app-sidebar${sideOpen ? ' open' : ''}`} style={S.side}>
-        <div style={S.sideHead}>
+        <a href="/" style={{ ...S.sideHead, textDecoration: 'none', cursor: 'pointer' }}
+          title="الصفحة الرئيسية">
           <span style={{ fontSize: 28 }}>🌿</span>
           <span style={S.sideName}>لوحة الإدارة</span>
-        </div>
+        </a>
         <div style={S.userCard}>
           <div style={S.avatar}>{(session?.fullName || 'أ').charAt(0)}</div>
           <div>
@@ -69,6 +70,10 @@ export default function Admin() {
           <a href="/dashboard"
             style={{ ...S.navBtn, textDecoration: 'none', color: 'rgba(255,255,255,.5)', marginTop: 8, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 15, minWidth: 20 }}>←</span>لوحة المستخدم
+          </a>
+          <a href="/"
+            style={{ ...S.navBtn, textDecoration: 'none', color: 'rgba(255,255,255,.45)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 15, minWidth: 20 }}>🏠</span>الصفحة الرئيسية
           </a>
         </nav>
         <button className="btn btn-ghost btn-sm" style={{ margin: '0 16px 16px', width: 'calc(100% - 32px)', color: '#fff', borderColor: 'rgba(255,255,255,.3)' }} onClick={logout}>

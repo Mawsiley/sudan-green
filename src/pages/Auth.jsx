@@ -176,6 +176,9 @@ export default function Auth() {
 
       {/* Top-right controls */}
       <div style={{ position: 'fixed', top: 16, insetInlineEnd: 16, display: 'flex', gap: 8, zIndex: 200 }}>
+        <a href="/" style={{ ...iconBtn(isDark), textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="الصفحة الرئيسية">
+          <span style={{ fontSize: 15 }}>🏠</span>
+        </a>
         <button onClick={toggleLang} style={iconBtn(isDark)} title="Toggle language">
           <span style={{ fontSize: 12, fontWeight: 700 }}>{isAr ? 'EN' : 'ع'}</span>
         </button>
