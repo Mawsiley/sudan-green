@@ -613,7 +613,7 @@ function SettingsTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#166534' }}>
-          ✅ APPS_SCRIPT_URL يُحفظ في Netlify Blobs — يعمل فوراً لجميع المتصفحات.
+          ✅ أدخل رابط Apps Script الجديد واضغط اختبار أولاً، ثم حفظ في Netlify — يعمل فوراً.
         </div>
 
         <form onSubmit={saveSysVars}>
@@ -926,6 +926,11 @@ function DevToolsTab({ api, toast }) {
                 <span style={{ color: '#166534', marginRight: 12, fontSize: 12 }}>
                   {status.gasStatus.stats.totalUsers} مستخدم • {status.gasStatus.stats.totalProjects} مشروع
                 </span>
+              )}
+              {status.gasStatus?.urlSuffix && (
+                <div style={{ marginTop: 6, fontSize: 11, color: status.gasStatus?.ok ? '#166534' : '#991B1B', fontFamily: 'monospace', direction: 'ltr' }}>
+                  الرابط المستخدم: {status.gasStatus.urlSuffix}
+                </div>
               )}
             </div>
 
