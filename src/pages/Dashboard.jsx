@@ -158,7 +158,7 @@ function Crops({ crops, api, toast, reload }) {
 
   async function saveEdit(c) {
     try {
-      const r = await api('updateCropPrice', { cropId: c.cropId || c.id, price: Number(editVal.price), unit: editVal.unit });
+      const r = await api('updateCrop', { cropId: c.cropId || c.id, price: Number(editVal.price), unit: editVal.unit });
       if (r.success) { toast('تم التحديث', 'success'); reload(); setEditing(null); }
       else toast(r.message || 'فشل التحديث');
     } catch { toast('خطأ في الاتصال'); }

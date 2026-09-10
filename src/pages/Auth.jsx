@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
@@ -36,7 +36,11 @@ export default function Auth() {
   const [country, setCountry] = useState('249');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
   const [name, setName] = useState('');
+  const [roleId, setRoleId] = useState('user');
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [publicRoles, setPublicRoles] = useState([]);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [newPw, setNewPw] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,12 +49,23 @@ export default function Auth() {
   const otpRefs = useRef([]);
   const timerRef = useRef(null);
 
+  const loadPublicRoles = useCallback(async () => {
+    try {
+      const r = await apiCall('getPublicRoles', {});
+      if (r.success && Array.isArray(r.data) && r.data.length > 0) setPublicRoles(r.data);
+    } catch { /* تجاهل — يبقى الافتراضي */ }
+  }, []);
+
   useEffect(() => {
     if (timer > 0) {
       timerRef.current = setTimeout(() => setTimer(n => n - 1), 1000);
     }
     return () => clearTimeout(timerRef.current);
   }, [timer]);
+
+  useEffect(() => {
+    if (mode === 'register') loadPublicRoles();
+  }, [mode, loadPublicRoles]);
 
   function toast(text, type = 'error') {
     setMsg({ text, type });
@@ -85,15 +100,17 @@ export default function Auth() {
 
   async function handleRegister(e) {
     e.preventDefault();
-    if (!name.trim()) return toast(t('err.name'));
-    if (!phone.trim()) return toast(t('err.phone'));
-    if (pwStrength(password) < 2) return toast(t('err.pw_weak'));
+    if (!name.trim())                       return toast(t('err.name'));
+    if (!phone.trim())                      return toast(t('err.phone'));
+    if (pwStrength(password) < 2)           return toast(t('err.pw_weak'));
+    if (password !== confirmPw)             return toast(isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+    if (!acceptTerms)                       return toast(isAr ? 'يجب الموافقة على الشروط والأحكام' : 'You must accept the terms');
     setLoading(true);
     try {
       const r = await apiCall('register', {
         fullName: name.trim(), phone: phone.trim(),
-        password, confirmPassword: password,
-        acceptTerms: true, countryCode: country
+        password, confirmPassword: confirmPw,
+        roleId, acceptTerms: true, countryCode: country
       });
       if (r.success) {
         toast(r.message || (isAr ? 'تم التسجيل بنجاح' : 'Registered successfully'), 'success');
@@ -244,6 +261,8 @@ export default function Auth() {
           {mode === 'register' && (
             <form onSubmit={handleRegister}>
               <h2 style={{ fontFamily: "'Amiri',serif", fontSize: 22, color: textMain, marginBottom: 20 }}>{t('auth.create')}</h2>
+
+              {/* الاسم */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: labelClr }}>
                   <span style={{ color: '#DC2626', marginInlineEnd: 2 }}>*</span>{t('auth.fullname')}
@@ -251,7 +270,25 @@ export default function Auth() {
                 <input value={name} onChange={e => setName(e.target.value)} placeholder={t('auth.name_ph')}
                   style={inputStyle(inputBg, inputBdr, textMain)} />
               </div>
+
+              {/* رقم الهاتف */}
               <PhoneField country={country} setCountry={setCountry} phone={phone} setPhone={setPhone} label={t('auth.phone')} inputBg={inputBg} inputBdr={inputBdr} labelClr={labelClr} textMain={textMain} />
+
+              {/* الدور */}
+              {publicRoles.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: labelClr }}>
+                    <span style={{ color: '#DC2626', marginInlineEnd: 2 }}>*</span>{isAr ? 'نوع الحساب' : 'Account type'}
+                  </label>
+                  <select value={roleId} onChange={e => setRoleId(e.target.value)} style={inputStyle(inputBg, inputBdr, textMain)}>
+                    {publicRoles.map(r => (
+                      <option key={r.roleId} value={r.roleId}>{r.roleNameAr || r.roleId}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* كلمة المرور */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: labelClr }}>
                   <span style={{ color: '#DC2626', marginInlineEnd: 2 }}>*</span>{t('auth.password')}
@@ -260,6 +297,31 @@ export default function Auth() {
                   style={inputStyle(inputBg, inputBdr, textMain)} />
                 {password && <StrengthBar s={strength} label={STRENGTH_LABEL[strength]} />}
               </div>
+
+              {/* تأكيد كلمة المرور */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: labelClr }}>
+                  <span style={{ color: '#DC2626', marginInlineEnd: 2 }}>*</span>{isAr ? 'تأكيد كلمة المرور' : 'Confirm password'}
+                </label>
+                <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
+                  placeholder={isAr ? 'أعد كتابة كلمة المرور' : 'Re-enter password'}
+                  style={{ ...inputStyle(inputBg, inputBdr, textMain), borderColor: confirmPw && confirmPw !== password ? '#DC2626' : inputBdr }} />
+                {confirmPw && confirmPw !== password && (
+                  <span style={{ fontSize: 11, color: '#DC2626', marginTop: 4, display: 'block' }}>
+                    {isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'}
+                  </span>
+                )}
+              </div>
+
+              {/* الشروط والأحكام */}
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <input type="checkbox" id="acceptTerms" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)}
+                  style={{ marginTop: 2, accentColor: '#1A9A48', width: 16, height: 16, flexShrink: 0, cursor: 'pointer' }} />
+                <label htmlFor="acceptTerms" style={{ fontSize: 13, color: labelClr, cursor: 'pointer', lineHeight: 1.5 }}>
+                  {isAr ? 'أوافق على الشروط والأحكام وسياسة الخصوصية' : 'I agree to the Terms & Conditions and Privacy Policy'}
+                </label>
+              </div>
+
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 4 }} disabled={loading}>
                 {loading ? t('auth.loading_reg') : t('auth.submit_reg')}
               </button>

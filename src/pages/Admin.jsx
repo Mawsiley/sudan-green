@@ -340,7 +340,7 @@ function BroadcastTab({ api, toast }) {
         </div>
 
         <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
-          ⚠️ يجب أن يكون WhatsApp مفعّلاً في الإعدادات لإرسال الرسائل.
+          ⚠️ يتم حفظ الإعلانات في سجل Announcements. إرسال WhatsApp يتطلب تفعيله في الإعدادات.
         </div>
 
         <form onSubmit={send}>
@@ -370,12 +370,8 @@ function BroadcastTab({ api, toast }) {
           <div style={{ marginTop: 16, background: result.ok ? '#DCFCE7' : '#FEE2E2', border: `1px solid ${result.ok ? '#86EFAC' : '#FECACA'}`, borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
             {result.ok ? (
               <>
-                <div style={{ color: '#166534', fontWeight: 700, marginBottom: 4 }}>✅ {result.message}</div>
-                {result.data && (
-                  <div style={{ color: '#166534' }}>
-                    أُرسل إلى: {result.data.sent || '—'} • فشل: {result.data.failed || 0}
-                  </div>
-                )}
+                <div style={{ color: '#166534', fontWeight: 700, marginBottom: 4 }}>✅ {result.message || 'تم حفظ الإعلان بنجاح'}</div>
+                <div style={{ color: '#166534' }}>تم تسجيل الإعلان في قاعدة البيانات.</div>
               </>
             ) : (
               <div style={{ color: '#991B1B', fontWeight: 600 }}>❌ {result.message}</div>

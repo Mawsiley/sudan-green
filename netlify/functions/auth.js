@@ -202,6 +202,7 @@ exports.handler = async (event) => {
     let result;
     switch (action) {
       case 'register':              result = await doRegister(body);                        break;
+      case 'getPublicRoles':        result = await doGetPublicRoles();                      break;
       case 'requestOTP':            result = await doRequestOTP(body);                      break;
       case 'verifyOTP':             result = await doVerifyOTP(body);                       break;
       case 'login':                 result = await doLogin(body);                           break;
@@ -309,6 +310,17 @@ async function doRegister(b) {
           ? 'تم التسجيل والتفعيل — يمكنك تسجيل الدخول الآن'
           : 'تم التسجيل — تواصل مع المدير لتفعيل الحساب')
   );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  getPublicRoles — أدوار متاحة للتسجيل (بدون مصادقة)
+// ═══════════════════════════════════════════════════════════════
+async function doGetPublicRoles() {
+  try {
+    const r = await gas('getRoles', { publicOnly: true });
+    if (!r?.ok) return ok([]);
+    return ok(r.roles || []);
+  } catch { return ok([]); }
 }
 
 // ═══════════════════════════════════════════════════════════════
