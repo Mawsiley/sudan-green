@@ -10,6 +10,7 @@ const ALL_TABS = [
   { id: 'roles',     label: 'الأدوار',        icon: '🔑', adminOnly: false },
   { id: 'audit',     label: 'سجل التدقيق',   icon: '📝', adminOnly: false },
   { id: 'settings',  label: 'الإعدادات',      icon: '⚙️', settingsOnly: true },
+  { id: 'devtools',  label: 'أدوات التطوير',  icon: '🛠️', settingsOnly: true },
 ];
 
 // حالات المستخدم المعيارية من Apps Script
@@ -88,6 +89,7 @@ export default function Admin() {
           {tab === 'roles'     && <RolesTab     api={api} toast={toast} />}
           {tab === 'audit'     && <AuditTab     api={api} />}
           {tab === 'settings'  && isSettingsAdmin && <SettingsTab api={api} toast={toast} />}
+          {tab === 'devtools'  && isSettingsAdmin && <DevToolsTab api={api} toast={toast} />}
         </div>
       </main>
     </div>
@@ -761,6 +763,185 @@ function SettingsTab({ api, toast }) {
             ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DevToolsTab — أدوات التطوير (settings_admin فقط)
+// ═══════════════════════════════════════════════════════════════
+function DevToolsTab({ api, toast }) {
+  const [status, setStatus]       = useState(null);
+  const [statusLoading, setSL]    = useState(false);
+  const [regTest, setRegTest]     = useState(null);
+  const [regLoading, setRL]       = useState(false);
+  const [logs, setLogs]           = useState([]);
+  const [logsLoading, setLL]      = useState(false);
+
+  const loadStatus = useCallback(async () => {
+    setSL(true);
+    try {
+      const r = await api('getSystemStatus');
+      if (r.success) setStatus(r.data);
+      else toast(r.message || 'فشل تحميل الحالة');
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setSL(false); }
+  }, [api]);
+
+  const loadLogs = useCallback(async () => {
+    setLL(true);
+    try {
+      const r = await api('getDevLogs');
+      if (r.success) setLogs(r.data?.logs || []);
+    } catch {}
+    finally { setLL(false); }
+  }, [api]);
+
+  async function testReg() {
+    setRL(true); setRegTest(null);
+    try {
+      const r = await api('testRegistration');
+      setRegTest(r.success ? r.data : { allOk: false, steps: [], error: r.message });
+      toast(r.message, r.data?.allOk ? 'success' : 'error');
+      if (!r.success) toast(r.message);
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setRL(false); }
+  }
+
+  useEffect(() => { loadStatus(); loadLogs(); }, [loadStatus, loadLogs]);
+
+  const VAR_LABELS = {
+    APPS_SCRIPT_URL:           'رابط Apps Script (env)',
+    APPS_SCRIPT_URL_BLOB:      'رابط Apps Script (Blobs)',
+    APPS_SCRIPT_SHARED_SECRET: 'السر المشترك مع GAS',
+    AUTH_PASSWORD_PEPPER:      'تشفير كلمات المرور',
+    SETTINGS_SESSION_SECRET:   'سر JWT',
+    AUTH_OTP_SECRET:           'سر OTP',
+    SETTINGS_ADMIN_ACCOUNT:    'حساب مدير الإعدادات',
+    SETTINGS_ADMIN_PIN:        'PIN مدير الإعدادات',
+    NETLIFY_BLOBS_CONTEXT:     'Netlify Blobs (تلقائي)',
+    NETLIFY_ACCESS_TOKEN:      'Netlify Access Token',
+    ALLOWED_ORIGIN:            'النطاق المسموح (CORS)',
+  };
+
+  return (
+    <div style={{ maxWidth: 720 }}>
+
+      {/* ══ حالة النظام ══ */}
+      <div style={{ ...S.panel, border: '2px solid rgba(59,130,246,.3)', background: '#EFF6FF', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 22 }}>🔍</span>
+          <h3 style={{ ...S.panelTitle, color: '#1E40AF', marginBottom: 0, flex: 1 }}>حالة النظام</h3>
+          <button className="btn btn-ghost btn-sm" onClick={loadStatus} disabled={statusLoading}>
+            {statusLoading ? '⏳' : '↻ تحديث'}
+          </button>
+        </div>
+
+        {status ? (
+          <>
+            {/* GAS */}
+            <div style={{ background: status.gasStatus?.ok ? '#DCFCE7' : '#FEE2E2', border: `1px solid ${status.gasStatus?.ok ? '#86EFAC' : '#FECACA'}`, borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: status.gasStatus?.ok ? '#166534' : '#991B1B' }}>
+                {status.gasStatus?.ok ? '✅ Apps Script متصل' : `❌ Apps Script ${status.gasStatus?.error || 'غير متصل'}`}
+              </strong>
+              {status.gasStatus?.stats && (
+                <span style={{ color: '#166534', marginRight: 12, fontSize: 12 }}>
+                  {status.gasStatus.stats.totalUsers} مستخدم • {status.gasStatus.stats.totalProjects} مشروع
+                </span>
+              )}
+            </div>
+
+            {/* متغيرات البيئة */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {Object.entries(status.vars || {}).map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: '#fff', borderRadius: 6, border: `1px solid ${v === true ? 'rgba(22,163,74,.2)' : v === false ? 'rgba(220,38,38,.2)' : 'rgba(59,130,246,.15)'}`, fontSize: 12 }}>
+                  <span>{v === true ? '✅' : v === false ? '❌' : '📋'}</span>
+                  <span style={{ color: '#374151', flex: 1, fontSize: 11 }}>{VAR_LABELS[k] || k}</span>
+                  {typeof v === 'string' && <span style={{ color: '#6B7280', fontSize: 11, fontFamily: 'monospace' }}>{v.slice(0, 30)}</span>}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : statusLoading ? (
+          <div style={{ textAlign: 'center', padding: 24 }}><Spin /></div>
+        ) : null}
+      </div>
+
+      {/* ══ اختبار التسجيل ══ */}
+      <div style={{ ...S.panel, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 22 }}>🧪</span>
+          <h3 style={{ ...S.panelTitle, marginBottom: 0, flex: 1 }}>اختبار تدفق التسجيل</h3>
+          <button className="btn btn-primary btn-sm" onClick={testReg} disabled={regLoading}>
+            {regLoading ? '⏳' : '▶ اختبار'}
+          </button>
+        </div>
+
+        <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#92400E', marginBottom: 14 }}>
+          يختبر: checkPhone → getRoleById → getPublicRoles. إذا فشلت أي خطوة، التسجيل لن يعمل.
+        </div>
+
+        {regTest && (
+          <div>
+            <div style={{ fontWeight: 700, color: regTest.allOk ? '#166534' : '#991B1B', fontSize: 14, marginBottom: 10 }}>
+              {regTest.allOk ? '✅ كل الخطوات تعمل — التسجيل يعمل' : '❌ هناك مشكلة — التسجيل لا يعمل'}
+            </div>
+            {(regTest.steps || []).map((step, i) => (
+              <div key={i} style={{ padding: '8px 12px', borderRadius: 8, background: step.ok ? '#F0FDF4' : '#FEF2F2', border: `1px solid ${step.ok ? '#86EFAC' : '#FECACA'}`, fontSize: 13, marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{step.ok ? '✅' : '❌'}</span>
+                  <code style={{ fontWeight: 600, color: '#111827' }}>{step.step}</code>
+                  {!step.ok && step.response?.error && (
+                    <span style={{ background: '#FEE2E2', color: '#991B1B', padding: '1px 8px', borderRadius: 4, fontSize: 11, marginRight: 'auto' }}>{step.response.error}</span>
+                  )}
+                </div>
+                {step.error && <div style={{ fontSize: 12, color: '#991B1B', marginTop: 4 }}>{step.error}</div>}
+              </div>
+            ))}
+            {!regTest.allOk && (
+              <div style={{ marginTop: 10, padding: '10px 14px', background: '#FFF8F8', border: '1px solid #FECACA', borderRadius: 8, fontSize: 12, color: '#7F1D1D' }}>
+                <strong>الحل:</strong> في Code.gs تحقق أن <code>REGISTER_ENABLED = true</code> في ورقة Settings
+                أو أن <code>APPS_SCRIPT_SHARED_SECRET</code> في Netlify يطابق <code>API_SHARED_SECRET</code> في GAS.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ══ سجل الأخطاء ══ */}
+      <div style={S.panel}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 22 }}>📋</span>
+          <h3 style={{ ...S.panelTitle, marginBottom: 0, flex: 1 }}>سجل الأخطاء ({logs.length})</h3>
+          <button className="btn btn-ghost btn-sm" onClick={loadLogs} disabled={logsLoading}>
+            {logsLoading ? '⏳' : '↻'}
+          </button>
+        </div>
+
+        <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#92400E', marginBottom: 14 }}>
+          ⚠️ السجل مؤقت — يُمسح عند إعادة تشغيل Lambda. للأخطاء الدائمة راجع: Netlify → Functions → Logs.
+        </div>
+
+        {logs.length === 0 ? (
+          <div style={{ textAlign: 'center', color: '#587A68', padding: 20, fontSize: 14 }}>
+            {logsLoading ? <Spin /> : '✅ لا توجد أخطاء مسجلة في هذا الـ instance'}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {logs.map((log, i) => (
+              <div key={i} style={{ padding: '8px 12px', borderRadius: 8, background: '#FEF2F2', border: '1px solid #FECACA', fontSize: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 2 }}>
+                  <span style={{ color: '#991B1B', fontWeight: 700, fontSize: 11 }}>{log.source}</span>
+                  <code style={{ background: '#FEE2E2', padding: '1px 6px', borderRadius: 4, fontSize: 10 }}>{log.code}</code>
+                  <span style={{ color: '#9CA3AF', marginRight: 'auto', fontSize: 10 }}>{new Date(log.ts).toLocaleTimeString('ar-SA')}</span>
+                </div>
+                <div style={{ color: '#7F1D1D' }}>{log.message}</div>
+                {log.detail && <div style={{ color: '#991B1B', marginTop: 3, fontFamily: 'monospace', fontSize: 10, wordBreak: 'break-all' }}>{log.detail}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

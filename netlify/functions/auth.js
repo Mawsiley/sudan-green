@@ -16,6 +16,13 @@ const JWT_SECRET     = process.env.SETTINGS_SESSION_SECRET     || '';
 const OTP_SECRET     = process.env.AUTH_OTP_SECRET             || '';
 const ALLOWED        = process.env.ALLOWED_ORIGIN              || '*';
 
+// ── In-memory error log (مؤقت — يُمسح عند إعادة تشغيل Lambda) ──
+const _errLog = [];
+function logErr(source, code, msg, detail = '') {
+  _errLog.unshift({ ts: new Date().toISOString(), source, code: String(code), message: String(msg), detail: String(detail).slice(0, 400) });
+  if (_errLog.length > 80) _errLog.length = 80;
+}
+
 // ── Remote config cache (يُقرأ من Apps Script ويُخزَّن 5 دقائق) ─
 let _rcache = null; let _rcacheAt = 0;
 async function remoteVar(key) {
@@ -214,6 +221,9 @@ exports.handler = async (event) => {
       case 'changePassword':        result = await doChangePassword(body, bearerToken);     break;
       case 'getCurrentUser':        result = await doGetCurrentUser(bearerToken);           break;
       case 'sendWATest':            result = await doWATest(body, bearerToken);             break;
+      case 'getDevLogs':            result = await doGetDevLogs(body, bearerToken);         break;
+      case 'getSystemStatus':       result = await doGetSystemStatus(body, bearerToken);    break;
+      case 'testRegistration':      result = await doTestRegistration(body, bearerToken);   break;
       case 'syncApiSecret':         result = await doSyncApiSecret(body, bearerToken);      break;
       case 'updateNetlifyEnv':      result = await doUpdateNetlifyEnv(body, bearerToken);   break;
       case 'testGasConnection':     result = await doTestGasConnection(body, bearerToken);  break;
@@ -248,7 +258,14 @@ async function doRegister(b) {
   const nPhone = normalizePhone(phone, countryCode);
 
   const check = await gas('checkPhone', { phone: nPhone });
-  if (!check.ok)    return fail('DB_ERROR',    'خطأ في الاتصال بقاعدة البيانات');
+  if (!check.ok) {
+    if (check.error === 'FORBIDDEN') {
+      logErr('Register', 'GAS_FORBIDDEN', 'checkPhone — السر المشترك لا يتطابق. تحقق من APPS_SCRIPT_SHARED_SECRET أو فعّل REGISTER_ENABLED في GAS Settings.', nPhone);
+      return fail('CONFIG_ERROR', 'خطأ في إعداد الاتصال — تواصل مع المدير');
+    }
+    logErr('Register', 'CHECK_PHONE_FAIL', check.message || check.error || 'unknown', nPhone);
+    return fail('DB_ERROR', 'خطأ في الاتصال بقاعدة البيانات');
+  }
   if (check.exists) return fail('PHONE_EXISTS','رقم الهاتف مسجل مسبقاً');
 
   if (['admin','super_admin'].includes(roleId)) {
@@ -613,6 +630,81 @@ async function doWATest(b, token) {
   if (!to || !message) return fail('MISSING_FIELDS', 'الرقم والرسالة مطلوبان');
   const r = await sendWA(to, message);
   return ok(r, r.sent ? 'تم الإرسال' : 'فشل الإرسال');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  getDevLogs — سجل الأخطاء المؤقت (settings_admin فقط)
+// ═══════════════════════════════════════════════════════════════
+async function doGetDevLogs(b, token) {
+  const p = verifyJWT(token);
+  if (!p || p.roleId !== 'settings_admin') return fail('FORBIDDEN', 'غير مصرح');
+  return ok({ logs: _errLog, count: _errLog.length });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  getSystemStatus — حالة النظام (settings_admin فقط)
+// ═══════════════════════════════════════════════════════════════
+async function doGetSystemStatus(b, token) {
+  const p = verifyJWT(token);
+  if (!p || p.roleId !== 'settings_admin') return fail('FORBIDDEN', 'غير مصرح');
+
+  const vars = {
+    APPS_SCRIPT_URL:           !!GAS_URL,
+    APPS_SCRIPT_URL_BLOB:      !!GAS_URL_BLOB,
+    APPS_SCRIPT_SHARED_SECRET: !!GAS_SECRET,
+    AUTH_PASSWORD_PEPPER:      !!PEPPER,
+    SETTINGS_SESSION_SECRET:   !!JWT_SECRET,
+    AUTH_OTP_SECRET:           !!OTP_SECRET,
+    SETTINGS_ADMIN_ACCOUNT:    !!SETTINGS_ADMIN,
+    SETTINGS_ADMIN_PIN:        !!SETTINGS_PIN,
+    NETLIFY_BLOBS_CONTEXT:     !!process.env.NETLIFY_BLOBS_CONTEXT,
+    NETLIFY_ACCESS_TOKEN:      !!process.env.NETLIFY_ACCESS_TOKEN,
+    ALLOWED_ORIGIN:            ALLOWED,
+  };
+
+  let gasStatus = { ok: false, error: 'URL_NOT_SET' };
+  try {
+    const url = await getGasUrl();
+    if (url) {
+      const r = await gas('getStats', {});
+      gasStatus = { ok: !!r?.ok, stats: r?.stats || null, urlSet: true };
+      if (!r?.ok) logErr('SystemStatus', 'GAS_NOT_OK', JSON.stringify(r).slice(0, 200));
+    }
+  } catch (e) {
+    gasStatus = { ok: false, error: e.message, urlSet: false };
+    logErr('SystemStatus', 'GAS_THROW', e.message);
+  }
+
+  return ok({ vars, gasStatus, errorCount: _errLog.length });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  testRegistration — اختبار تدفق التسجيل (settings_admin فقط)
+// ═══════════════════════════════════════════════════════════════
+async function doTestRegistration(b, token) {
+  const p = verifyJWT(token);
+  if (!p || p.roleId !== 'settings_admin') return fail('FORBIDDEN', 'غير مصرح');
+
+  const steps = [];
+
+  async function runStep(name, fn) {
+    try {
+      const r = await fn();
+      const passed = r?.ok !== false && !r?.error;
+      steps.push({ step: name, ok: passed, response: r });
+      if (!passed) logErr('TestReg', name, JSON.stringify(r).slice(0, 200));
+    } catch (e) {
+      steps.push({ step: name, ok: false, error: e.message });
+      logErr('TestReg', name, e.message);
+    }
+  }
+
+  await runStep('checkPhone',    () => gas('checkPhone',  { phone: '+249000000000' }));
+  await runStep('getRoleById',   () => gas('getRoleById', { roleId: 'user' }));
+  await runStep('getPublicRoles',() => gas('getRoles',    { publicOnly: true }));
+
+  const allOk = steps.every(s => s.ok);
+  return ok({ steps, allOk }, allOk ? '✅ تدفق التسجيل يعمل بشكل صحيح' : '❌ هناك مشكلة في تدفق التسجيل — راجع الخطوات');
 }
 
 // ═══════════════════════════════════════════════════════════════

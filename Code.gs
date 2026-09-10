@@ -30,12 +30,17 @@ function doPost(e) {
     ensureSheets_();
 
     // التحقق من السر — اختياري: إذا لم يُضبط يسمح بكل الطلبات
-    const publicActions = new Set(['getStats','getCrops','getProjects','getRegions','doGet']);
+    const publicActions = new Set(['getStats','getCrops','getProjects','getRegions','doGet','getRoles']);
+    // إجراءات التسجيل: تُسمح عند تفعيل التسجيل (REGISTER_ENABLED = true) بغض النظر عن السر
+    const registrationActions = new Set(['checkPhone','getRoleById','savePendingUser','activateUser','saveOTP','verifyAndConsumeOTP']);
     if (!publicActions.has(action)) {
-      const secret = getApiSecret_();
-      const DEFAULT = 'CHANGE_ME_STRONG_SECRET';
-      if (secret && secret !== DEFAULT && data._secret !== secret) {
-        return jsonOut({ ok: false, error: 'FORBIDDEN', message: 'Unauthorized' });
+      const isOpenReg = registrationActions.has(action) && getSetting_('REGISTER_ENABLED') === 'true';
+      if (!isOpenReg) {
+        const secret = getApiSecret_();
+        const DEFAULT = 'CHANGE_ME_STRONG_SECRET';
+        if (secret && secret !== DEFAULT && data._secret !== secret) {
+          return jsonOut({ ok: false, error: 'FORBIDDEN', message: 'Unauthorized' });
+        }
       }
     }
 
