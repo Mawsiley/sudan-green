@@ -1,15 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-//  auth.js — Netlify Function (Secure Auth Middleware)
+//  auth.js — Netlify Function (Secure Auth Middleware) v4.0
 //  المصادقة الآمنة: PBKDF2 + JWT + WhatsApp OTP
 //  لا تُرسَل أسرار WhatsApp من المتصفح — كل شيء هنا
 // ═══════════════════════════════════════════════════════════════
 'use strict';
-const crypto   = require('crypto');
-const { getStore } = require('@netlify/blobs');
+const crypto = require('crypto');
 
 // ── متغيرات البيئة الأساسية ───────────────────────────────────
-const GAS_URL        = process.env.APPS_SCRIPT_URL            || '';
-let   GAS_URL_BLOB   = '';   // مخزَّن عند أول قراءة من Netlify Blobs
+let   GAS_URL        = (process.env.APPS_SCRIPT_URL || '').trim(); // قابل للتحديث في الذاكرة
+let   GAS_URL_CACHED = '';   // يُحدَّث بعد كل حفظ ناجح
 const GAS_SECRET     = process.env.APPS_SCRIPT_SHARED_SECRET  || '';
 const PEPPER         = process.env.AUTH_PASSWORD_PEPPER        || '';
 const JWT_SECRET     = process.env.SETTINGS_SESSION_SECRET     || '';
@@ -98,17 +97,6 @@ function normalizePhone(phone, cc = '249') {
   return '+' + code + digits;
 }
 
-// ── Netlify Blobs store ───────────────────────────────────────
-function cfgStore() {
-  if (process.env.NETLIFY_BLOBS_CONTEXT) {
-    return getStore({ name: 'app-config' });
-  }
-  const siteID = process.env.SITE_ID || process.env.NETLIFY_SITE_ID || '';
-  const token  = process.env.NETLIFY_ACCESS_TOKEN || '';
-  if (!siteID || !token) throw new Error('BLOBS_NOT_CONFIGURED');
-  return getStore({ name: 'app-config', siteID, token });
-}
-
 // ── اكتشاف SITE_ID من Netlify API تلقائياً ──────────────────
 async function getNetlifySiteId() {
   const cached = process.env.NETLIFY_SITE_ID || process.env.SITE_ID || '';
@@ -133,18 +121,12 @@ async function getNetlifySiteId() {
 }
 
 // ── Google Apps Script ───────────────────────────────────────
-async function getGasUrl() {
-  if (GAS_URL)       return GAS_URL.trim();
-  if (GAS_URL_BLOB)  return GAS_URL_BLOB.trim();
-  try {
-    const url = await cfgStore().get('APPS_SCRIPT_URL');
-    if (url) { GAS_URL_BLOB = url.trim(); return GAS_URL_BLOB; }
-  } catch {}
-  return '';
+function getGasUrl() {
+  return GAS_URL || GAS_URL_CACHED || '';
 }
 
 async function gas(action, data = {}) {
-  const url = await getGasUrl();
+  const url = getGasUrl();
   if (!url) throw new Error('رابط Apps Script غير محدد — أضفه من لوحة المدير → الإعدادات');
   const payload = GAS_SECRET ? { action, _secret: GAS_SECRET, ...data } : { action, ...data };
   const body = JSON.stringify(payload);
@@ -669,8 +651,7 @@ async function doGetSystemStatus(b, token) {
   if (!p || p.roleId !== 'settings_admin') return fail('FORBIDDEN', 'غير مصرح');
 
   const vars = {
-    APPS_SCRIPT_URL:           !!GAS_URL,
-    APPS_SCRIPT_URL_BLOB:      !!GAS_URL_BLOB,
+    APPS_SCRIPT_URL:           !!getGasUrl(),
     APPS_SCRIPT_SHARED_SECRET: !!GAS_SECRET,
     AUTH_PASSWORD_PEPPER:      !!PEPPER,
     SETTINGS_SESSION_SECRET:   !!JWT_SECRET,
@@ -684,7 +665,7 @@ async function doGetSystemStatus(b, token) {
 
   let gasStatus = { ok: false, error: 'URL_NOT_SET', urlSuffix: '' };
   try {
-    const url = await getGasUrl();
+    const url = getGasUrl();
     const urlSuffix = url ? ('...' + url.replace(/.*\/s\//, '/s/').slice(-40)) : '';
     if (url) {
       const r = await gas('getStats', {});
@@ -694,7 +675,7 @@ async function doGetSystemStatus(b, token) {
       gasStatus = { ok: false, error: 'URL_NOT_SET', urlSet: false, urlSuffix: '' };
     }
   } catch (e) {
-    const url = GAS_URL.trim() || GAS_URL_BLOB.trim();
+    const url = getGasUrl();
     const urlSuffix = url ? ('...' + url.replace(/.*\/s\//, '/s/').slice(-40)) : '';
     gasStatus = { ok: false, error: e.message, urlSet: !!url, urlSuffix };
     logErr('SystemStatus', 'GAS_THROW', e.message);
@@ -877,60 +858,49 @@ async function doUpdateNetlifyEnv(b, token) {
 
   const savedKeys = [];
 
-  // ── 1. إذا أُرسِل APPS_SCRIPT_URL → حفظه ──────────────────────
+  // ── 1. إذا أُرسِل APPS_SCRIPT_URL → حفظه عبر Netlify API ────
   const newGasUrl = String(vars.APPS_SCRIPT_URL || '').trim();
   if (newGasUrl) {
     if (!newGasUrl.includes('script.google.com'))
       return fail('INVALID_URL', 'رابط Apps Script يجب أن يكون من script.google.com');
 
-    let blobSaved = false;
-    // محاولة الحفظ في Blobs أولاً
+    const NETLIFY_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || '';
+    if (!NETLIFY_TOKEN)
+      return fail('MISSING_TOKEN',
+        'أضف NETLIFY_ACCESS_TOKEN من Netlify User Settings → Personal access tokens');
+
+    const siteId = await getNetlifySiteId();
+    if (!siteId)
+      return fail('SITE_ID_MISSING',
+        'لم يُعثر على SITE_ID — أضف NETLIFY_SITE_ID يدوياً في Netlify → Environment Variables');
+
     try {
-      await cfgStore().set('APPS_SCRIPT_URL', newGasUrl);
-      blobSaved = true;
-    } catch (_) {}
-
-    if (blobSaved) {
-      GAS_URL_BLOB = newGasUrl;
-      savedKeys.push('APPS_SCRIPT_URL');
-    } else {
-      // Blobs غير متاح → استخدام Netlify API مباشرة
-      const NETLIFY_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || '';
-      if (!NETLIFY_TOKEN)
-        return fail('BLOBS_NOT_CONFIGURED',
-          'أضف NETLIFY_ACCESS_TOKEN من Netlify User Settings → Personal access tokens');
-
-      const siteId = await getNetlifySiteId();
-      if (!siteId)
-        return fail('SITE_ID_MISSING',
-          'لم يُعثر على SITE_ID — أضف NETLIFY_SITE_ID يدوياً في Netlify → Environment Variables');
-
-      try {
-        const nr = await fetch(
-          `https://api.netlify.com/api/v1/sites/${siteId}/env`,
-          {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify([{ key: 'APPS_SCRIPT_URL', values: [{ value: newGasUrl, context: 'all' }] }]),
-            signal: AbortSignal.timeout(15000)
-          }
-        );
-        if (!nr.ok) {
-          const txt = await nr.text().catch(() => '');
-          return fail('NETLIFY_API_ERROR', `Netlify API أعاد HTTP ${nr.status}: ${txt.slice(0,200)}`);
-        }
-        GAS_URL_BLOB = newGasUrl; // تأثير فوري على هذا الـ Lambda container
-        savedKeys.push('APPS_SCRIPT_URL');
-
-        // إطلاق إعادة النشر
-        await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/builds`, {
+      const nr = await fetch(
+        `https://api.netlify.com/api/v1/sites/${siteId}/env`,
+        {
           method: 'POST',
           headers: { Authorization: `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(10000)
-        }).catch(() => {});
-      } catch (e2) {
-        return fail('NETLIFY_API_ERROR', `فشل تحديث Netlify: ${e2.message}`);
+          body: JSON.stringify([{ key: 'APPS_SCRIPT_URL', values: [{ value: newGasUrl, context: 'all' }] }]),
+          signal: AbortSignal.timeout(15000)
+        }
+      );
+      if (!nr.ok) {
+        const txt = await nr.text().catch(() => '');
+        return fail('NETLIFY_API_ERROR', `Netlify API أعاد HTTP ${nr.status}: ${txt.slice(0,200)}`);
       }
+      // تأثير فوري على هذا الـ Lambda container
+      GAS_URL        = newGasUrl;
+      GAS_URL_CACHED = newGasUrl;
+      savedKeys.push('APPS_SCRIPT_URL');
+
+      // إطلاق إعادة النشر لتثبيت الرابط الجديد في env
+      await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/builds`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(10000)
+      }).catch(() => {});
+    } catch (e2) {
+      return fail('NETLIFY_API_ERROR', `فشل تحديث Netlify: ${e2.message}`);
     }
   }
 
