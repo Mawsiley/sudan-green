@@ -291,6 +291,16 @@ async function doRegister(b) {
     } catch { /* تجاهل */ }
   }
 
+  // إشعار المدير بتسجيل مستخدم جديد
+  try {
+    const adminPhone = await getWaAdmin();
+    if (adminPhone && adminPhone !== nPhone) {
+      const status = autoActivated ? 'مفعّل تلقائياً' : 'ينتظر الموافقة';
+      const adminMsg = `📋 *مستخدم جديد*\nالاسم: ${fullName.trim()}\nالهاتف: ${nPhone}\nالحالة: ${status}\n\nراجع لوحة الإدارة للموافقة.`;
+      await sendWA(adminPhone, adminMsg);
+    }
+  } catch { /* تجاهل خطأ إشعار المدير */ }
+
   return ok(
     { phone: nPhone, whatsappSent: wa.sent, autoActivated },
     wa.sent

@@ -5,10 +5,11 @@ import { fmtDate, fmt } from '../api';
 // settings_admin يرى فقط الإعدادات
 // admin / super_admin يرون كل شيء عدا الإعدادات
 const ALL_TABS = [
-  { id: 'users',    label: 'المستخدمون',   adminOnly: false },
-  { id: 'roles',    label: 'الأدوار',      adminOnly: false },
-  { id: 'audit',    label: 'سجل التدقيق',  adminOnly: false },
-  { id: 'settings', label: 'الإعدادات',    settingsOnly: true },
+  { id: 'users',     label: 'المستخدمون',     icon: '👥', adminOnly: false },
+  { id: 'broadcast', label: 'إعلانات',        icon: '📢', adminOnly: false },
+  { id: 'roles',     label: 'الأدوار',        icon: '🔑', adminOnly: false },
+  { id: 'audit',     label: 'سجل التدقيق',   icon: '📝', adminOnly: false },
+  { id: 'settings',  label: 'الإعدادات',      icon: '⚙️', settingsOnly: true },
 ];
 
 // حالات المستخدم المعيارية من Apps Script
@@ -43,7 +44,7 @@ export default function Admin() {
     <div style={S.shell}>
       {msg && <div className={`alert-toast alert-${msg.type === 'success' ? 'success' : 'error'}`}>{msg.text}</div>}
 
-      <aside style={{ ...S.side, ...(sideOpen ? S.sideOpen : {}) }}>
+      <aside className={`app-sidebar${sideOpen ? ' open' : ''}`} style={S.side}>
         <div style={S.sideHead}>
           <span style={{ fontSize: 28 }}>🌿</span>
           <span style={S.sideName}>لوحة الإدارة</span>
@@ -57,12 +58,17 @@ export default function Admin() {
         </div>
         <nav style={S.nav}>
           {visibleTabs.map(t => (
-            <button key={t.id} style={{ ...S.navBtn, ...(tab === t.id ? S.navActive : {}) }}
+            <button key={t.id}
+              style={{ ...S.navBtn, ...(tab === t.id ? S.navActive : {}) }}
               onClick={() => { setTab(t.id); setSideOpen(false); }}>
+              <span style={{ fontSize: 15, minWidth: 20 }}>{t.icon}</span>
               {t.label}
             </button>
           ))}
-          <a href="/dashboard" style={{ ...S.navBtn, display: 'block', textDecoration: 'none', color: 'rgba(255,255,255,.7)' }}>← لوحة المستخدم</a>
+          <a href="/dashboard"
+            style={{ ...S.navBtn, textDecoration: 'none', color: 'rgba(255,255,255,.5)', marginTop: 8, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 15, minWidth: 20 }}>←</span>لوحة المستخدم
+          </a>
         </nav>
         <button className="btn btn-ghost btn-sm" style={{ margin: '0 16px 16px', width: 'calc(100% - 32px)', color: '#fff', borderColor: 'rgba(255,255,255,.3)' }} onClick={logout}>
           تسجيل الخروج
@@ -71,16 +77,17 @@ export default function Admin() {
 
       {sideOpen && <div style={S.overlay} onClick={() => setSideOpen(false)} />}
 
-      <main style={S.main}>
+      <main className="app-main" style={S.main}>
         <header style={S.topbar}>
-          <button style={S.menuBtn} onClick={() => setSideOpen(o => !o)}>☰</button>
+          <button className="app-menu-btn" style={S.menuBtn} onClick={() => setSideOpen(o => !o)}>☰</button>
           <h2 style={S.pageTitle}>{visibleTabs.find(t => t.id === tab)?.label}</h2>
         </header>
         <div style={S.content}>
-          {tab === 'users'    && <UsersTab    api={api} toast={toast} />}
-          {tab === 'roles'    && <RolesTab    api={api} toast={toast} />}
-          {tab === 'audit'    && <AuditTab    api={api} />}
-          {tab === 'settings' && isSettingsAdmin && <SettingsTab api={api} toast={toast} />}
+          {tab === 'users'     && <UsersTab     api={api} toast={toast} />}
+          {tab === 'broadcast' && <BroadcastTab api={api} toast={toast} />}
+          {tab === 'roles'     && <RolesTab     api={api} toast={toast} />}
+          {tab === 'audit'     && <AuditTab     api={api} />}
+          {tab === 'settings'  && isSettingsAdmin && <SettingsTab api={api} toast={toast} />}
         </div>
       </main>
     </div>
@@ -91,16 +98,17 @@ export default function Admin() {
 //  UsersTab
 // ═══════════════════════════════════════════════════════════════
 function UsersTab({ api, toast }) {
-  const [users, setUsers]     = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers]       = useState([]);
+  const [loading, setLoading]   = useState(true);
   const [selected, setSelected] = useState(null);
-  const [filter, setFilter]   = useState('all');
+  const [filter, setFilter]     = useState('all');
+  const [search, setSearch]     = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await api('getUsers');
-      // doProxy wraps GAS response: r.data = { ok, users, total }
       if (r.success) setUsers(r.data?.users || []);
       else toast(r.message || 'فشل تحميل المستخدمين');
     } catch { toast('خطأ في الاتصال'); }
@@ -117,22 +125,74 @@ function UsersTab({ api, toast }) {
     } catch { toast('خطأ في الاتصال'); }
   }
 
-  const filtered = filter === 'all' ? users : users.filter(u => u.status === filter.toUpperCase() || u.status?.startsWith(filter.toUpperCase()));
+  async function exportUsers() {
+    setExporting(true);
+    try {
+      const r = await api('exportUsers');
+      if (r.success && r.data) {
+        // تحويل البيانات إلى CSV
+        const rows = r.data?.users || users;
+        if (!rows.length) { toast('لا يوجد مستخدمون للتصدير'); return; }
+        const headers = ['الاسم', 'الهاتف', 'الدور', 'الحالة', 'تاريخ التسجيل'];
+        const csv = [
+          '﻿' + headers.join(','),
+          ...rows.map(u => [u.fullName, u.phone, u.roleId, u.status, u.createdAt].map(v => `"${v || ''}"`).join(','))
+        ].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = `users-${Date.now()}.csv`; a.click();
+        URL.revokeObjectURL(url);
+        toast('تم التصدير', 'success');
+      } else {
+        // تصدير من البيانات المحلية
+        if (!users.length) { toast('لا يوجد مستخدمون'); return; }
+        const headers = ['الاسم', 'الهاتف', 'الدور', 'الحالة', 'تاريخ التسجيل'];
+        const csv = [
+          '﻿' + headers.join(','),
+          ...users.map(u => [u.fullName, u.phone, u.roleId, u.status, u.createdAt].map(v => `"${v || ''}"`).join(','))
+        ].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = `users-${Date.now()}.csv`; a.click();
+        URL.revokeObjectURL(url);
+        toast('تم التصدير', 'success');
+      }
+    } catch { toast('فشل التصدير'); }
+    finally { setExporting(false); }
+  }
+
+  const filtered = users.filter(u => {
+    const matchStatus = filter === 'all' || u.status === filter;
+    const q = search.toLowerCase();
+    const matchSearch = !q || u.fullName?.toLowerCase().includes(q) || u.phone?.includes(q) || u.roleId?.includes(q);
+    return matchStatus && matchSearch;
+  });
+
+  const pendingCount = users.filter(u => u.status === 'PENDING_APPROVAL' || u.status === 'PENDING_VERIFICATION').length;
 
   return (
     <div style={S.panel}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <h3 style={{ ...S.panelTitle, marginBottom: 0, flex: 1 }}>إدارة المستخدمين ({users.length})</h3>
+        <h3 style={{ ...S.panelTitle, marginBottom: 0 }}>
+          إدارة المستخدمين ({users.length})
+          {pendingCount > 0 && <span className="notif-dot" title={`${pendingCount} ينتظر الموافقة`} />}
+        </h3>
+        <input className="search-box" placeholder="بحث بالاسم أو الهاتف..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
         <select style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontFamily: 'inherit', fontSize: 13 }}
           value={filter} onChange={e => setFilter(e.target.value)}>
-          <option value="all">الكل</option>
-          <option value="PENDING_APPROVAL">ينتظر الموافقة</option>
-          <option value="PENDING_VERIFICATION">ينتظر التحقق</option>
-          <option value="ACTIVE">نشط</option>
-          <option value="SUSPENDED">موقوف</option>
-          <option value="REJECTED">مرفوض</option>
+          <option value="all">الكل ({users.length})</option>
+          <option value="PENDING_APPROVAL">ينتظر الموافقة ({users.filter(u=>u.status==='PENDING_APPROVAL').length})</option>
+          <option value="PENDING_VERIFICATION">ينتظر التحقق ({users.filter(u=>u.status==='PENDING_VERIFICATION').length})</option>
+          <option value="ACTIVE">نشط ({users.filter(u=>u.status==='ACTIVE').length})</option>
+          <option value="SUSPENDED">موقوف ({users.filter(u=>u.status==='SUSPENDED').length})</option>
+          <option value="REJECTED">مرفوض ({users.filter(u=>u.status==='REJECTED').length})</option>
         </select>
-        <button className="btn btn-ghost btn-sm" onClick={load}>تحديث</button>
+        <button className="btn btn-ghost btn-sm" onClick={load}>↻</button>
+        <button className="btn btn-ghost btn-sm" onClick={exportUsers} disabled={exporting} title="تصدير CSV">
+          {exporting ? '...' : '⬇ CSV'}
+        </button>
       </div>
       {loading ? <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div> : (
         <div className="tbl-wrap">
@@ -229,6 +289,99 @@ function UserModal({ user, onClose, api, toast, reload }) {
           <button className="btn btn-ghost" onClick={onClose}>إلغاء</button>
           <button className="btn btn-primary" onClick={save}>حفظ</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BroadcastTab — إعلانات جماعية عبر WhatsApp
+// ═══════════════════════════════════════════════════════════════
+function BroadcastTab({ api, toast }) {
+  const [msg, setMsg]       = useState('');
+  const [target, setTarget] = useState('all');
+  const [sending, setSending] = useState(false);
+  const [result, setResult]  = useState(null);
+
+  async function send(e) {
+    e.preventDefault();
+    if (!msg.trim()) return toast('أدخل نص الرسالة');
+    if (msg.trim().length < 10) return toast('الرسالة قصيرة جداً (10 أحرف على الأقل)');
+    setSending(true); setResult(null);
+    try {
+      const r = await api('broadcast', { message: msg.trim(), targetGroup: target });
+      if (r.success) {
+        setResult({ ok: true, data: r.data, message: r.message });
+        toast(r.message || 'تم الإرسال', 'success');
+        setMsg('');
+      } else {
+        setResult({ ok: false, message: r.message });
+        toast(r.message || 'فشل الإرسال');
+      }
+    } catch { toast('خطأ في الاتصال'); }
+    finally { setSending(false); }
+  }
+
+  const TARGET_LABELS = {
+    all:     'جميع المستخدمين النشطين',
+    pending: 'ينتظرون الموافقة',
+    new:     'المسجلون حديثاً (آخر 7 أيام)',
+  };
+
+  return (
+    <div style={{ maxWidth: 600 }}>
+      <div style={S.panel}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 28 }}>📢</span>
+          <div>
+            <h3 style={{ ...S.panelTitle, marginBottom: 2 }}>إعلانات جماعية</h3>
+            <p style={{ fontSize: 12, color: '#587A68' }}>إرسال رسالة WhatsApp لمجموعة من المستخدمين</p>
+          </div>
+        </div>
+
+        <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
+          ⚠️ يجب أن يكون WhatsApp مفعّلاً في الإعدادات لإرسال الرسائل.
+        </div>
+
+        <form onSubmit={send}>
+          <div className="field">
+            <label>الفئة المستهدفة</label>
+            <select value={target} onChange={e => setTarget(e.target.value)}>
+              {Object.entries(TARGET_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label>نص الرسالة</label>
+            <textarea
+              value={msg} onChange={e => setMsg(e.target.value)}
+              rows={6} placeholder="اكتب رسالتك هنا..."
+              style={{ width: '100%', padding: '11px 15px', border: '1.5px solid rgba(26,154,72,.2)', borderRadius: 10, fontFamily: 'inherit', fontSize: 14, resize: 'vertical', outline: 'none' }}
+            />
+            <div style={{ fontSize: 11, color: '#587A68', marginTop: 4, textAlign: 'left' }}>{msg.length} حرف</div>
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={sending} style={{ width: '100%' }}>
+            {sending ? '⏳ جاري الإرسال...' : '📤 إرسال الإعلان'}
+          </button>
+        </form>
+
+        {result && (
+          <div style={{ marginTop: 16, background: result.ok ? '#DCFCE7' : '#FEE2E2', border: `1px solid ${result.ok ? '#86EFAC' : '#FECACA'}`, borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+            {result.ok ? (
+              <>
+                <div style={{ color: '#166534', fontWeight: 700, marginBottom: 4 }}>✅ {result.message}</div>
+                {result.data && (
+                  <div style={{ color: '#166534' }}>
+                    أُرسل إلى: {result.data.sent || '—'} • فشل: {result.data.failed || 0}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ color: '#991B1B', fontWeight: 600 }}>❌ {result.message}</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
