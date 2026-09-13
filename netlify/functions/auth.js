@@ -658,7 +658,6 @@ async function doGetSystemStatus(b, token) {
     AUTH_OTP_SECRET:           !!OTP_SECRET,
     SETTINGS_ADMIN_ACCOUNT:    !!SETTINGS_ADMIN,
     SETTINGS_ADMIN_PIN:        !!SETTINGS_PIN,
-    NETLIFY_BLOBS_CONTEXT:     !!process.env.NETLIFY_BLOBS_CONTEXT,
     NETLIFY_ACCESS_TOKEN:      !!process.env.NETLIFY_ACCESS_TOKEN,
     ALLOWED_ORIGIN:            ALLOWED,
   };
@@ -880,7 +879,7 @@ async function doUpdateNetlifyEnv(b, token) {
         {
           method: 'POST',
           headers: { Authorization: `Bearer ${NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify([{ key: 'APPS_SCRIPT_URL', values: [{ value: newGasUrl, context: 'all' }] }]),
+          body: JSON.stringify([{ key: 'APPS_SCRIPT_URL', scopes: ['functions', 'builds', 'runtime'], values: [{ value: newGasUrl, context: 'all' }] }]),
           signal: AbortSignal.timeout(15000)
         }
       );
@@ -928,9 +927,12 @@ async function doUpdateNetlifyEnv(b, token) {
     }
   }
 
+  const didUpdateUrl = savedKeys.includes('APPS_SCRIPT_URL');
   return ok(
-    { updatedKeys: savedKeys, redeploying: false },
-    `✅ تم حفظ ${savedKeys.length} إعداد — يعمل فوراً لجميع المتصفحات`
+    { updatedKeys: savedKeys, redeploying: didUpdateUrl },
+    didUpdateUrl
+      ? `✅ تم حفظ الرابط — سيُعاد تشغيل الموقع خلال دقيقتين`
+      : `✅ تم حفظ ${savedKeys.length} إعداد — يعمل فوراً`
   );
 }
 
