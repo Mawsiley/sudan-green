@@ -1,0 +1,10 @@
+# موقع ثابت فقط: الواجهة. المعالجة الفعلية (Apktool) تعمل على الخادم في مجلد server/
+[build]
+  base = "apk-lab"
+  publish = "web"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"

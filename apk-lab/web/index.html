@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APK Lab</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--fg:#1c2330;--mut:#6b7585;--bd:#dde1e8;--ac:#1f7a4d;--ac2:#175c3a;--er:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#10141b;--card:#171d27;--fg:#e6eaf0;--mut:#8b96a8;--bd:#2a3342;--ac:#3fb67a;--ac2:#2f9462;--er:#ff7b72}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 system-ui,"Segoe UI",Tahoma,sans-serif}
+header{padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--card);display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:18px;margin:0}
+main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input,textarea,select{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
+textarea{font-family:ui-monospace,Consolas,monospace;font-size:13px;direction:ltr;text-align:left}
+button{padding:8px 14px;border:0;border-radius:6px;background:var(--ac);color:#fff;font:inherit;cursor:pointer}
+button:hover{background:var(--ac2)} button:disabled{opacity:.5;cursor:not-allowed}
+button.sec{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.grid2{display:grid;gap:16px;grid-template-columns:300px 1fr}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+#tree{max-height:520px;overflow:auto;direction:ltr;text-align:left;font:12px ui-monospace,Consolas,monospace}
+#tree div{padding:2px 6px;cursor:pointer;border-radius:4px;white-space:nowrap}
+#tree div:hover,#tree div.on{background:var(--bd)}
+#editor{height:380px}
+#out{white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;max-height:380px;overflow:auto}
+#status{color:var(--mut);font-size:13px;min-height:20px}
+#status.err{color:var(--er)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><h1>APK Lab — تحليل وتعديل APK بالذكاء الاصطناعي</h1><span id="status"></span></header>
+<main>
+  <section class="card">
+    <h2>1) الإعدادات</h2>
+    <label>رابط الخادم (حيث يعمل Apktool)</label>
+    <input id="server" placeholder="https://your-server.onrender.com" dir="ltr">
+    <label>مفتاح DeepSeek API</label>
+    <input id="key" type="password" placeholder="sk-..." dir="ltr" autocomplete="off">
+    <label>رمز الدخول للخادم (اختياري)</label>
+    <input id="token" type="password" dir="ltr" autocomplete="off">
+    <div class="row"><button id="save">حفظ</button><button id="ping" class="sec">اختبار الاتصال</button>
+    <small style="color:var(--mut)">تُحفظ القيم في متصفحك فقط.</small></div>
+  </section>
+
+  <section class="card">
+    <h2>2) رفع ملف APK</h2>
+    <input id="apk" type="file" accept=".apk">
+    <div class="row"><button id="up">فك الملف وتحليله</button></div>
+  </section>
+
+  <section id="work" class="hide">
+    <div class="grid2">
+      <div class="card"><h2>العناصر <span id="count" style="color:var(--mut)"></span></h2>
+        <input id="filter" placeholder="بحث في الأسماء…" dir="ltr"><div id="tree" style="margin-top:8px"></div></div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card"><h2>تحليل الذكاء الاصطناعي</h2>
+          <input id="q" placeholder="سؤال اختياري، مثال: هل يوجد تتبع أو إعلانات؟">
+          <div class="row"><button id="analyze">حلّل التطبيق</button></div>
+          <div id="out" class="hide" style="margin-top:10px"></div></div>
+        <div class="card"><h2>المحرر: <span id="cur" dir="ltr" style="color:var(--mut)">—</span></h2>
+          <textarea id="editor" spellcheck="false" disabled></textarea>
+          <input id="instr" placeholder="تعليمات للذكاء الاصطناعي لتعديل هذا الملف…" style="margin-top:8px">
+          <div class="row"><button id="aiedit" disabled>عدّل بالذكاء الاصطناعي</button>
+          <button id="savef" class="sec" disabled>حفظ الملف</button></div></div>
+        <div class="card"><h2>3) إعادة البناء</h2>
+          <div class="row"><button id="build">بناء وتوقيع APK وتحميله</button></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const ls={get:k=>{try{return localStorage.getItem(k)||''}catch{return''}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}}};
+let sid=null,files=[],curPath=null;
+$('server').value=ls.get('al_server');$('key').value=ls.get('al_key');$('token').value=ls.get('al_token');
+
+const status=(m,err)=>{$('status').textContent=m||'';$('status').className=err?'err':''};
+const base=()=>$('server').value.trim().replace(/\/+$/,'');
+async function api(path,opts={}){
+  if(!base())throw new Error('أدخل رابط الخادم أولاً');
+  opts.headers={...(opts.headers||{}),'x-access-token':$('token').value};
+  const r=await fetch(base()+path,opts);
+  if(!r.ok){let m=r.statusText;try{m=(await r.json()).error||m}catch{}throw new Error(m)}
+  return r;
+}
+const json=(b)=>({method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+async function task(msg,fn,btn){
+  status(msg);if(btn)btn.disabled=true;
+  try{const v=await fn();status('تم ✓');return v}catch(e){status(e.message,true)}finally{if(btn)btn.disabled=false}
+}
+
+$('save').onclick=()=>{ls.set('al_server',$('server').value);ls.set('al_key',$('key').value);ls.set('al_token',$('token').value);status('تم الحفظ ✓')};
+$('ping').onclick=()=>task('جارٍ الاتصال…',async()=>{await api('/api/health')});
+
+$('up').onclick=()=>task('جارٍ الرفع والفك (قد يستغرق دقيقة)…',async()=>{
+  const f=$('apk').files[0];if(!f)throw new Error('اختر ملف APK');
+  const fd=new FormData();fd.append('apk',f);
+  const d=await(await api('/api/decompile',{method:'POST',body:fd})).json();
+  sid=d.id;files=d.files;curPath=null;
+  $('work').classList.remove('hide');renderTree();
+},$('up'));
+
+function renderTree(){
+  const f=$('filter').value.toLowerCase();
+  const list=files.filter(x=>x.path.toLowerCase().includes(f)).slice(0,500);
+  $('count').textContent=`(${files.length})`;
+  $('tree').innerHTML='';
+  for(const x of list){
+    const d=document.createElement('div');d.textContent=x.path;
+    if(x.path===curPath)d.className='on';
+    d.onclick=()=>openFile(x.path);$('tree').appendChild(d);
+  }
+}
+$('filter').oninput=renderTree;
+
+function openFile(p){task('تحميل الملف…',async()=>{
+  const d=await(await api(`/api/file?id=${sid}&path=${encodeURIComponent(p)}`)).json();
+  curPath=p;$('cur').textContent=p;renderTree();
+  const ok=!d.binary;
+  $('editor').disabled=$('aiedit').disabled=$('savef').disabled=!ok;
+  $('editor').value=ok?d.content:'(ملف ثنائي — لا يمكن عرضه)';
+})}
+
+$('savef').onclick=()=>task('جارٍ الحفظ…',()=>api('/api/file',{...json({id:sid,path:curPath,content:$('editor').value}),method:'PUT'}),$('savef'));
+
+$('analyze').onclick=()=>task('الذكاء الاصطناعي يحلل…',async()=>{
+  const d=await(await api('/api/analyze',json({id:sid,apiKey:$('key').value,question:$('q').value}))).json();
+  $('out').textContent=d.answer;$('out').classList.remove('hide');
+},$('analyze'));
+
+$('aiedit').onclick=()=>task('الذكاء الاصطناعي يعدّل…',async()=>{
+  const d=await(await api('/api/ai-edit',json({id:sid,apiKey:$('key').value,path:curPath,instruction:$('instr').value}))).json();
+  $('editor').value=d.content;status('راجع التعديل ثم اضغط «حفظ الملف»');
+},$('aiedit'));
+
+$('build').onclick=()=>task('جارٍ البناء والتوقيع…',async()=>{
+  await api('/api/build',json({id:sid}));
+  const blob=await(await api(`/api/download?id=${sid}`)).blob();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='modified.apk';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+},$('build'));
+</script>
+</body>
+</html>
